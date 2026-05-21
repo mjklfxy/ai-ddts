@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 import os
@@ -16,6 +17,50 @@ from fastapi.staticfiles import StaticFiles
 
 from application.api_service import ApiService
 from application.config_service import ConfigService
+
+
+# === MODIFIED START ===
+# 原因：后台管理入口需要可选登录验证，避免配置和任务触发接口暴露在无认证环境。
+# 影响范围：FastAPI 后台页面、静态资源和管理 API。
+AUTH_EXEMPT_PATHS = ("/health", "/order-files/download")
+
+
+def _admin_auth_response() -> JSONResponse:
+    """Builds a Basic-auth challenge response for the management console."""
+
+    return JSONResponse(
+        status_code=401,
+        content={"detail": "Authentication required"},
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
+
+def _is_public_path(path: str) -> bool:
+    """Returns whether a path can bypass management-console authentication."""
+
+    return path in AUTH_EXEMPT_PATHS
+
+
+def _has_valid_basic_auth(auth_header: str | None, username: str, password: str) -> bool:
+    """Validates one HTTP Basic Authorization header without logging credentials."""
+
+    if not auth_header or not auth_header.startswith("Basic "):
+        return False
+    token = auth_header.removeprefix("Basic ").strip()
+    try:
+        decoded = base64.b64decode(token, validate=True).decode("utf-8")
+    except Exception:
+        return False
+    provided_user, separator, provided_password = decoded.partition(":")
+    if not separator:
+        return False
+    return hmac.compare_digest(provided_user, username) and hmac.compare_digest(
+        provided_password,
+        password,
+    )
+
+
+# === MODIFIED END ===
 
 
 # === MODIFIED START ===
@@ -65,6 +110,27 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
+    # === MODIFIED START ===
+    # 原因：后台一旦配置管理员密码，所有管理入口都必须先通过登录验证。
+    # 影响范围：/app、/static、配置接口、任务触发接口和查询接口。
+    admin_password = os.environ.get("AI_DDTS_ADMIN_PASSWORD", "").strip()
+    admin_username = os.environ.get("AI_DDTS_ADMIN_USER", "admin").strip() or "admin"
+    if admin_password:
+        @app.middleware("http")
+        async def admin_basic_auth(request: Request, call_next):
+            """Protects management-console routes with HTTP Basic auth."""
+
+            if _is_public_path(request.url.path):
+                return await call_next(request)
+            if not _has_valid_basic_auth(
+                request.headers.get("authorization"),
+                admin_username,
+                admin_password,
+            ):
+                return _admin_auth_response()
+            return await call_next(request)
+
+    # === MODIFIED END ===
     # === MODIFIED START ===
     # 原因：提供首版原生静态前端页面，FastAPI 仅做静态资源托管。
     # 影响范围：/app 页面和 /static 静态资源。

@@ -28,12 +28,21 @@ class SkuGroupMapStore:
             if not key:
                 continue
             if isinstance(v, str) and v.strip():
-                result[key] = SkuGroupInfo(group_name=v.strip(), owner_mobile="")
+                result[key] = SkuGroupInfo(group_name=v.strip(), owner_mobile="", user_id="")
             elif isinstance(v, dict):
                 group_name = str(v.get("group_name", "")).strip()
                 owner_mobile = str(v.get("owner_mobile", "")).strip()
+                # === MODIFIED START ===
+                # 原因：SKU 群配置新增 user_id 后，独立 Store 读写也必须保留该字段。
+                # 影响范围：SkuGroupMapStore 读取结果和后续推送身份解析。
+                user_id = str(v.get("user_id", "")).strip()
+                # === MODIFIED END ===
                 if group_name:
-                    result[key] = SkuGroupInfo(group_name=group_name, owner_mobile=owner_mobile)
+                    result[key] = SkuGroupInfo(
+                        group_name=group_name,
+                        owner_mobile=owner_mobile,
+                        user_id=user_id,
+                    )
         return result
 
     def get(self, sku_code: str) -> SkuGroupInfo | None:
@@ -49,7 +58,7 @@ class SkuGroupMapStore:
 
     # -- write ---------------------------------------------------------------
 
-    def add(self, sku_code: str, group_name: str, owner_mobile: str = "") -> None:
+    def add(self, sku_code: str, group_name: str, owner_mobile: str = "", user_id: str = "") -> None:
         """Adds a mapping. Raises ValueError if the SKU already exists."""
         sku = sku_code.strip()
         gn = group_name.strip()
@@ -60,10 +69,10 @@ class SkuGroupMapStore:
         current = self.load()
         if sku in current:
             raise ValueError(f"SKU already mapped: {sku} → {current[sku].group_name}")
-        current[sku] = SkuGroupInfo(group_name=gn, owner_mobile=owner_mobile.strip())
+        current[sku] = SkuGroupInfo(group_name=gn, owner_mobile=owner_mobile.strip(), user_id=user_id.strip())
         self._save(current)
 
-    def update(self, sku_code: str, group_name: str, owner_mobile: str = "") -> None:
+    def update(self, sku_code: str, group_name: str, owner_mobile: str = "", user_id: str = "") -> None:
         """Updates an existing mapping. Raises ValueError if not found."""
         sku = sku_code.strip()
         gn = group_name.strip()
@@ -74,10 +83,10 @@ class SkuGroupMapStore:
         current = self.load()
         if sku not in current:
             raise ValueError(f"SKU not found: {sku}")
-        current[sku] = SkuGroupInfo(group_name=gn, owner_mobile=owner_mobile.strip())
+        current[sku] = SkuGroupInfo(group_name=gn, owner_mobile=owner_mobile.strip(), user_id=user_id.strip())
         self._save(current)
 
-    def set(self, sku_code: str, group_name: str, owner_mobile: str = "") -> None:
+    def set(self, sku_code: str, group_name: str, owner_mobile: str = "", user_id: str = "") -> None:
         """Adds or updates a mapping (upsert)."""
         sku = sku_code.strip()
         gn = group_name.strip()
@@ -86,7 +95,7 @@ class SkuGroupMapStore:
         if not gn:
             raise ValueError("group_name must be a non-empty string")
         current = self.load()
-        current[sku] = SkuGroupInfo(group_name=gn, owner_mobile=owner_mobile.strip())
+        current[sku] = SkuGroupInfo(group_name=gn, owner_mobile=owner_mobile.strip(), user_id=user_id.strip())
         self._save(current)
 
     def remove(self, sku_code: str) -> None:
@@ -124,7 +133,11 @@ class SkuGroupMapStore:
         count = 0
         for sku, info in list(current.items()):
             if info.group_name == old:
-                current[sku] = SkuGroupInfo(group_name=new, owner_mobile=info.owner_mobile)
+                current[sku] = SkuGroupInfo(
+                    group_name=new,
+                    owner_mobile=info.owner_mobile,
+                    user_id=info.user_id,
+                )
                 count += 1
         if count:
             self._save(current)
@@ -146,6 +159,11 @@ class SkuGroupMapStore:
             sku: {
                 "group_name": info.group_name,
                 "owner_mobile": info.owner_mobile,
+                # === MODIFIED START ===
+                # 原因：完整保存推送身份配置，避免 user_id 丢失导致手机号/群配置表现异常。
+                # 影响范围：config.rules.sku_group_map。
+                "user_id": info.user_id,
+                # === MODIFIED END ===
             }
             for sku, info in mapping.items()
         }

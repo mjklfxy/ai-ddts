@@ -258,6 +258,12 @@ class ApiService:
             sku_code = item["sku_code"]
             group_name = item["group_name"]
             owner_mobile = item["owner_mobile"]
+            # === MODIFIED START ===
+            # 原因：XLSX 导入只更新群名和手机号时，需要保留已有 user_id 以免真实推送身份丢失。
+            # 影响范围：SKU 群上传接口和后续 MessagePayload.user_id。
+            existing_info = existing.get(sku_code)
+            user_id = existing_info.user_id if existing_info is not None else ""
+            # === MODIFIED END ===
             if sku_code in existing:
                 modified += 1
             else:
@@ -265,12 +271,25 @@ class ApiService:
             existing[sku_code] = SkuGroupInfo(
                 group_name=group_name,
                 owner_mobile=owner_mobile,
+                # === MODIFIED START ===
+                # 原因：保留已有 user_id，避免手机号配置更新后覆盖直接推送身份。
+                # 影响范围：SKU 群上传接口。
+                user_id=user_id,
+                # === MODIFIED END ===
             )
 
         data = json.loads(self.config_path.read_text(encoding="utf-8"))
         rules = data.setdefault("rules", {})
         rules["sku_group_map"] = {
-            sku: {"group_name": info.group_name, "owner_mobile": info.owner_mobile}
+            # === MODIFIED START ===
+            # 原因：完整持久化 SKU 群映射字段，避免 user_id 在保存时丢失。
+            # 影响范围：config.rules.sku_group_map。
+            sku: {
+                "group_name": info.group_name,
+                "owner_mobile": info.owner_mobile,
+                "user_id": info.user_id,
+            }
+            # === MODIFIED END ===
             for sku, info in existing.items()
         }
         config_service.save(self.config_path, config_service.from_dict(data))

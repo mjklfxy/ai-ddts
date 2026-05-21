@@ -1,7 +1,10 @@
+import base64
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from unittest import TestCase
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -113,6 +116,43 @@ class InterfacesAppTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok"})
+
+    # === MODIFIED START ===
+    # 原因：后台管理入口需要在给定管理员密码后启用登录验证，避免未授权触发真实推送。
+    # 影响范围：/app、/static 和后台 API 入口。
+    def test_admin_auth_blocks_background_without_basic_credentials(self) -> None:
+        with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
+            client = TestClient(create_app(ApiService(config_path=self.config_path)))
+
+        response = client.post("/tasks/run")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.headers["www-authenticate"], "Basic")
+
+    def test_admin_auth_allows_background_with_basic_credentials(self) -> None:
+        with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
+            client = TestClient(
+                create_app(
+                    ApiService(
+                        config_path=self.config_path,
+                        task_store_path=self.task_store_path,
+                        supplier_mapping_path=self.supplier_mapping_path,
+                        exception_order_path=self.exception_order_path,
+                        pushed_order_path=self.pushed_order_path,
+                        execution_log_path=self.execution_log_path,
+                    )
+                )
+            )
+
+        credentials = base64.b64encode(b"admin:secret").decode("ascii")
+        response = client.post(
+            "/tasks/run",
+            headers={"Authorization": f"Basic {credentials}"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("push_status", response.json())
+    # === MODIFIED END ===
 
     # === MODIFIED START ===
     # 原因：新增静态管理台入口，需要验证 /app 和静态资源可访问。
@@ -356,7 +396,7 @@ class InterfacesAppTests(TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(payload["task"]["name"], "daily-direct-order")
-        self.assertEqual(payload["rules"]["sku_group_map"], {"SKU-PASS": {"group_name": "GROUP-A", "owner_mobile": ""}})
+        self.assertEqual(payload["rules"]["sku_group_map"], {"SKU-PASS": {"group_name": "GROUP-A", "owner_mobile": "", "user_id": ""}})
         # === MODIFIED START ===
         # 原因：配置接口需要返回规则模块级开关。
         # 影响范围：/config。
@@ -461,7 +501,7 @@ class InterfacesAppTests(TestCase):
         self.assertEqual(response.json()["schedule"]["schedule_id"], "morning")
         persisted = json.loads(self.config_path.read_text(encoding="utf-8"))
         self.assertFalse(persisted["rules"]["excluded_warehouses_enabled"])
-        self.assertEqual(persisted["rules"]["sku_group_map"]["SKU-NEW"], {"group_name": "GROUP-B", "owner_mobile": ""})
+        self.assertEqual(persisted["rules"]["sku_group_map"]["SKU-NEW"], {"group_name": "GROUP-B", "owner_mobile": "", "user_id": ""})
         self.assertTrue(persisted["rules"]["sku_group_map_enabled"])
         self.assertEqual(persisted["schedules"][1]["schedule_id"], "afternoon")
 
@@ -496,13 +536,60 @@ class InterfacesAppTests(TestCase):
         self.assertTrue(payload["rules"]["restricted_regions_enabled"])
         self.assertTrue(payload["rules"]["sku_group_map_enabled"])
         self.assertEqual(payload["rules"]["excluded_skus"], ["SKU-EXCLUDE", "SKU-NEW"])
-        self.assertEqual(payload["rules"]["sku_group_map"]["SKU-NEW"], {"group_name": "GROUP-B", "owner_mobile": ""})
+        self.assertEqual(payload["rules"]["sku_group_map"]["SKU-NEW"], {"group_name": "GROUP-B", "owner_mobile": "", "user_id": ""})
         persisted = json.loads(self.config_path.read_text(encoding="utf-8"))
         self.assertFalse(persisted["rules"]["excluded_warehouses_enabled"])
         self.assertTrue(persisted["rules"]["excluded_skus_enabled"])
         self.assertTrue(persisted["rules"]["restricted_regions_enabled"])
         self.assertTrue(persisted["rules"]["sku_group_map_enabled"])
-        self.assertEqual(persisted["rules"]["sku_group_map"]["SKU-NEW"], {"group_name": "GROUP-B", "owner_mobile": ""})
+        self.assertEqual(persisted["rules"]["sku_group_map"]["SKU-NEW"], {"group_name": "GROUP-B", "owner_mobile": "", "user_id": ""})
+
+    # === MODIFIED START ===
+    # 原因：SKU 群导入更新群名/手机号时不能丢弃已有 user_id，否则手机号解析兜底会表现为配置不生效。
+    # 影响范围：SKU 群 XLSX 导入接口与真实推送配置。
+    def test_upload_sku_group_xlsx_preserves_existing_user_id(self) -> None:
+        data = json.loads(self.config_path.read_text(encoding="utf-8"))
+        data["rules"]["sku_group_map"] = {
+            "SKU-PASS": {
+                "group_name": "GROUP-A",
+                "owner_mobile": "15176152071",
+                "user_id": "USER-EXISTING",
+            }
+        }
+        self.config_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+
+        with patch(
+            "application.api_service.load_sku_groups_from_bytes",
+            return_value=[
+                {
+                    "sku_code": "SKU-PASS",
+                    "group_name": "GROUP-B",
+                    "owner_mobile": "15176152071",
+                }
+            ],
+        ):
+            response = self.client.post(
+                "/config/sku-groups/upload-xlsx",
+                files={
+                    "file": (
+                        "sku-groups.xlsx",
+                        b"placeholder",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    )
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        persisted = json.loads(self.config_path.read_text(encoding="utf-8"))
+        self.assertEqual(
+            persisted["rules"]["sku_group_map"]["SKU-PASS"],
+            {
+                "group_name": "GROUP-B",
+                "owner_mobile": "15176152071",
+                "user_id": "USER-EXISTING",
+            },
+        )
+    # === MODIFIED END ===
 
     def test_update_rule_config_rejects_unknown_key(self) -> None:
         response = self.client.put("/config/rules", json={"unknown": []})
