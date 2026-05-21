@@ -20,7 +20,7 @@
     }
   ],
   "source": {
-    "mode": "mock"
+    "mode": "jikeyun"
   },
   "jikeyun": {
     "api_url": "https://open.jackyun.com/open/openapi/do",
@@ -9092,7 +9092,7 @@
   },
   "qixin": {
     "mode": "qixin",
-    "api_base_url": "https://state.renruikeji.cn/api/marketengine",
+    "api_base_url": "https://teststate.renruikeji.cn/api/marketengine",
     "caller_id": "10002",
     "secret_key_env": "EuZFTaZWXm7ezguXQM8soUtO6LnTbjrQW7y2A9rLZ8",
     "timeout_seconds": 30.0,
