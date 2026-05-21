@@ -46,6 +46,8 @@ def _sanitize_next_path(value: str | None) -> str:
 
     if not value or not value.startswith("/") or value.startswith("//"):
         return "/app"
+    if value in {"/", "/app/"}:
+        return "/app"
     return value
 
 
@@ -54,6 +56,15 @@ def _login_redirect(path: str) -> RedirectResponse:
 
     query = urlencode({"next": _sanitize_next_path(path)}, safe="/")
     return RedirectResponse(url=f"/login?{query}", status_code=303)
+
+
+def _should_redirect_to_login(request: Request) -> bool:
+    """Returns whether an unauthenticated request is a browser page request."""
+
+    path = request.url.path
+    if request.method != "GET":
+        return False
+    return path in {"/", "/app", "/app/"} or path.startswith("/static")
 
 
 def _session_signature(username: str, secret: str) -> str:
@@ -155,7 +166,7 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
                 session_secret,
             ):
                 return await call_next(request)
-            if request.url.path == "/app" or request.url.path.startswith("/static"):
+            if _should_redirect_to_login(request):
                 return _login_redirect(str(request.url.path))
             return _admin_auth_response()
 
@@ -218,6 +229,12 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
         response.delete_cookie(ADMIN_SESSION_COOKIE)
         return response
     # === MODIFIED END ===
+
+    @app.get("/", include_in_schema=False)
+    def frontend_root() -> RedirectResponse:
+        """Redirects the service root to the management console."""
+
+        return RedirectResponse(url="/app", status_code=303)
 
     @app.get("/app", include_in_schema=False)
     def frontend_app() -> FileResponse:

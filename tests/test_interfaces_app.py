@@ -128,6 +128,24 @@ class InterfacesAppTests(TestCase):
         self.assertEqual(response.status_code, 303)
         self.assertEqual(response.headers["location"], "/login?next=/app")
 
+    def test_admin_login_redirects_root_when_unauthenticated(self) -> None:
+        with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
+            client = TestClient(create_app(ApiService(config_path=self.config_path)))
+
+        response = client.get("/", follow_redirects=False)
+
+        self.assertEqual(response.status_code, 303)
+        self.assertEqual(response.headers["location"], "/login?next=/app")
+
+    def test_admin_login_redirects_app_slash_when_unauthenticated(self) -> None:
+        with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
+            client = TestClient(create_app(ApiService(config_path=self.config_path)))
+
+        response = client.get("/app/", follow_redirects=False)
+
+        self.assertEqual(response.status_code, 303)
+        self.assertEqual(response.headers["location"], "/login?next=/app")
+
     def test_admin_login_sets_cookie_and_allows_app(self) -> None:
         with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
             client = TestClient(
