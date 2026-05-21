@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-import base64
 import hashlib
 import hmac
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
+from urllib.parse import parse_qs, urlencode
 
 # === MODIFIED START ===
 # 原因：配置接口需要把应用层校验错误转换为 HTTP 400 响应。
 # 影响范围：接口层错误响应映射。
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 # === MODIFIED END ===
 
@@ -22,16 +22,16 @@ from application.config_service import ConfigService
 # === MODIFIED START ===
 # 原因：后台管理入口需要可选登录验证，避免配置和任务触发接口暴露在无认证环境。
 # 影响范围：FastAPI 后台页面、静态资源和管理 API。
-AUTH_EXEMPT_PATHS = ("/health", "/order-files/download")
+AUTH_EXEMPT_PATHS = ("/health", "/login", "/logout", "/order-files/download")
+ADMIN_SESSION_COOKIE = "ai_ddts_session"
 
 
 def _admin_auth_response() -> JSONResponse:
-    """Builds a Basic-auth challenge response for the management console."""
+    """Builds a JSON auth failure response for management-console APIs."""
 
     return JSONResponse(
         status_code=401,
         content={"detail": "Authentication required"},
-        headers={"WWW-Authenticate": "Basic"},
     )
 
 
@@ -41,22 +41,48 @@ def _is_public_path(path: str) -> bool:
     return path in AUTH_EXEMPT_PATHS
 
 
-def _has_valid_basic_auth(auth_header: str | None, username: str, password: str) -> bool:
-    """Validates one HTTP Basic Authorization header without logging credentials."""
+def _sanitize_next_path(value: str | None) -> str:
+    """Keeps login redirects inside this application."""
 
-    if not auth_header or not auth_header.startswith("Basic "):
+    if not value or not value.startswith("/") or value.startswith("//"):
+        return "/app"
+    return value
+
+
+def _login_redirect(path: str) -> RedirectResponse:
+    """Redirects browser requests to the login page with a safe return path."""
+
+    query = urlencode({"next": _sanitize_next_path(path)}, safe="/")
+    return RedirectResponse(url=f"/login?{query}", status_code=303)
+
+
+def _session_signature(username: str, secret: str) -> str:
+    """Signs a session username without exposing the configured password."""
+
+    return hmac.HMAC(
+        secret.encode("utf-8"),
+        username.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def _build_session_token(username: str, secret: str) -> str:
+    """Builds a compact signed session token for the admin console."""
+
+    return f"{username}:{_session_signature(username, secret)}"
+
+
+def _has_valid_session_cookie(token: str | None, username: str, secret: str) -> bool:
+    """Validates the signed admin session cookie."""
+
+    if not token:
         return False
-    token = auth_header.removeprefix("Basic ").strip()
-    try:
-        decoded = base64.b64decode(token, validate=True).decode("utf-8")
-    except Exception:
-        return False
-    provided_user, separator, provided_password = decoded.partition(":")
+    provided_user, separator, provided_signature = token.partition(":")
     if not separator:
         return False
     return hmac.compare_digest(provided_user, username) and hmac.compare_digest(
-        provided_password,
-        password,
+        provided_signature,
+        _session_signature(provided_user, secret),
     )
 
 
@@ -115,20 +141,23 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
     # 影响范围：/app、/static、配置接口、任务触发接口和查询接口。
     admin_password = os.environ.get("AI_DDTS_ADMIN_PASSWORD", "").strip()
     admin_username = os.environ.get("AI_DDTS_ADMIN_USER", "admin").strip() or "admin"
+    session_secret = os.environ.get("AI_DDTS_SESSION_SECRET", "").strip() or admin_password
     if admin_password:
         @app.middleware("http")
-        async def admin_basic_auth(request: Request, call_next):
-            """Protects management-console routes with HTTP Basic auth."""
+        async def admin_session_auth(request: Request, call_next):
+            """Protects management-console routes with signed browser sessions."""
 
             if _is_public_path(request.url.path):
                 return await call_next(request)
-            if not _has_valid_basic_auth(
-                request.headers.get("authorization"),
+            if _has_valid_session_cookie(
+                request.cookies.get(ADMIN_SESSION_COOKIE),
                 admin_username,
-                admin_password,
+                session_secret,
             ):
-                return _admin_auth_response()
-            return await call_next(request)
+                return await call_next(request)
+            if request.url.path == "/app" or request.url.path.startswith("/static"):
+                return _login_redirect(str(request.url.path))
+            return _admin_auth_response()
 
     # === MODIFIED END ===
     # === MODIFIED START ===
@@ -139,6 +168,55 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
     # 原因：避免浏览器沿用旧静态资源，导致规则 tab 联动修复不生效。
     # 影响范围：/static 静态资源响应头。
     app.mount("/static", NoCacheStaticFiles(directory=static_dir), name="static")
+    # === MODIFIED END ===
+
+    # === MODIFIED START ===
+    # 原因：后台需要像常规管理系统一样使用登录页和浏览器 Cookie 保存登录状态。
+    # 影响范围：/login、/logout 和 /app 访问前的会话校验。
+    @app.get("/login", include_in_schema=False)
+    def login_page() -> FileResponse:
+        """Serves the admin login page."""
+
+        return FileResponse(
+            static_dir / "login.html",
+            headers={"Cache-Control": "no-store"},
+        )
+
+    @app.post("/login", include_in_schema=False)
+    async def login(request: Request) -> Response:
+        """Creates a signed admin session cookie after password validation."""
+
+        body = (await request.body()).decode("utf-8")
+        fields = parse_qs(body, keep_blank_values=True)
+        provided_user = fields.get("username", [""])[0]
+        provided_password = fields.get("password", [""])[0]
+        next_path = _sanitize_next_path(fields.get("next", [request.query_params.get("next")])[0])
+        if not admin_password or (
+            hmac.compare_digest(provided_user, admin_username)
+            and hmac.compare_digest(provided_password, admin_password)
+        ):
+            response = RedirectResponse(url=next_path, status_code=303)
+            response.set_cookie(
+                ADMIN_SESSION_COOKIE,
+                _build_session_token(admin_username, session_secret),
+                httponly=True,
+                samesite="lax",
+                max_age=7 * 24 * 60 * 60,
+            )
+            return response
+        return HTMLResponse(
+            "<!doctype html><title>Login failed</title><p>Authentication failed</p>",
+            status_code=401,
+            headers={"Cache-Control": "no-store"},
+        )
+
+    @app.get("/logout", include_in_schema=False)
+    def logout() -> RedirectResponse:
+        """Clears the admin session cookie and returns to the login page."""
+
+        response = RedirectResponse(url="/login", status_code=303)
+        response.delete_cookie(ADMIN_SESSION_COOKIE)
+        return response
     # === MODIFIED END ===
 
     @app.get("/app", include_in_schema=False)

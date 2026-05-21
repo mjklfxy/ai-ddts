@@ -1,4 +1,3 @@
-import base64
 import json
 import os
 from datetime import datetime
@@ -120,16 +119,16 @@ class InterfacesAppTests(TestCase):
     # === MODIFIED START ===
     # 原因：后台管理入口需要在给定管理员密码后启用登录验证，避免未授权触发真实推送。
     # 影响范围：/app、/static 和后台 API 入口。
-    def test_admin_auth_blocks_background_without_basic_credentials(self) -> None:
+    def test_admin_login_redirects_app_when_unauthenticated(self) -> None:
         with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
             client = TestClient(create_app(ApiService(config_path=self.config_path)))
 
-        response = client.post("/tasks/run")
+        response = client.get("/app", follow_redirects=False)
 
-        self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.headers["www-authenticate"], "Basic")
+        self.assertEqual(response.status_code, 303)
+        self.assertEqual(response.headers["location"], "/login?next=/app")
 
-    def test_admin_auth_allows_background_with_basic_credentials(self) -> None:
+    def test_admin_login_sets_cookie_and_allows_app(self) -> None:
         with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
             client = TestClient(
                 create_app(
@@ -144,12 +143,53 @@ class InterfacesAppTests(TestCase):
                 )
             )
 
-        credentials = base64.b64encode(b"admin:secret").decode("ascii")
-        response = client.post(
-            "/tasks/run",
-            headers={"Authorization": f"Basic {credentials}"},
+        login_response = client.post(
+            "/login",
+            data={"username": "admin", "password": "secret", "next": "/app"},
+            follow_redirects=False,
         )
 
+        self.assertEqual(login_response.status_code, 303)
+        self.assertEqual(login_response.headers["location"], "/app")
+        self.assertIn("ai_ddts_session=", login_response.headers["set-cookie"])
+
+        app_response = client.get("/app")
+        self.assertEqual(app_response.status_code, 200)
+        self.assertIn("text/html", app_response.headers["content-type"])
+
+    def test_admin_session_blocks_api_without_cookie(self) -> None:
+        with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
+            client = TestClient(create_app(ApiService(config_path=self.config_path)))
+
+        response = client.post("/tasks/run")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {"detail": "Authentication required"})
+        self.assertNotIn("www-authenticate", response.headers)
+
+    def test_admin_session_allows_task_trigger_with_cookie(self) -> None:
+        with patch.dict(os.environ, {"AI_DDTS_ADMIN_PASSWORD": "secret"}, clear=False):
+            client = TestClient(
+                create_app(
+                    ApiService(
+                        config_path=self.config_path,
+                        task_store_path=self.task_store_path,
+                        supplier_mapping_path=self.supplier_mapping_path,
+                        exception_order_path=self.exception_order_path,
+                        pushed_order_path=self.pushed_order_path,
+                        execution_log_path=self.execution_log_path,
+                    )
+                )
+            )
+
+        login_response = client.post(
+            "/login",
+            data={"username": "admin", "password": "secret"},
+            follow_redirects=False,
+        )
+        response = client.post("/tasks/run")
+
+        self.assertEqual(login_response.status_code, 303)
         self.assertEqual(response.status_code, 200)
         self.assertIn("push_status", response.json())
     # === MODIFIED END ===

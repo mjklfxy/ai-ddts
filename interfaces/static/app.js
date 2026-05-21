@@ -152,6 +152,14 @@ async function api(path, options = {}) {
     headers: options.body instanceof FormData ? {} : { "Content-Type": "application/json" },
     ...options,
   });
+  // === MODIFIED START ===
+  // 原因：后台登录态过期后，前端需要回到登录页而不是只显示接口错误。
+  // 影响范围：所有通过 api() 发出的后台请求。
+  if (response.status === 401) {
+    redirectToLogin();
+    throw new Error("请先登录后台");
+  }
+  // === MODIFIED END ===
   if (!response.ok) {
     let detail = `请求失败：${response.status}`;
     try {
@@ -164,6 +172,21 @@ async function api(path, options = {}) {
   }
   return response.json();
 }
+
+// === MODIFIED START ===
+// 原因：后台登录态改为 Cookie，会话过期时需要统一跳回登录页。
+// 影响范围：管理台 API 请求和上传请求的未登录处理。
+function redirectToLogin() {
+  const next = encodeURIComponent("/app");
+  window.location.href = `/login?next=${next}`;
+}
+
+function handleUnauthorizedResponse(response) {
+  if (response.status !== 401) return false;
+  redirectToLogin();
+  return true;
+}
+// === MODIFIED END ===
 
 // === MODIFIED START ===
 // 原因：执行日志按周期查询，页面切换周期时只刷新日志数据，不重载全部工作台数据。
@@ -1269,6 +1292,11 @@ async function uploadRegionXlsx() {
       method: "POST",
       body: formData,
     });
+    // === MODIFIED START ===
+    // 原因：上传接口未登录时需要跳回登录页，保持后台会话行为一致。
+    // 影响范围：限发区域 Excel 上传。
+    if (handleUnauthorizedResponse(response)) return;
+    // === MODIFIED END ===
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
       throw new Error(errorBody.detail || `HTTP ${response.status}`);
@@ -1308,6 +1336,11 @@ async function uploadSkuGroupXlsx() {
       method: "POST",
       body: formData,
     });
+    // === MODIFIED START ===
+    // 原因：上传接口未登录时需要跳回登录页，保持后台会话行为一致。
+    // 影响范围：SKU 群 Excel 上传。
+    if (handleUnauthorizedResponse(response)) return;
+    // === MODIFIED END ===
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
       throw new Error(errorBody.detail || `HTTP ${response.status}`);
@@ -1347,6 +1380,11 @@ async function uploadExcludedSkuXlsx() {
       method: "POST",
       body: formData,
     });
+    // === MODIFIED START ===
+    // 原因：上传接口未登录时需要跳回登录页，保持后台会话行为一致。
+    // 影响范围：排除 SKU Excel 上传。
+    if (handleUnauthorizedResponse(response)) return;
+    // === MODIFIED END ===
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
       throw new Error(errorBody.detail || `HTTP ${response.status}`);
