@@ -4,6 +4,7 @@ import ctypes
 import ctypes.wintypes
 import os
 import time
+from pathlib import Path
 
 import pyautogui as pg
 import pygetwindow as gw
@@ -20,21 +21,45 @@ pg.PAUSE = 0.05
 _TRACE_ID = f"db-to-xlsx-{os.getpid()}"
 
 
-def _find_window(substring: str) -> gw.Win32Window | None:
+# === MODIFIED START ===
+# 原因：RPA 导出完成后需要明确记录目标文件位置和文件状态，方便确认导出落点。
+# 影响范围：桌面导出日志、Jikeyun RPA 调试。
+def describe_export_file(target_path: Path | str) -> tuple[str, dict[str, object]]:
+    """Builds the export-file log event and payload for one target path."""
+
+    path = Path(target_path)
+    payload: dict[str, object] = {
+        "path": str(path),
+        "exists": path.exists(),
+    }
+    if not path.exists():
+        return "export_file_missing", payload
+
+    stat = path.stat()
+    payload["size_bytes"] = stat.st_size
+    payload["modified_at"] = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(stat.st_mtime))
+    return "export_file_detected", payload
+
+
+# === MODIFIED END ===
+
+
+def _find_window(substring: str, trace_id: str) -> gw.Win32Window | None:
     """查找标题包含 substring 的窗口，返回窗口对象。"""
     windows = gw.getWindowsWithTitle(substring)
     if not windows:
-        log_info("window_not_found", {"trace_id": _TRACE_ID, "substring": substring})
+        log_info("window_not_found", {"trace_id": trace_id, "substring": substring})
         return None
+    log_info("window_found", {"trace_id": trace_id, "substring": substring, "title": windows[0].title})
     return windows[0]
 
 
-def _activate_window(win: gw.Win32Window) -> bool:
+def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
     """激活窗口并返回是否成功。"""
     log_info(
         "window_activate",
         {
-            "trace_id": _TRACE_ID,
+            "trace_id": trace_id,
             "title": win.title,
             "left": win.left,
             "top": win.top,
@@ -50,61 +75,84 @@ def _activate_window(win: gw.Win32Window) -> bool:
     time.sleep(0.5)
     try:
         cur = pg.position()
-        log_info("mouse_position", {"trace_id": _TRACE_ID, "position": cur})
+        log_info("mouse_position", {"trace_id": trace_id, "position": cur})
     except Exception as e:
-        log_error("pyautogui_error", {"trace_id": _TRACE_ID, "error": str(e)})
+        log_error("pyautogui_error", {"trace_id": trace_id, "error": str(e)})
         return False
     return True
 
 
-def _click(win: gw.Win32Window, rx: int, ry: int, delay: float = 1) -> None:
+def _click(win: gw.Win32Window, rx: int, ry: int, trace_id: str, delay: float = 1) -> None:
     """点击窗口内相对坐标 (rx, ry)。"""
     # x, y = win.left + rx, win.top + ry
     x, y = rx, ry
     log_info(
         "click",
-        {"trace_id": _TRACE_ID, "relative": (rx, ry), "screen": (x, y)},
+        {"trace_id": trace_id, "relative": (rx, ry), "screen": (x, y)},
     )
     pg.click(x, y)
     time.sleep(delay)
 
 
-def _hover(win: gw.Win32Window, rx: int, ry: int, delay: float = 1) -> None:
+def _hover(win: gw.Win32Window, rx: int, ry: int, trace_id: str, delay: float = 1) -> None:
     """悬浮到窗口内相对坐标。"""
     x, y = rx, ry
     log_info(
         "hover",
-        {"trace_id": _TRACE_ID, "relative": (rx, ry), "screen": (x, y)},
+        {"trace_id": trace_id, "relative": (rx, ry), "screen": (x, y)},
     )
     pg.moveTo(x, y, duration=0.3)
     time.sleep(delay)
 
 
-def _type(text: str, delay: float = 1) -> None:
+def _type(text: str, trace_id: str, delay: float = 1) -> None:
     """通过剪贴板输入文本。"""
+    log_info(
+        "clipboard_type",
+        {
+            "trace_id": trace_id,
+            "text_preview": text[:12],
+            "text_length": len(text),
+        },
+    )
     pyperclip.copy(text)
     pg.hotkey("ctrl", "v")
     pyperclip.copy("")
     time.sleep(delay)
 
 
-def export_orders_to_xlsx() -> None:
+def export_orders_to_xlsx(
+    trace_id: str | None = None,
+    xlsx_path: Path | str = Path("input") / "销售单查询.xlsx",
+) -> None:
     """从吉客云 OMS 桌面应用导出订单数据到 xlsx。
 
     所有坐标均为相对窗口左上角的偏移量 (rx, ry)。
     窗口位置变化或 DPI 缩放都不会影响操作。
     """
+    safe_trace_id = trace_id or _TRACE_ID
+    target_path = Path(xlsx_path)
+    start_epoch = time.time()
+    log_info("export_start", {"trace_id": safe_trace_id})
+    log_info(
+        "export_target_path",
+        {
+            "trace_id": safe_trace_id,
+            "xlsx_path": str(target_path),
+        },
+    )
+
     pg.moveTo(1, 1, duration=0.1)
 
-    win = _find_window("吉客云")
+    win = _find_window("吉客云", safe_trace_id)
     if not win:
         log_error(
-            "export_cancel", {"trace_id": _TRACE_ID, "reason": "吉客云窗口未找到"}
+            "export_cancel", {"trace_id": safe_trace_id, "reason": "吉客云窗口未找到"}
         )
         return
 
-    if not _activate_window(win):
-        log_error("export_cancel", {"trace_id": _TRACE_ID, "reason": "无法激活窗口"})
+    if not _activate_window(win, safe_trace_id):
+        log_error("export_cancel", {"trace_id": safe_trace_id, "reason": "无法激活窗口"})
         return
 
     # === 修改坐标从这里开始 ===
@@ -129,17 +177,45 @@ def export_orders_to_xlsx() -> None:
     ]
     # === 修改坐标到这里结束 ===
 
-    for action, value, delay in steps:
+    for index, (action, value, delay) in enumerate(steps, start=1):
+        payload = {
+            "trace_id": safe_trace_id,
+            "step_index": index,
+            "step_count": len(steps),
+            "action": action,
+            "delay_seconds": delay,
+        }
+        if isinstance(value, tuple):
+            payload["relative"] = value
+        else:
+            payload["text_preview"] = value[:12]
+            payload["text_length"] = len(value)
+        log_info("export_step_start", payload)
         if action in ("hover", "click") and isinstance(value, tuple):
             rx, ry = value
             if action == "hover":
-                _hover(win, rx, ry, delay)
+                _hover(win, rx, ry, safe_trace_id, delay)
             else:
-                _click(win, rx, ry, delay)
+                _click(win, rx, ry, safe_trace_id, delay)
         elif action == "type" and isinstance(value, str):
-            _type(value, delay)
+            _type(value, safe_trace_id, delay)
+        log_info("export_step_complete", payload)
 
-    log_info("export_complete", {"trace_id": _TRACE_ID})
+    log_info(
+        "export_complete",
+        {
+            "trace_id": safe_trace_id,
+            "step_count": len(steps),
+            "duration_ms": int((time.time() - start_epoch) * 1000),
+        },
+    )
+    event, payload = describe_export_file(target_path)
+    payload["trace_id"] = safe_trace_id
+    payload["xlsx_path"] = str(target_path)
+    if event == "export_file_missing":
+        log_error(event, payload)
+    else:
+        log_info(event, payload)
 
 
 if __name__ == "__main__":

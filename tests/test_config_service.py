@@ -155,6 +155,8 @@ class ConfigServiceTests(TestCase):
         self.assertEqual(config.message.max_attempts, 3)
         self.assertEqual(config.message.retry_interval_seconds, 0)
         self.assertEqual(config.output.order_file_dir, Path("outputs/order_files"))
+        self.assertFalse(config.rpa.enabled)
+        self.assertEqual(config.rpa.xlsx_path, Path("input") / "销售单查询.xlsx")
 
     def test_from_dict_parses_full_config(self) -> None:
         config = ConfigService().from_dict(
@@ -208,6 +210,10 @@ class ConfigServiceTests(TestCase):
                         "shopIds": ["S-001"],
                     },
                     "page_index_base": 0,
+                },
+                "rpa": {
+                    "enabled": True,
+                    "xlsx_path": "input/custom.xlsx",
                 },
                 # === MODIFIED END ===
                 # === MODIFIED START ===
@@ -287,6 +293,8 @@ class ConfigServiceTests(TestCase):
         self.assertEqual(config.jikeyun.status_values, (0, 1, "3"))
         self.assertEqual(config.jikeyun.extra_params, {"shopIds": ["S-001"]})
         self.assertEqual(config.jikeyun.page_index_base, 0)
+        self.assertTrue(config.rpa.enabled)
+        self.assertEqual(config.rpa.xlsx_path, Path("input/custom.xlsx"))
         # === MODIFIED END ===
         # === MODIFIED START ===
         # 原因：断言金蝶配置已解析。

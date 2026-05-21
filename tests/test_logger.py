@@ -2,7 +2,7 @@ import json
 import logging
 from unittest import TestCase
 
-from shared.logging.logger import REDACTED, log_error, log_info, sanitize_payload
+from shared.logging.logger import REDACTED, _get_project_logger, log_error, log_info, sanitize_payload
 
 
 class ListLogHandler(logging.Handler):
@@ -81,6 +81,11 @@ class LoggerTests(TestCase):
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertEqual(message["event"], "event_error")
         self.assertEqual(message["payload"]["APP_SECRET"], REDACTED)
+
+    def test_project_logger_has_console_handler(self) -> None:
+        logger = _get_project_logger()
+
+        self.assertTrue(any(isinstance(handler, logging.StreamHandler) for handler in logger.handlers))
 
 
 class RecordingLogHandler(ListLogHandler):

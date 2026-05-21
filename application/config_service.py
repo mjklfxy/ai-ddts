@@ -78,6 +78,20 @@ class ScheduleConfig:
 
 
 # === MODIFIED START ===
+# 原因：RPA 桌面导出需要独立开关，避免默认影响吉客云 OpenAPI 拉单。
+# 影响范围：配置解析、任务组装、吉客云 XLSX 兜底补数。
+@dataclass(frozen=True, slots=True)
+class RpaConfig:
+    """Configuration for optional desktop RPA order export."""
+
+    enabled: bool
+    xlsx_path: Path
+
+
+# === MODIFIED END ===
+
+
+# === MODIFIED START ===
 # 原因：订单来源需要支持 mock 与真实吉客云接口切换。
 # 影响范围：任务运行数据源配置。
 @dataclass(frozen=True, slots=True)
@@ -257,6 +271,11 @@ class AppConfig:
     # 影响范围：AppConfig 和任务运行。
     source: OrderSourceConfig
     jikeyun: JikeyunConfig
+    # === MODIFIED START ===
+    # 原因：RPA 导出配置需要随应用配置一起传入任务组装层。
+    # 影响范围：AppConfig 构造、配置解析、吉客云客户端组装。
+    rpa: RpaConfig
+    # === MODIFIED END ===
     # === MODIFIED END ===
     # === MODIFIED START ===
     # 原因：应用配置需要携带金蝶采购申请提交设置。
@@ -341,6 +360,11 @@ class ConfigService:
         # 影响范围：配置解析。
         source = data.get("source", {})
         jikeyun = data.get("jikeyun", {})
+        # === MODIFIED START ===
+        # 原因：RPA 配置需要独立解析，默认关闭以免影响既有取数链路。
+        # 影响范围：配置解析、吉客云客户端组装。
+        rpa = data.get("rpa", {})
+        # === MODIFIED END ===
         # === MODIFIED END ===
         # === MODIFIED START ===
         # 原因：解析金蝶采购申请提交配置。
@@ -445,6 +469,21 @@ class ConfigService:
             # === MODIFIED END ===
             page_index_base=_non_negative_int(jikeyun, "page_index_base", 0, "jikeyun.page_index_base"),
         )
+        # === MODIFIED START ===
+        # 原因：RPA 导出的启停和 XLSX 路径需要配置化，默认关闭保持既有行为。
+        # 影响范围：配置解析、吉客云任务运行。
+        rpa_config = RpaConfig(
+            enabled=_optional_bool(rpa, "enabled", False, "rpa.enabled"),
+            xlsx_path=Path(
+                _optional_string_with_default(
+                    rpa,
+                    "xlsx_path",
+                    str(Path("input") / "销售单查询.xlsx"),
+                    "rpa.xlsx_path",
+                )
+            ),
+        )
+        # === MODIFIED END ===
         # === MODIFIED END ===
         # === MODIFIED START ===
         # 原因：解析金蝶接口模式、地址、鉴权环境变量和追踪号字段。
@@ -655,6 +694,11 @@ class ConfigService:
             # 影响范围：AppConfig 构造。
             source=source_config,
             jikeyun=jikeyun_config,
+            # === MODIFIED START ===
+            # 原因：把 RPA 配置交给任务组装层决定是否注入桌面导出能力。
+            # 影响范围：AppConfig 构造、吉客云客户端组装。
+            rpa=rpa_config,
+            # === MODIFIED END ===
             # === MODIFIED END ===
             # === MODIFIED START ===
             # 原因：返回金蝶接口配置给应用层。
@@ -1158,6 +1202,14 @@ def to_dict(config: AppConfig) -> dict[str, object]:
             # === MODIFIED END ===
             "page_index_base": config.jikeyun.page_index_base,
         },
+        # === MODIFIED START ===
+        # 原因：配置 API 需要输出 RPA 桌面导出开关和 XLSX 路径。
+        # 影响范围：/config 响应和配置落盘。
+        "rpa": {
+            "enabled": config.rpa.enabled,
+            "xlsx_path": str(config.rpa.xlsx_path),
+        },
+        # === MODIFIED END ===
         # === MODIFIED END ===
         # === MODIFIED START ===
         # 原因：配置 API 需要输出金蝶采购申请提交配置。

@@ -9,13 +9,13 @@ import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from application.order_splitter import OrderLineForSplit
 from application.pipeline import PipelineOrder
 from application.xlsx_reader import OrderAddressInfo, load_order_address_lookup
 from domain.rules.base import RuleContext
-from infrastructure.db_to_xlsx import export_orders_to_xlsx
 
 
 JIKEYUN_ORDER_QUERY_METHOD = "wms.order.query-info.page.v2"
@@ -60,6 +60,13 @@ class JikeyunPageResult:
 
 Transport = Callable[[JikeyunPageRequest], JikeyunPageResult]
 Clock = Callable[[], datetime]
+# === MODIFIED START ===
+# 原因：RPA 桌面导出通过依赖注入接入，避免基础取数客户端直接绑定 pyautogui。
+# 影响范围：JikeyunClient 初始化、fetch_orders 导出补数流程。
+RpaExporter = Callable[[str, Path], None]
+LogInfo = Callable[[str, dict[str, object]], None]
+LogError = Callable[[str, dict[str, object]], None]
+# === MODIFIED END ===
 
 
 # === MODIFIED START ===
@@ -138,6 +145,14 @@ class JikeyunClient:
         extra_params: dict[str, object] | None = None,
         page_index_base: int = 0,
         # === MODIFIED END ===
+        # === MODIFIED START ===
+        # 原因：RPA 导出和 XLSX 路径需要可配置、可测试，并且默认不启用。
+        # 影响范围：吉客云取数后的地址补数流程。
+        rpa_exporter: RpaExporter | None = None,
+        xlsx_path: str | Path = Path("input") / "销售单查询.xlsx",
+        log_info: LogInfo | None = None,
+        log_error: LogError | None = None,
+        # === MODIFIED END ===
         clock: Clock | None = None,
     ) -> None:
         if page_size < 1:
@@ -179,6 +194,14 @@ class JikeyunClient:
         self.extra_params = dict(extra_params or {})
         self.page_index_base = page_index_base
         # === MODIFIED END ===
+        # === MODIFIED START ===
+        # 原因：保存可选 RPA 导出依赖和 XLSX 路径，失败时只记录日志不阻断 OpenAPI 拉单。
+        # 影响范围：fetch_orders 的桌面导出补数步骤。
+        self.rpa_exporter = rpa_exporter
+        self.xlsx_path = Path(xlsx_path)
+        self.log_info = log_info or self._noop_log_info
+        self.log_error = log_error or self._noop_log_error
+        # === MODIFIED END ===
         self.clock = clock or datetime.now
 
     def fetch_orders(
@@ -187,6 +210,16 @@ class JikeyunClient:
         start_time: datetime,
         end_time: datetime,
     ) -> tuple[PipelineOrder, ...]:
+        self.log_info(
+            "jikeyun_fetch_orders_start",
+            {
+                "trace_id": trace_id,
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
+                "page_index_base": self.page_index_base,
+                "xlsx_path": str(self.xlsx_path),
+            },
+        )
         # === MODIFIED START ===
         # 原因：wms.order.query-info.page.v2 的 pageIndex 从 0 开始。
         # 影响范围：真实吉客云分页拉单。
@@ -205,18 +238,35 @@ class JikeyunClient:
             )
             page_result = self.transport(request)
             raw_items.extend(page_result.items)
+            self.log_info(
+                "jikeyun_page_fetched",
+                {
+                    "trace_id": trace_id,
+                    "page_no": page_no,
+                    "item_count": len(page_result.items),
+                    "has_next": page_result.has_next,
+                },
+            )
 
             if not page_result.has_next:
                 break
             page_no += 1
             # time.sleep(1)
 
-        try:
-            # export_orders_to_xlsx()
-            pass
-        except Exception:
-            pass
-        xlsx_lookup = load_order_address_lookup("input/销售单查询.xlsx")
+        # === MODIFIED START ===
+        # 原因：可选执行 RPA 导出，随后从配置的 XLSX 路径补齐订单地址信息。
+        # 影响范围：fetch_orders 吉客云订单映射前置数据准备。
+        self._run_rpa_export(trace_id)
+        xlsx_lookup = load_order_address_lookup(self.xlsx_path)
+        self.log_info(
+            "jikeyun_xlsx_lookup_loaded",
+            {
+                "trace_id": trace_id,
+                "xlsx_path": str(self.xlsx_path),
+                "record_count": len(xlsx_lookup),
+            },
+        )
+        # === MODIFIED END ===
 
         orders = [
             self.map_order(
@@ -224,8 +274,74 @@ class JikeyunClient:
             )
             for raw_order in raw_items
         ]
+        self.log_info(
+            "jikeyun_fetch_orders_complete",
+            {
+                "trace_id": trace_id,
+                "raw_order_count": len(raw_items),
+                "order_count": len(orders),
+                "xlsx_path": str(self.xlsx_path),
+            },
+        )
         return tuple(orders)
         # === MODIFIED END ===
+
+    # === MODIFIED START ===
+    # 原因：隔离 RPA 异常处理，保证桌面自动化失败不会让 OpenAPI 拉单结果丢失。
+    # 影响范围：fetch_orders 的可选 RPA 导出步骤。
+    def _run_rpa_export(self, trace_id: str) -> None:
+        """Runs the optional desktop exporter and logs recoverable failures."""
+
+        if self.rpa_exporter is None:
+            self.log_info(
+                "jikeyun_rpa_export_skipped",
+                {
+                    "trace_id": trace_id,
+                    "xlsx_path": str(self.xlsx_path),
+                },
+            )
+            return
+
+        self.log_info(
+            "jikeyun_rpa_export_start",
+            {
+                "trace_id": trace_id,
+                "xlsx_path": str(self.xlsx_path),
+            },
+        )
+        try:
+            self.rpa_exporter(trace_id, self.xlsx_path)
+            self.log_info(
+                "jikeyun_rpa_export_succeeded",
+                {
+                    "trace_id": trace_id,
+                    "xlsx_path": str(self.xlsx_path),
+                },
+            )
+        except Exception as exc:
+            self.log_error(
+                "jikeyun_rpa_export_failed",
+                {
+                    "trace_id": trace_id,
+                    "xlsx_path": str(self.xlsx_path),
+                    "error_type": exc.__class__.__name__,
+                    "reason": str(exc)[:200],
+                },
+            )
+
+    @staticmethod
+    def _noop_log_info(event: str, payload: dict[str, object]) -> None:
+        """Accepts log events when no application logger is injected."""
+
+        _ = (event, payload)
+
+    @staticmethod
+    def _noop_log_error(event: str, payload: dict[str, object]) -> None:
+        """Accepts log events when no application logger is injected."""
+
+        _ = (event, payload)
+
+    # === MODIFIED END ===
 
     def build_page_request(
         self,
@@ -343,6 +459,9 @@ class JikeyunClient:
             xlsx_info = xlsx_lookup.get(order_no) if xlsx_lookup else None
 
             api_receiver = _optional_string_any(merged_source, RECEIVER_NAME_ALIASES)
+            receiver_name_source = "api" if api_receiver else "default"
+            if not api_receiver and xlsx_info and xlsx_info.receiver_name:
+                receiver_name_source = "xlsx"
             receiver_name = (
                 api_receiver
                 or (
@@ -354,6 +473,9 @@ class JikeyunClient:
             )
 
             api_address = _optional_string_any(merged_source, ADDRESS_ALIASES)
+            address_source = "api" if api_address else "default"
+            if not api_address and xlsx_info and xlsx_info.address:
+                address_source = "xlsx"
             address = (
                 api_address
                 or (xlsx_info.address if xlsx_info and xlsx_info.address else "")
@@ -361,10 +483,24 @@ class JikeyunClient:
             )
 
             api_phone = _optional_string_any(merged_source, PHONE_ALIASES)
+            phone_source = "api" if api_phone else "default"
+            if not api_phone and xlsx_info and xlsx_info.phone:
+                phone_source = "xlsx"
             phone = (
                 api_phone
                 or (xlsx_info.phone if xlsx_info and xlsx_info.phone else "")
                 or "未提供"
+            )
+            self.log_info(
+                "jikeyun_contact_fields_resolved",
+                {
+                    "trace_id": trace_id,
+                    "order_no": order_no,
+                    "delivery_order_no": delivery_order_no,
+                    "receiver_name_source": receiver_name_source,
+                    "address_source": address_source,
+                    "phone_source": phone_source,
+                },
             )
             # === MODIFIED END ===
             order_lines.append(

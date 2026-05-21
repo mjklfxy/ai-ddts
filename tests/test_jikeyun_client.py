@@ -2,6 +2,7 @@ import hashlib
 import json
 import urllib.parse
 from datetime import datetime
+from pathlib import Path
 from unittest import TestCase
 
 from infrastructure.jikeyun_client import (
@@ -90,6 +91,194 @@ class JikeyunClientTests(TestCase):
         self.assertEqual([order.rule_context.trace_id for order in orders], ["TRACE-001", "TRACE-001"])
         self.assertEqual(orders[0].rule_context.sku_codes, ("SKU-001",))
         self.assertEqual(orders[0].order_lines[0].goods_summary, "Goods SKU-001")
+
+    def test_fetch_orders_runs_injected_rpa_exporter_before_mapping(self) -> None:
+        calls: list[str] = []
+
+        def exporter(trace_id: str, xlsx_path: Path) -> None:
+            calls.append(f"{trace_id}:{xlsx_path}")
+
+        client = make_client(
+            transport=lambda request: JikeyunPageResult(
+                items=(make_raw_order(order_no="SO-RPA", sku_code="SKU-RPA"),),
+                has_next=False,
+            ),
+            rpa_exporter=exporter,
+        )
+
+        orders = client.fetch_orders(
+            trace_id="TRACE-RPA",
+            start_time=datetime(2026, 4, 30, 8, 0, 0),
+            end_time=datetime(2026, 4, 30, 12, 0, 0),
+        )
+
+        self.assertEqual(calls, ["TRACE-RPA:tmp\\test_jikeyun_missing.xlsx"])
+        self.assertEqual([order.rule_context.order_no for order in orders], ["SO-RPA"])
+
+    def test_fetch_orders_continues_when_rpa_exporter_fails(self) -> None:
+        errors: list[tuple[str, dict[str, object]]] = []
+
+        def failing_exporter(trace_id: str, xlsx_path: Path) -> None:
+            _ = (trace_id, xlsx_path)
+            raise RuntimeError("desktop unavailable")
+
+        client = make_client(
+            transport=lambda request: JikeyunPageResult(
+                items=(make_raw_order(order_no="SO-RPA-FAIL", sku_code="SKU-RPA"),),
+                has_next=False,
+            ),
+            rpa_exporter=failing_exporter,
+            log_error=lambda event, payload: errors.append((event, payload)),
+        )
+
+        orders = client.fetch_orders(
+            trace_id="TRACE-RPA",
+            start_time=datetime(2026, 4, 30, 8, 0, 0),
+            end_time=datetime(2026, 4, 30, 12, 0, 0),
+        )
+
+        self.assertEqual([order.rule_context.order_no for order in orders], ["SO-RPA-FAIL"])
+        self.assertEqual(errors[0][0], "jikeyun_rpa_export_failed")
+        self.assertEqual(errors[0][1]["trace_id"], "TRACE-RPA")
+        self.assertEqual(errors[0][1]["xlsx_path"], "tmp\\test_jikeyun_missing.xlsx")
+
+    def test_fetch_orders_logs_rpa_export_lifecycle_and_xlsx_lookup_path(self) -> None:
+        infos: list[tuple[str, dict[str, object]]] = []
+        exporter_calls: list[tuple[str, Path]] = []
+
+        def exporter(trace_id: str, xlsx_path: Path) -> None:
+            exporter_calls.append((trace_id, xlsx_path))
+
+        client = make_client(
+            transport=lambda request: JikeyunPageResult(
+                items=(make_raw_order(order_no="SO-RPA-LOG", sku_code="SKU-RPA"),),
+                has_next=False,
+            ),
+            rpa_exporter=exporter,
+            log_info=lambda event, payload: infos.append((event, payload)),
+            xlsx_path="tmp/test_jikeyun_rpa_log.xlsx",
+        )
+
+        orders = client.fetch_orders(
+            trace_id="TRACE-RPA-LOG",
+            start_time=datetime(2026, 4, 30, 8, 0, 0),
+            end_time=datetime(2026, 4, 30, 12, 0, 0),
+        )
+
+        self.assertEqual(exporter_calls, [("TRACE-RPA-LOG", Path("tmp/test_jikeyun_rpa_log.xlsx"))])
+        self.assertEqual([order.rule_context.order_no for order in orders], ["SO-RPA-LOG"])
+        self.assertEqual(
+            [event for event, _ in infos],
+            [
+                "jikeyun_fetch_orders_start",
+                "jikeyun_page_fetched",
+                "jikeyun_rpa_export_start",
+                "jikeyun_rpa_export_succeeded",
+                "jikeyun_xlsx_lookup_loaded",
+                "jikeyun_contact_fields_resolved",
+                "jikeyun_fetch_orders_complete",
+            ],
+        )
+        self.assertEqual(infos[2][1]["xlsx_path"], "tmp\\test_jikeyun_rpa_log.xlsx")
+        self.assertEqual(infos[4][1]["record_count"], 0)
+        self.assertEqual(infos[5][1]["receiver_name_source"], "api")
+        self.assertEqual(infos[6][1]["raw_order_count"], 1)
+        self.assertEqual(infos[6][1]["order_count"], 1)
+
+    def test_fetch_orders_logs_rpa_export_skipped_when_not_configured(self) -> None:
+        infos: list[tuple[str, dict[str, object]]] = []
+
+        client = make_client(
+            transport=lambda request: JikeyunPageResult(
+                items=(make_raw_order(order_no="SO-RPA-SKIP", sku_code="SKU-RPA"),),
+                has_next=False,
+            ),
+            log_info=lambda event, payload: infos.append((event, payload)),
+        )
+
+        client.fetch_orders(
+            trace_id="TRACE-RPA-SKIP",
+            start_time=datetime(2026, 4, 30, 8, 0, 0),
+            end_time=datetime(2026, 4, 30, 12, 0, 0),
+        )
+
+        self.assertIn(("jikeyun_rpa_export_skipped", {"trace_id": "TRACE-RPA-SKIP", "xlsx_path": "tmp\\test_jikeyun_missing.xlsx"}), infos)
+
+    def test_map_order_logs_contact_field_sources_from_xlsx(self) -> None:
+        infos: list[tuple[str, dict[str, object]]] = []
+        client = make_client(
+            transport=lambda request: JikeyunPageResult(items=(), has_next=False),
+            log_info=lambda event, payload: infos.append((event, payload)),
+        )
+        raw_order = {
+            "orderNo": "JY-XLSX-001",
+            "deliveryOrderNo": "S-XLSX-001",
+            "goodsDetail": [{"goodsName": "Goods 001", "sellCount": 1}],
+            "receiverName": "",
+            "address": "",
+            "phone": "",
+        }
+
+        order = client.map_order(
+            raw_order=raw_order,
+            trace_id="TRACE-SOURCE",
+            xlsx_lookup={
+                "JY-XLSX-001": make_xlsx_info(
+                    receiver_name="Receiver XLSX",
+                    address="Address XLSX",
+                    phone="13900000000",
+                )
+            },
+        )
+
+        self.assertEqual(order.order_lines[0].receiver_name, "Receiver XLSX")
+        self.assertEqual(
+            infos[-1],
+            (
+                "jikeyun_contact_fields_resolved",
+                {
+                    "trace_id": "TRACE-SOURCE",
+                    "order_no": "JY-XLSX-001",
+                    "delivery_order_no": "S-XLSX-001",
+                    "receiver_name_source": "xlsx",
+                    "address_source": "xlsx",
+                    "phone_source": "xlsx",
+                },
+            ),
+        )
+
+    def test_map_order_logs_contact_field_sources_from_default(self) -> None:
+        infos: list[tuple[str, dict[str, object]]] = []
+        client = make_client(
+            transport=lambda request: JikeyunPageResult(items=(), has_next=False),
+            log_info=lambda event, payload: infos.append((event, payload)),
+        )
+        raw_order = {
+            "orderNo": "JY-DEFAULT-001",
+            "deliveryOrderNo": "S-DEFAULT-001",
+            "goodsDetail": [{"goodsName": "Goods 001", "sellCount": 1}],
+            "receiverName": "",
+            "address": "",
+            "phone": "",
+        }
+
+        order = client.map_order(raw_order=raw_order, trace_id="TRACE-SOURCE")
+
+        self.assertEqual(order.order_lines[0].receiver_name, "未提供")
+        self.assertEqual(
+            infos[-1],
+            (
+                "jikeyun_contact_fields_resolved",
+                {
+                    "trace_id": "TRACE-SOURCE",
+                    "order_no": "JY-DEFAULT-001",
+                    "delivery_order_no": "S-DEFAULT-001",
+                    "receiver_name_source": "default",
+                    "address_source": "default",
+                    "phone_source": "default",
+                },
+            ),
+        )
 
     def test_missing_required_field_is_rejected(self) -> None:
         client = make_client(transport=lambda request: JikeyunPageResult(items=(), has_next=False))
@@ -289,13 +478,17 @@ class JikeyunClientTests(TestCase):
     # === MODIFIED END ===
 
 
-def make_client(transport) -> JikeyunClient:
+def make_client(transport, rpa_exporter=None, log_info=None, log_error=None, xlsx_path="tmp/test_jikeyun_missing.xlsx") -> JikeyunClient:
     """Builds a deterministic JackYun client for tests."""
 
     return JikeyunClient(
         credentials=JikeyunCredentials(app_key="APPKEY", app_secret="SECRET"),
         transport=transport,
         page_size=2,
+        rpa_exporter=rpa_exporter,
+        xlsx_path=xlsx_path,
+        log_info=log_info,
+        log_error=log_error,
         clock=lambda: datetime(2026, 4, 30, 12, 0, 0),
     )
 
@@ -320,6 +513,18 @@ def make_raw_order(order_no: str, sku_code: str) -> dict[str, object]:
         "receiver_city": "杭州市",
         "receiver_district": "西湖区",
     }
+
+
+def make_xlsx_info(receiver_name: str, address: str, phone: str):
+    """Builds one xlsx fallback fixture."""
+
+    from application.xlsx_reader import OrderAddressInfo
+
+    return OrderAddressInfo(
+        receiver_name=receiver_name,
+        address=address,
+        phone=phone,
+    )
 
 
 # === MODIFIED START ===

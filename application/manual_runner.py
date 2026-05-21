@@ -578,6 +578,15 @@ def build_jikeyun_client_from_config(
         # app_key="88026291",
         # app_secret="5401b92de3334150857739e615dbbceb",
     )
+    # === MODIFIED START ===
+    # 原因：仅在配置启用 RPA 时才加载 pyautogui 导出模块，避免默认运行受桌面环境影响。
+    # 影响范围：吉客云客户端组装、RPA 实验模式。
+    rpa_exporter = None
+    if config.rpa.enabled:
+        from infrastructure.db_to_xlsx import export_orders_to_xlsx
+
+        rpa_exporter = export_orders_to_xlsx
+    # === MODIFIED END ===
     return JikeyunClient(
         credentials=credentials,
         page_size=config.jikeyun.page_size,
@@ -590,6 +599,14 @@ def build_jikeyun_client_from_config(
         extra_params=config.jikeyun.extra_params,
         page_index_base=config.jikeyun.page_index_base,
         transport=transport or JikeyunHttpTransport(config.jikeyun.api_url),
+        # === MODIFIED START ===
+        # 原因：把配置化 RPA 导出和 XLSX 路径注入吉客云客户端，失败时通过统一日志记录 trace_id。
+        # 影响范围：吉客云真实来源运行。
+        rpa_exporter=rpa_exporter,
+        xlsx_path=config.rpa.xlsx_path,
+        log_info=log_info,
+        log_error=log_error,
+        # === MODIFIED END ===
     )
 
 

@@ -59,7 +59,7 @@ def _log(level: int, event: str, payload: Mapping[str, Any]) -> None:
         raise ValueError("log payload must include trace_id")
 
     sanitized_payload = sanitize_payload(dict(payload))
-    logging.getLogger("ai_ddts").log(
+    _get_project_logger().log(
         level,
         json.dumps(
             {
@@ -70,6 +70,17 @@ def _log(level: int, event: str, payload: Mapping[str, Any]) -> None:
             default=str,
         ),
     )
+
+
+def _get_project_logger() -> logging.Logger:
+    """Returns the project logger with a default console handler attached."""
+
+    logger = logging.getLogger("ai_ddts")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    if not logger.handlers:
+        logger.addHandler(logging.StreamHandler())
+    return logger
 
 
 def _is_sensitive_key(key: str) -> bool:
