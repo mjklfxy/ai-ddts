@@ -1,0 +1,1592 @@
+:root {
+  --navy-950: #071426;
+  --navy-900: #0a1d38;
+  --navy-800: #0d2a56;
+  --blue-700: #1d5ee6;
+  --blue-600: #2563eb;
+  --blue-500: #3b82f6;
+  --blue-100: #dbeafe;
+  --mint-500: #2ecb82;
+  --mint-100: #dcfce7;
+  --orange-500: #f59e0b;
+  --orange-100: #ffedd5;
+  --red-500: #ef4444;
+  --red-100: #fee2e2;
+  --ink-900: #111827;
+  --ink-700: #334155;
+  --ink-500: #64748b;
+  --line: #dbe4f0;
+  --panel: rgba(255, 255, 255, 0.9);
+  --shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink-900);
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(59, 130, 246, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 0%, rgba(14, 165, 233, 0.13), transparent 25%),
+    linear-gradient(135deg, #f7fbff 0%, #edf5ff 45%, #f8fbff 100%);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 26px 18px;
+  color: #e5f0ff;
+  background:
+    linear-gradient(180deg, rgba(11, 39, 78, 0.96), rgba(3, 15, 32, 0.98)),
+    radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.45), transparent 32%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 16px 0 40px rgba(8, 24, 48, 0.22);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 38px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  font-weight: 900;
+  font-size: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.35);
+}
+
+.brand strong {
+  display: block;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+
+.brand span {
+  display: block;
+  margin-top: 4px;
+  color: #8fb1d8;
+  font-size: 12px;
+}
+
+.nav-list {
+  display: grid;
+  gap: 10px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  padding: 14px 16px;
+  color: #dceaff;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.nav-item:hover,
+.nav-item.is-active {
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.32);
+}
+
+.nav-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: #a8c9ff;
+  /* === MODIFIED START ===
+  原因：导航按钮标识改为中文单字，需要略大字号提升识别度。
+  影响范围：侧边栏导航图标。
+  === MODIFIED END === */
+  font-size: 13px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+}
+
+.nav-item.is-active .nav-icon {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 24px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 18px;
+  color: #8fb1d8;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 13px;
+}
+
+.pulse {
+  width: 9px;
+  height: 9px;
+  background: #2dd4bf;
+  border-radius: 99px;
+  box-shadow: 0 0 0 7px rgba(45, 212, 191, 0.12);
+}
+
+.main {
+  min-width: 0;
+  padding: 22px 28px 36px;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr) minmax(260px, 420px) auto;
+  align-items: center;
+  gap: 18px;
+  margin: -22px -28px 22px;
+  padding: 18px 28px;
+  background: rgba(248, 251, 255, 0.78);
+  border-bottom: 1px solid rgba(219, 228, 240, 0.85);
+  backdrop-filter: blur(18px);
+}
+
+.menu-button,
+.ghost-button,
+.primary-button,
+.link-button,
+.tab,
+.drawer-close {
+  cursor: pointer;
+  border: 0;
+}
+
+.menu-button {
+  /* === MODIFIED START ===
+  原因：菜单按钮只服务移动端侧边栏抽屉，桌面端常驻侧边栏时不应展示无效按钮。
+  影响范围：桌面端顶部栏与移动端菜单开关显示。
+  === MODIFIED END === */
+  display: none;
+  width: 42px;
+  height: 42px;
+  color: var(--navy-800);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.breadcrumb {
+  color: var(--ink-500);
+  font-size: 13px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  margin-top: 4px;
+  font-size: 26px;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+.search-box {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  height: 46px;
+  color: var(--ink-500);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.search-box input,
+.filter-row input,
+.filter-row select,
+.rule-editor textarea {
+  width: 100%;
+  color: var(--ink-700);
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-time {
+  color: var(--ink-500);
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.ghost-button,
+.primary-button,
+.link-button,
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 11px;
+}
+
+.ghost-button {
+  color: var(--blue-700);
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.primary-button {
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.25);
+}
+
+.primary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.primary-button.full {
+  width: 100%;
+}
+
+.link-button {
+  color: var(--blue-700);
+  background: #eff6ff;
+  text-decoration: none;
+}
+
+.notice {
+  margin-bottom: 18px;
+  padding: 13px 16px;
+  color: var(--blue-700);
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+}
+
+.notice.is-error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+.view {
+  display: none;
+  animation: rise 0.32s ease both;
+}
+
+.view.is-active {
+  display: block;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.metric-card,
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(203, 213, 225, 0.78);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.metric-card {
+  position: relative;
+  min-height: 138px;
+  padding: 22px;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.metric-card::after {
+  position: absolute;
+  right: -32px;
+  bottom: -42px;
+  width: 130px;
+  height: 130px;
+  content: "";
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.16), transparent 70%);
+  border-radius: 50%;
+}
+
+.metric-label {
+  color: var(--ink-500);
+  font-size: 14px;
+}
+
+.metric-value {
+  margin-top: 12px;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.metric-foot {
+  margin-top: 10px;
+  color: var(--ink-500);
+  font-size: 13px;
+}
+
+.metric-dot {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  margin-bottom: 14px;
+  color: #fff;
+  font-weight: 900;
+  border-radius: 18px;
+}
+
+.metric-dot.blue {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.metric-dot.green {
+  background: linear-gradient(135deg, #34d399, #16a34a);
+}
+
+.metric-dot.orange {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+.metric-dot.purple {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 0.9fr);
+  gap: 18px;
+}
+
+.panel {
+  padding: 18px;
+  border-radius: var(--radius);
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.panel-head p {
+  margin-top: 5px;
+  color: var(--ink-500);
+  font-size: 13px;
+}
+
+.table-wrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+/* === MODIFIED START ===
+原因：任务清单记录较多时需要在面板内纵向滚动，展示框不能超过当前页面。
+影响范围：任务清单列表和表头固定展示。
+=== MODIFIED END === */
+.task-list-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 142px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.task-list-table-wrap {
+  flex: 1;
+  min-height: 260px;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.task-list-table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8fbff;
+}
+
+/* === MODIFIED START ===
+原因：执行日志页需要固定在当前视口内滚动，避免长日志撑开页面。
+影响范围：执行日志页面布局。
+=== MODIFIED END === */
+.log-list-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 142px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.log-timeline-wrap {
+  flex: 1;
+  min-height: 320px;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.log-timeline {
+  display: grid;
+  min-width: 820px;
+  gap: 14px;
+  padding-right: 4px;
+}
+
+.log-group {
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.log-group-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e7eef8;
+}
+
+.log-group-head h3 {
+  margin-top: 6px;
+  font-size: 17px;
+}
+
+.log-group-head p {
+  margin-top: 4px;
+  color: var(--ink-500);
+  font-size: 13px;
+}
+
+.log-batch {
+  display: inline-flex;
+  color: var(--blue-700);
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.log-group-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-500);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.log-step-list {
+  display: grid;
+  gap: 0;
+  margin-top: 12px;
+}
+
+.log-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.log-step::before {
+  position: absolute;
+  top: 28px;
+  bottom: -12px;
+  left: 8px;
+  width: 2px;
+  content: "";
+  background: #dbeafe;
+}
+
+.log-step:last-child::before {
+  display: none;
+}
+
+.log-step-marker {
+  width: 18px;
+  height: 18px;
+  margin-top: 4px;
+  background: #22c55e;
+  border: 4px solid #dcfce7;
+  border-radius: 50%;
+}
+
+.log-step.is-failed .log-step-marker {
+  background: #ef4444;
+  border-color: #fee2e2;
+}
+
+.log-step.is-partial .log-step-marker {
+  background: #f59e0b;
+  border-color: #ffedd5;
+}
+
+.log-step.is-skipped .log-step-marker {
+  background: #64748b;
+  border-color: #e2e8f0;
+}
+
+.log-step-content {
+  min-width: 0;
+}
+
+.log-step-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.log-step-title time {
+  color: var(--ink-500);
+  font-size: 12px;
+}
+
+.log-step-content p {
+  margin-top: 7px;
+  color: var(--ink-700);
+  font-size: 14px;
+}
+
+/* === MODIFIED START ===
+原因：执行日志单条记录需要可收起/展开详细信息，默认只展示摘要。
+影响范围：执行日志时间线单条记录。
+=== MODIFIED END === */
+.log-step-details {
+  margin-top: 10px;
+}
+
+.log-step-details summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 0 10px;
+  color: var(--blue-700);
+  font-size: 13px;
+  font-weight: 800;
+  list-style: none;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.log-step-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.log-step-details summary:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  outline-offset: 2px;
+}
+
+.log-step-toggle-icon {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid currentColor;
+  transition: transform 0.16s ease;
+}
+
+.log-step-details[open] .log-step-toggle-icon {
+  transform: rotate(90deg);
+}
+/* === MODIFIED END === */
+
+.log-step-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.log-step-meta div {
+  min-width: 0;
+  padding: 10px 12px;
+  background: #f8fbff;
+  border: 1px solid #e7eef8;
+  border-radius: 12px;
+}
+
+.log-step-meta span {
+  display: block;
+  color: var(--ink-500);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.log-step-meta strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-700);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+/* === MODIFIED START ===
+原因：结构化 details 可能较长，需要跨列展示并保留换行。
+影响范围：执行日志展开详情。
+=== MODIFIED END === */
+.log-step-detail-json {
+  grid-column: 1 / -1;
+}
+
+.log-step-detail-json strong {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: Consolas, "SFMono-Regular", monospace;
+}
+/* === MODIFIED END === */
+
+.log-empty {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+th,
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e7eef8;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+th {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  background: #f8fbff;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr {
+  cursor: default;
+}
+
+tbody tr:hover {
+  background: #f8fbff;
+}
+
+.empty-row {
+  padding: 36px 16px;
+  color: var(--ink-500);
+  text-align: center;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status.blue {
+  color: #1d4ed8;
+  background: var(--blue-100);
+}
+
+.status.green {
+  color: #15803d;
+  background: var(--mint-100);
+}
+
+.status.orange {
+  color: #b45309;
+  background: var(--orange-100);
+}
+
+.status.red {
+  color: #b91c1c;
+  background: var(--red-100);
+}
+
+.status.gray {
+  color: #475569;
+  background: #f1f5f9;
+}
+
+.row-actions {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.row-actions button,
+.row-actions a {
+  color: var(--blue-700);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* === MODIFIED START ===
+原因：任务没有对应明细时，下载入口需要显示为不可点击，避免用户误以为按钮无效。
+影响范围：任务清单行操作。
+=== MODIFIED END === */
+.row-actions .action-disabled {
+  color: #94a3b8;
+  font-weight: 700;
+  cursor: not-allowed;
+  white-space: nowrap;
+}
+
+.rule-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.rule-card {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.rule-card-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
+  background: linear-gradient(135deg, #2563eb, #38bdf8);
+  border-radius: 13px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-row.compact input,
+.filter-row.compact select {
+  width: 170px;
+  height: 38px;
+  padding: 0 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+
+/* === MODIFIED START ===
+原因：执行日志筛选项自动生效，需要在筛选区展示当前周期和结果数量。
+影响范围：执行日志筛选区。
+=== MODIFIED END === */
+.log-filter-status {
+  flex-basis: 100%;
+  color: var(--ink-500);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.tab {
+  color: var(--ink-700);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.tab.is-active {
+  color: var(--blue-700);
+  background: #eff6ff;
+  box-shadow: inset 0 -2px 0 var(--blue-600);
+}
+
+.rule-layout {
+  display: grid;
+  /* === MODIFIED START ===
+  原因：规则结果模型说明区已删除，规则配置面板改为单列展示。
+  影响范围：规则配置中心布局。
+  === MODIFIED END === */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+/* === MODIFIED START ===
+原因：规则配置页内容较长时需要在当前页面内滚动，保存按钮保持在面板顶部。
+影响范围：规则配置中心面板与内容滚动区域。
+=== MODIFIED END === */
+#view-rules.is-active {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 154px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rule-layout {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rule-config-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rule-config-scroll {
+  flex: 1;
+  min-height: 0;
+  padding-right: 6px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+.rule-editor {
+  /* === MODIFIED START ===
+  原因：规则配置改为多个 tab 联动，下方一次只展示一个模块。
+  影响范围：规则配置编辑区布局。
+  === MODIFIED END === */
+  display: block;
+}
+
+.rule-panel {
+  display: none;
+}
+
+.rule-panel.is-active {
+  display: grid;
+  gap: 16px;
+}
+
+.rule-module-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rule-module-head h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.rule-module-head p {
+  margin-top: 5px;
+  color: var(--ink-500);
+  font-size: 13px;
+}
+
+.rule-panel > label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink-700);
+  font-weight: 800;
+}
+
+.rule-editor textarea {
+  min-height: 240px;
+  padding: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.toggle-row {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 7px 11px;
+  color: var(--ink-700);
+  background: #f8fbff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-row input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 24px;
+  background: #cbd5e1;
+  border-radius: 999px;
+  transition: background 0.18s ease;
+}
+
+.switch::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  content: "";
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22);
+  transition: transform 0.18s ease;
+}
+
+.toggle-row input:checked + .switch {
+  background: var(--blue-600);
+}
+
+.toggle-row input:checked + .switch::after {
+  transform: translateX(18px);
+}
+
+.toggle-row input:focus-visible + .switch {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+/* === MODIFIED START ===
+原因：限发区域改为表单式输入，需要 SKU 分组卡片、区域行、增删按钮等样式。
+影响范围：规则配置中心限发区域面板。
+=== MODIFIED END === */
+.region-groups {
+  display: grid;
+  gap: 14px;
+}
+
+.region-group {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.region-group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.region-sku-input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  color: var(--ink-700);
+  background: #f8fbff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: 0;
+}
+
+.region-sku-input:focus {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.region-group-remove {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.region-rows {
+  display: grid;
+  gap: 8px;
+}
+
+.region-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.region-row input {
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  color: var(--ink-700);
+  background: #f8fbff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  outline: 0;
+}
+
+.region-row input:focus {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.region-province {
+  flex: 2;
+}
+
+.region-city {
+  flex: 2;
+}
+
+.region-district {
+  flex: 2;
+}
+
+.region-row-remove {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.region-row-remove:hover {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.region-add-row,
+.add-sku-btn {
+  justify-self: start;
+}
+
+.region-text-details {
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.region-text-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--blue-600);
+  user-select: none;
+}
+
+.region-text-import {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.region-text-import input[type="file"] {
+  font-size: 13px;
+}
+
+.upload-status {
+  font-size: 13px;
+  color: var(--success, #2e7d32);
+}
+
+/* === MODIFIED END === */
+.rule-schedule-table table {
+  min-width: 920px;
+}
+
+.rule-schedule-table td {
+  vertical-align: middle;
+}
+
+.schedule-input {
+  width: 100%;
+  min-width: 120px;
+  height: 38px;
+  padding: 0 10px;
+  color: var(--ink-700);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: 0;
+}
+
+.schedule-input:focus {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.schedule-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.toggle-row.compact {
+  min-height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+}
+
+.rule-schedule-table button[data-action="remove-schedule"] {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  cursor: pointer;
+  min-height: 34px;
+  padding: 0 12px;
+}
+/* === MODIFIED END === */
+
+.model-card,
+.log-safe {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 15px;
+}
+
+.model-card.pass {
+  color: #166534;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+}
+
+.model-card.ignore {
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+}
+
+.model-card.error {
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.log-safe {
+  color: var(--blue-700);
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.model-card span,
+.log-safe span {
+  color: inherit;
+  opacity: 0.78;
+  font-size: 13px;
+}
+
+.receipt-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
+}
+
+.upload-panel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.upload-panel p {
+  color: var(--ink-500);
+  font-size: 13px;
+}
+
+.upload-box {
+  display: grid;
+  min-height: 178px;
+  place-items: center;
+  gap: 8px;
+  padding: 20px;
+  color: var(--blue-700);
+  text-align: center;
+  background: #f8fbff;
+  border: 1.5px dashed #60a5fa;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.upload-cloud {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  color: #fff;
+  /* === MODIFIED START ===
+  原因：上传入口文字从 UP 改成中文“上传”，需要稳定容纳两个汉字。
+  影响范围：付款回执上传区域。
+  === MODIFIED END === */
+  font-size: 14px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 18px;
+}
+
+#receiptFileInput {
+  display: none;
+}
+
+.recent-upload {
+  min-height: 54px;
+  padding: 14px;
+  color: var(--ink-500);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-size: 13px;
+}
+
+.detail-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 30;
+  width: min(440px, 96vw);
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 26px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  background: rgba(255, 255, 255, 0.96);
+  border-left: 1px solid var(--line);
+  box-shadow: -26px 0 70px rgba(15, 23, 42, 0.2);
+  transform: translateX(106%);
+  transition: transform 0.24s ease;
+}
+
+.detail-drawer.is-open {
+  transform: translateX(0);
+}
+
+.drawer-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  color: var(--ink-500);
+  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.drawer-title {
+  padding-right: 38px;
+}
+
+.drawer-title h2 {
+  font-size: 22px;
+}
+
+.drawer-title p {
+  margin-top: 6px;
+  color: var(--ink-500);
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.detail-cell {
+  padding: 14px;
+  background: #f8fbff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.detail-cell span {
+  display: block;
+  color: var(--ink-500);
+  font-size: 12px;
+}
+
+.detail-cell strong {
+  display: block;
+  margin-top: 6px;
+  word-break: break-all;
+}
+
+.timeline {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 26px;
+  color: var(--ink-700);
+}
+
+.timeline-item::before {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  width: 11px;
+  height: 11px;
+  content: "";
+  background: var(--blue-600);
+  border: 3px solid #dbeafe;
+  border-radius: 50%;
+}
+
+.timeline-item small {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink-500);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1180px) {
+  .app-shell {
+    grid-template-columns: 92px 1fr;
+  }
+
+  .sidebar {
+    padding: 22px 12px;
+  }
+
+  .brand div:last-child,
+  .nav-item span:last-child,
+  .sidebar-footer span:last-child {
+    display: none;
+  }
+
+  .brand {
+    justify-content: center;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 14px 10px;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .content-grid,
+  .rule-layout,
+  .receipt-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    width: 280px;
+    transform: translateX(-105%);
+    transition: transform 0.24s ease;
+  }
+
+  body.menu-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* === MODIFIED START ===
+  原因：移动端需要通过顶部菜单按钮展开隐藏的侧边栏。
+  影响范围：宽度 760px 以下的导航入口。
+  === MODIFIED END === */
+  .menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand div:last-child,
+  .nav-item span:last-child,
+  .sidebar-footer span:last-child {
+    display: block;
+  }
+
+  .nav-item {
+    justify-content: flex-start;
+  }
+
+  .main {
+    padding: 18px;
+  }
+
+  /* === MODIFIED START ===
+  原因：移动端顶部栏换行后，规则配置滚动区域需要更保守的视口高度。
+  影响范围：规则配置移动端布局。
+  === MODIFIED END === */
+  #view-rules.is-active {
+    height: calc(100vh - 220px);
+  }
+
+  /* === MODIFIED START ===
+  原因：移动端顶部栏会换行，任务清单面板需要更保守的视口高度限制。
+  影响范围：任务清单移动端布局。
+  === MODIFIED END === */
+  .task-list-panel {
+    max-height: calc(100vh - 210px);
+  }
+
+  .topbar {
+    grid-template-columns: auto 1fr;
+    margin: -18px -18px 18px;
+    padding: 14px 18px;
+  }
+
+  .search-box,
+  .top-actions {
+    grid-column: 1 / -1;
+  }
+
+  .top-actions {
+    justify-content: space-between;
+  }
+
+  .metric-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rule-module-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toggle-row {
+    justify-content: space-between;
+  }
+}

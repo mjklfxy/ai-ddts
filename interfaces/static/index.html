@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>厂直订单推送中心</title>
+    <!-- === MODIFIED START ===
+    原因：本地预览浏览器可能缓存旧静态资源，导致规则 tab 仍执行旧交互逻辑。
+    影响范围：规则配置页 CSS/JS 资源加载。
+    === MODIFIED END === -->
+    <link rel="stylesheet" href="/static/app.css?v=20260511-cn-buttons" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <!-- === MODIFIED START ===
+          原因：页面可视按键和标识统一中文化，避免业务用户看到英文缩写。
+          影响范围：侧边栏品牌标识。
+          === MODIFIED END === -->
+          <div class="brand-mark">厂</div>
+          <div>
+            <strong>厂直订单推送中心</strong>
+            <span>Direct Order Hub</span>
+          </div>
+        </div>
+        <nav class="nav-list" aria-label="主导航">
+          <button class="nav-item is-active" data-view="dashboard">
+            <!-- === MODIFIED START ===
+            原因：左侧导航按键标识从数字改为中文简称。
+            影响范围：左侧导航按钮。
+            === MODIFIED END === -->
+            <span class="nav-icon">台</span>
+            <span>工作台</span>
+          </button>
+          <button class="nav-item" data-view="tasks">
+            <span class="nav-icon">任</span>
+            <span>任务清单</span>
+          </button>
+          <button class="nav-item" data-view="rules">
+            <span class="nav-icon">规</span>
+            <span>规则配置</span>
+          </button>
+          <!-- === MODIFIED START ===
+          原因：新增面向业务人员的执行日志可视化页面。
+          影响范围：左侧导航。
+          === MODIFIED END === -->
+          <button class="nav-item" data-view="logs">
+            <span class="nav-icon">志</span>
+            <span>执行日志</span>
+          </button>
+          <button class="nav-item" data-view="receipts">
+            <span class="nav-icon">款</span>
+            <span>付款回执</span>
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="pulse"></span>
+          <span>本地预览服务运行中</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <button class="menu-button" type="button" id="menuButton" aria-label="展开或收起菜单">☰</button>
+          <div>
+            <div class="breadcrumb">工作台 / <span id="currentViewName">总览</span></div>
+            <h1 id="pageTitle">厂直订单推送工作台</h1>
+          </div>
+          <label class="search-box">
+            <span>搜索</span>
+            <!-- === MODIFIED START ===
+            原因：面向业务使用者统一使用“任务批次”，不暴露 trace_id 这类开发字段。
+            影响范围：顶部全局搜索占位文案。
+            === MODIFIED END === -->
+            <input id="globalSearch" type="search" placeholder="任务批次 / 状态 / 说明" />
+          </label>
+          <div class="top-actions">
+            <span class="task-time" id="taskTime">--</span>
+            <button class="ghost-button" type="button" id="refreshButton">刷新</button>
+          </div>
+        </header>
+
+        <section class="notice is-hidden" id="notice" role="status"></section>
+
+        <section class="view is-active" id="view-dashboard" data-title="厂直订单推送工作台" data-name="总览">
+          <div class="metric-grid" id="dashboardMetrics"></div>
+          <div class="content-grid">
+            <section class="panel panel-wide">
+              <div class="panel-head">
+                <div>
+                  <h2>任务概览</h2>
+                  <p>按最近任务展示推送、金蝶、付款状态</p>
+                </div>
+                <button class="link-button" type="button" data-view-link="tasks">查看全部</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>任务批次</th>
+                      <!-- === MODIFIED START ===
+                      原因：当前只有一类厂直订单推送任务，内部任务类型对业务用户无区分价值。
+                      影响范围：工作台任务概览列展示。
+                      === MODIFIED END === -->
+                      <th>推送状态</th>
+                      <th>金蝶状态</th>
+                      <th>付款状态</th>
+                      <th>异常数</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboardTaskRows"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <aside class="panel side-panel">
+              <div class="panel-head">
+                <div>
+                  <h2>配置与规则概览</h2>
+                  <p>来自当前配置与异常统计</p>
+                </div>
+              </div>
+              <div id="ruleOverview" class="rule-stack"></div>
+            </aside>
+          </div>
+
+          <!-- === MODIFIED START ===
+          原因：工作台首页删除下方展示模块，异常/正常订单下载统一放到任务清单。
+          影响范围：工作台首页下方展示区域。
+          === MODIFIED END === -->
+        </section>
+
+        <section class="view" id="view-tasks" data-title="任务清单" data-name="任务清单">
+          <!-- === MODIFIED START ===
+          原因：任务清单列表需要在当前页面内滚动，避免展示框被多条任务撑出视口。
+          影响范围：任务清单页面布局。
+          === MODIFIED END === -->
+          <section class="panel task-list-panel">
+            <div class="panel-head">
+              <div>
+                <h2>任务清单</h2>
+                <p>点击任务行查看右侧任务详情</p>
+              </div>
+              <div class="filter-row compact">
+                <select id="taskPushFilter">
+                  <option value="">推送状态：全部</option>
+                  <option value="待推送">待推送</option>
+                  <option value="已推送">已推送</option>
+                  <!-- === MODIFIED START ===
+                  原因：厂家群推送可能出现部分成功部分失败，需要筛选提醒用户查看详情。
+                  影响范围：任务清单推送状态筛选。
+                  === MODIFIED END === -->
+                  <option value="部分推送">部分推送</option>
+                  <option value="推送失败">推送失败</option>
+                </select>
+                <select id="taskPaymentFilter">
+                  <option value="">付款状态：全部</option>
+                  <option value="未付款">未付款</option>
+                  <option value="已付款">已付款</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrap task-list-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>任务批次</th>
+                    <th>创建时间</th>
+                    <th>订单统计</th>
+                    <th>推送状态</th>
+                    <th>金蝶状态</th>
+                    <th>付款状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="taskRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <!-- === MODIFIED START ===
+        原因：新增执行日志可视化页面，供非开发人员按任务批次查看阶段、结果和处理建议。
+        影响范围：前端页面结构。
+        === MODIFIED END === -->
+        <section class="view" id="view-logs" data-title="执行日志" data-name="执行日志">
+          <section class="panel log-list-panel">
+            <div class="panel-head">
+              <div>
+                <h2>执行日志</h2>
+                <p>最近任务的阶段记录</p>
+              </div>
+              <div class="filter-row compact log-filter-row">
+                <!-- === MODIFIED START ===
+                原因：执行日志展示改为按周期筛选，默认近 7 天，不再固定最近条数。
+                影响范围：执行日志筛选区。
+                === MODIFIED END === -->
+                <select id="logPeriodFilter">
+                  <option value="today">今日</option>
+                  <option value="24h">近 24 小时</option>
+                  <option value="7d" selected>近 7 天</option>
+                  <option value="30d">近 30 天</option>
+                  <option value="all">全部</option>
+                  <option value="custom">自定义时间</option>
+                </select>
+                <input class="log-custom-range is-hidden" id="logStartInput" type="datetime-local" aria-label="日志开始时间" />
+                <input class="log-custom-range is-hidden" id="logEndInput" type="datetime-local" aria-label="日志结束时间" />
+                <input id="logTraceFilter" type="search" placeholder="任务批次" />
+                <select id="logStageFilter">
+                  <option value="">阶段：全部</option>
+                  <option value="任务">任务</option>
+                  <option value="抓单">抓单</option>
+                  <option value="规则判断">规则判断</option>
+                  <option value="生成文件">生成文件</option>
+                  <option value="推送群">推送群</option>
+                  <option value="金蝶">金蝶</option>
+                  <option value="回执">回执</option>
+                </select>
+                <select id="logResultFilter">
+                  <option value="">结果：全部</option>
+                  <option value="成功">成功</option>
+                  <option value="部分成功">部分成功</option>
+                  <option value="失败">失败</option>
+                  <option value="跳过">跳过</option>
+                </select>
+                <button class="ghost-button" type="button" id="downloadLogsButton">下载日志</button>
+                <!-- === MODIFIED START ===
+                原因：执行日志采用自动筛选，需要明确提示当前筛选周期和结果数量。
+                影响范围：执行日志筛选区。
+                === MODIFIED END === -->
+                <div class="log-filter-status" id="logFilterStatus">已自动筛选 · 当前近 7 天 · 共 0 条</div>
+              </div>
+            </div>
+            <!-- === MODIFIED START ===
+            原因：执行日志不应像任务清单表格，改为按任务批次分组的阶段时间线。
+            影响范围：执行日志页面展示形态。
+            === MODIFIED END === -->
+            <div class="log-timeline-wrap">
+              <div class="log-timeline" id="logRows"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-rules" data-title="规则配置中心" data-name="规则配置">
+          <div class="tabs">
+            <button class="tab is-active" data-rule-tab="warehouse">排除库房</button>
+            <!-- === MODIFIED START ===
+            原因：SKU 规则实际是排除逻辑，不是服务启用逻辑。
+            影响范围：规则配置 tab 文案。
+            === MODIFIED END === -->
+            <button class="tab" data-rule-tab="sku">排除SKU</button>
+            <button class="tab" data-rule-tab="region">限发区域</button>
+            <button class="tab" data-rule-tab="group">SKU群配置</button>
+            <!-- === MODIFIED START ===
+            原因：规则配置联动区域应包含 SKU 供应商对照，共 5 项。
+            影响范围：规则配置 tab。
+            === MODIFIED END === -->
+            <button class="tab" data-rule-tab="supplier">SKU供应商对照</button>
+            <!-- === MODIFIED START ===
+            原因：规则配置中心新增定时任务配置模块，支持多条配置。
+            影响范围：规则配置 tab。
+            === MODIFIED END === -->
+            <button class="tab" data-rule-tab="schedule">定时任务配置</button>
+          </div>
+          <div class="rule-layout">
+            <!-- === MODIFIED START ===
+            原因：规则配置内容较长时需要在面板内上下滚动，避免展示区域超过当前页面。
+            影响范围：规则配置中心面板布局。
+            === MODIFIED END === -->
+            <section class="panel rule-config-panel">
+              <div class="panel-head">
+                <div>
+                  <h2>规则配置</h2>
+                  <p>按行维护配置，保存后立即写入后端配置文件</p>
+                </div>
+                <!-- === MODIFIED START ===
+                原因：规则配置中心保存按钮文案按产品要求简化为“保存”。
+                影响范围：规则配置中心按钮展示文案。
+                === MODIFIED END === -->
+                <button class="primary-button" type="button" id="saveRulesButton">保存</button>
+              </div>
+              <div class="rule-editor rule-config-scroll">
+                <!-- === MODIFIED START ===
+                原因：规则配置改为 tab 联动，只显示当前选中的配置模块。
+                影响范围：规则配置表单结构。
+                === MODIFIED END === -->
+                <section class="rule-panel is-active" data-rule-panel="warehouse">
+                  <div class="rule-module-head">
+                    <div>
+                      <h3>排除库房</h3>
+                      <p>命中库房编码或名称后，订单直接忽略。</p>
+                    </div>
+                    <!-- === MODIFIED START ===
+                    原因：排除库房需要和排除 SKU 一样支持模块级启用开关。
+                    影响范围：规则配置中心模块表单。
+                    === MODIFIED END === -->
+                    <label class="toggle-row">
+                      <input id="excludedWarehousesEnabledInput" type="checkbox" />
+                      <span class="switch" aria-hidden="true"></span>
+                      <strong>模块启用</strong>
+                    </label>
+                  </div>
+                  <label>
+                    <span>库房编码/名称</span>
+                    <textarea id="excludedWarehousesInput" placeholder="每行一个库房，例如：WH-IGNORE"></textarea>
+                  </label>
+                </section>
+
+                <section class="rule-panel" data-rule-panel="sku">
+                  <div class="rule-module-head">
+                    <div>
+                      <h3>排除SKU</h3>
+                      <p>这里的 SKU 指订单数据里的“商品名称”。模块启用后，命中列表中的任一商品名称会整单忽略。</p>
+                    </div>
+                    <label class="toggle-row">
+                      <input id="excludedSkusEnabledInput" type="checkbox" />
+                      <span class="switch" aria-hidden="true"></span>
+                      <strong>模块启用</strong>
+                    </label>
+                  </div>
+                  <label>
+                  <!-- === MODIFIED START ===
+                  原因：SKU 配置从启用白名单改为排除黑名单。
+                  影响范围：规则配置输入框。
+                  === MODIFIED END === -->
+                    <span>排除 SKU（商品名称）</span>
+                    <textarea id="excludedSkusInput" placeholder="每行一个需要排除的商品名称，例如：圣琪酵母粉/5g"></textarea>
+                  </label>
+                  <details class="region-text-details">
+                    <summary>上传 Excel 批量导入</summary>
+                    <div class="region-text-import">
+                      <input type="file" id="excludedSkuXlsxInput" accept=".xls,.xlsx" />
+                      <button type="button" class="ghost-button" id="uploadExcludedSkuXlsxButton">上传并解析</button>
+                      <span id="excludedSkuXlsxStatus" class="upload-status"></span>
+                    </div>
+                  </details>
+                </section>
+
+                <section class="rule-panel" data-rule-panel="region">
+                  <div class="rule-module-head">
+                    <div>
+                      <h3>限发区域</h3>
+                      <p>按 SKU（商品名称）+ 省市区匹配，命中后整单进入异常。</p>
+                    </div>
+                    <!-- === MODIFIED START ===
+                    原因：限发区域需要和排除 SKU 一样支持模块级启用开关。
+                    影响范围：规则配置中心模块表单。
+                    === MODIFIED END === -->
+                    <label class="toggle-row">
+                      <input id="restrictedRegionsEnabledInput" type="checkbox" />
+                      <span class="switch" aria-hidden="true"></span>
+                      <strong>模块启用</strong>
+                    </label>
+                  </div>
+                  <label>
+                    <span>限发区域：商品名称,省,市</span>
+                    <textarea id="regionTextInput" placeholder="每行一条，格式：商品名称,省,市&#10;例如：正大单冻大胸/1000袋以上,河北,保定&#10;产品d,广东,深圳" rows="6"></textarea>
+                  </label>
+                  <details class="region-text-details">
+                    <summary>上传 Excel 批量导入</summary>
+                    <div class="region-text-import">
+                      <input type="file" id="regionXlsxInput" accept=".xls,.xlsx" />
+                      <button type="button" class="ghost-button" id="uploadRegionXlsxButton">上传并解析</button>
+                      <span id="regionXlsxStatus" class="upload-status"></span>
+                    </div>
+                  </details>
+                </section>
+
+                <section class="rule-panel" data-rule-panel="group">
+                  <div class="rule-module-head">
+                    <div>
+                      <h3>SKU群配置</h3>
+                      <p>通过规则的订单会按 SKU（商品名称）的群配置拆分推送文件。</p>
+                    </div>
+                    <!-- === MODIFIED START ===
+                    原因：SKU 群配置需要和排除 SKU 一样支持模块级启用开关。
+                    影响范围：规则配置中心模块表单。
+                    === MODIFIED END === -->
+                    <label class="toggle-row">
+                      <input id="skuGroupMapEnabledInput" type="checkbox" />
+                      <span class="switch" aria-hidden="true"></span>
+                      <strong>模块启用</strong>
+                    </label>
+                  </div>
+                  <label>
+                    <span>SKU 群配置：商品名称,群名,群主手机号（手机号可选）</span>
+                    <textarea id="skuGroupMapInput" placeholder="圣琪酵母粉/5g,GROUP-A,13800138000"></textarea>
+                  </label>
+                  <details class="region-text-details">
+                    <summary>上传 Excel 批量导入</summary>
+                    <div class="region-text-import">
+                      <input type="file" id="skuGroupXlsxInput" accept=".xls,.xlsx" />
+                      <button type="button" class="ghost-button" id="uploadSkuGroupXlsxButton">上传并解析</button>
+                      <span id="skuGroupXlsxStatus" class="upload-status"></span>
+                    </div>
+                  </details>
+                </section>
+
+                <section class="rule-panel" data-rule-panel="supplier">
+                  <div class="rule-module-head">
+                    <div>
+                      <h3>SKU供应商对照</h3>
+                      <!-- === MODIFIED START ===
+                      原因：SKU-供应商对照不再需要供应商编码，后续将由 ERP 商品档案定时同步更新。
+                      影响范围：规则配置中心 SKU 供应商对照说明。
+                      === MODIFIED END === -->
+                      <p>用于金蝶采购申请提交，SKU 指商品名称；后续可由 ERP 商品档案定时同步，当前也可手工维护。</p>
+                    </div>
+                    <!-- === MODIFIED START ===
+                    原因：产品预设金蝶推送可启停，当前默认不启用。
+                    影响范围：规则配置中心金蝶开关。
+                    === MODIFIED END === -->
+                    <label class="toggle-row">
+                      <input id="kingdeeEnabledInput" type="checkbox" />
+                      <span class="switch" aria-hidden="true"></span>
+                      <strong>启用推送金蝶</strong>
+                    </label>
+                  </div>
+                  <label>
+                    <span>SKU 供应商对照：商品名称,供应商名称</span>
+                    <textarea id="supplierMappingsInput" placeholder="圣琪酵母粉/5g,供应商A"></textarea>
+                  </label>
+                </section>
+
+                <section class="rule-panel" data-rule-panel="schedule">
+                  <div class="rule-module-head">
+                    <div>
+                      <h3>定时任务配置</h3>
+                      <p>支持多条定时任务配置，按 schedule_id 维护独立运行状态与执行时间。</p>
+                    </div>
+                  </div>
+                  <div class="table-wrap rule-schedule-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>配置ID</th>
+                          <th>名称</th>
+                          <th>启用</th>
+                          <th>运行时间</th>
+                          <th>检查间隔(秒)</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody id="scheduleRows"></tbody>
+                    </table>
+                  </div>
+                  <div class="schedule-actions">
+                    <button class="ghost-button" type="button" id="addScheduleButton">新增定时任务</button>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+          </div>
+        </section>
+
+        <section class="view" id="view-receipts" data-title="付款回执管理" data-name="付款回执">
+          <div class="receipt-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>待处理任务</h2>
+                  <p>选择任务后在右侧上传付款凭证</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>任务批次</th>
+                      <th>金蝶状态</th>
+                      <th>付款状态</th>
+                      <th>上传回执</th>
+                    </tr>
+                  </thead>
+                  <tbody id="receiptRows"></tbody>
+                </table>
+              </div>
+            </section>
+            <aside class="panel upload-panel">
+              <h2>上传付款凭证回执</h2>
+              <p id="selectedReceiptTask">请选择左侧任务</p>
+              <label class="upload-box" for="receiptFileInput">
+                <!-- === MODIFIED START ===
+                原因：上传入口图标文字中文化。
+                影响范围：付款回执上传按钮区域。
+                === MODIFIED END === -->
+                <span class="upload-cloud">上传</span>
+                <strong>点击选择 PDF / JPG / PNG 文件</strong>
+                <small>上传成功后将任务付款状态标记为已付款</small>
+              </label>
+              <input id="receiptFileInput" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+              <button class="primary-button full" type="button" id="uploadReceiptButton">确认上传</button>
+              <div class="recent-upload" id="recentUploadInfo">暂无上传记录</div>
+            </aside>
+          </div>
+        </section>
+      </main>
+
+      <aside class="detail-drawer" id="detailDrawer" aria-live="polite">
+        <button class="drawer-close" type="button" id="drawerCloseButton">×</button>
+        <div id="drawerContent"></div>
+      </aside>
+    </div>
+    <script src="/static/app.js?v=20260511-cn-buttons" defer></script>
+  </body>
+</html>
