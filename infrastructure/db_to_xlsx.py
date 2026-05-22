@@ -4,6 +4,7 @@ import ctypes
 import ctypes.wintypes
 import os
 import time
+from datetime import datetime
 from pathlib import Path
 
 import pyautogui as pg
@@ -37,7 +38,9 @@ def describe_export_file(target_path: Path | str) -> tuple[str, dict[str, object
 
     stat = path.stat()
     payload["size_bytes"] = stat.st_size
-    payload["modified_at"] = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(stat.st_mtime))
+    payload["modified_at"] = time.strftime(
+        "%Y-%m-%dT%H:%M:%S", time.localtime(stat.st_mtime)
+    )
     return "export_file_detected", payload
 
 
@@ -45,17 +48,22 @@ def describe_export_file(target_path: Path | str) -> tuple[str, dict[str, object
 
 
 def _find_window(substring: str, trace_id: str) -> gw.Win32Window | None:
-    """查找标题包含 substring 的窗口，返回窗口对象。"""
+    """Finds the first desktop window whose title contains the target text."""
+
     windows = gw.getWindowsWithTitle(substring)
     if not windows:
         log_info("window_not_found", {"trace_id": trace_id, "substring": substring})
         return None
-    log_info("window_found", {"trace_id": trace_id, "substring": substring, "title": windows[0].title})
+    log_info(
+        "window_found",
+        {"trace_id": trace_id, "substring": substring, "title": windows[0].title},
+    )
     return windows[0]
 
 
 def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
-    """激活窗口并返回是否成功。"""
+    """Activates the target window before sending simulated input."""
+
     log_info(
         "window_activate",
         {
@@ -82,20 +90,42 @@ def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
     return True
 
 
+# === MODIFIED START ===
+# 原因：恢复之前更可靠的模拟键鼠实现，避免 pg.click 在吉客云 Flutter 桌面端未触发真实点击。
+# 影响范围：所有 RPA click 步骤、点击日志。
 def _click(win: gw.Win32Window, rx: int, ry: int, trace_id: str, delay: float = 1) -> None:
-    """点击窗口内相对坐标 (rx, ry)。"""
-    # x, y = win.left + rx, win.top + ry
+    """Clicks one screen coordinate using explicit down/up mouse events."""
+
+    _ = win
     x, y = rx, ry
     log_info(
         "click",
         {"trace_id": trace_id, "relative": (rx, ry), "screen": (x, y)},
     )
-    pg.click(x, y)
+    pg.moveTo(x, y, duration=0.2)
+    pg.mouseDown()
+    pg.mouseUp()
+    try:
+        actual_position = pg.position()
+    except Exception as e:
+        log_error("pyautogui_error", {"trace_id": trace_id, "error": str(e)})
+        actual_position = None
+    log_info(
+        "click_complete",
+        {
+            "trace_id": trace_id,
+            "relative": (rx, ry),
+            "screen": (x, y),
+            "actual_position": actual_position,
+        },
+    )
     time.sleep(delay)
 
 
 def _hover(win: gw.Win32Window, rx: int, ry: int, trace_id: str, delay: float = 1) -> None:
-    """悬浮到窗口内相对坐标。"""
+    """Moves the mouse to one screen coordinate and waits for hover menus."""
+
+    _ = win
     x, y = rx, ry
     log_info(
         "hover",
@@ -105,8 +135,12 @@ def _hover(win: gw.Win32Window, rx: int, ry: int, trace_id: str, delay: float = 
     time.sleep(delay)
 
 
+# === MODIFIED END ===
+
+
 def _type(text: str, trace_id: str, delay: float = 1) -> None:
-    """通过剪贴板输入文本。"""
+    """Inputs text through the clipboard."""
+
     log_info(
         "clipboard_type",
         {
@@ -121,15 +155,101 @@ def _type(text: str, trace_id: str, delay: float = 1) -> None:
     time.sleep(delay)
 
 
+# === MODIFIED START ===
+# 原因：恢复可测试的 RPA 导出步骤，同时去掉时间筛选，只保留状态筛选、全量导出、另存为和覆盖确认。
+# 影响范围：吉客云桌面导出流程、RPA 回归测试。
+def _replace_text(text: str, trace_id: str, delay: float = 1) -> None:
+    """Selects existing text and replaces it through the clipboard."""
+
+    log_info(
+        "clipboard_replace",
+        {
+            "trace_id": trace_id,
+            "text_preview": text[:12],
+            "text_length": len(text),
+        },
+    )
+    pg.hotkey("ctrl", "a")
+    _type(text, trace_id, delay)
+
+
+def _press(key: str, trace_id: str, delay: float = 1) -> None:
+    """Presses one keyboard key and waits for the desktop to react."""
+
+    log_info("key_press", {"trace_id": trace_id, "key": key})
+    pg.press(key)
+    time.sleep(delay)
+
+
+def _export_steps(
+    xlsx_path: Path | str,
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
+) -> list[tuple[str, str, tuple[int, int] | str, float]]:
+    """Builds the desktop RPA steps with an optional order-time window."""
+
+    target_path = str(Path(xlsx_path).resolve())
+    steps: list[tuple[str, str, tuple[int, int] | str, float]] = [
+        ("open_order_status_filter", "click", (230, 583), 4),
+        ("focus_status_keyword", "click", (120, 583), 2),
+        ("replace_status_keyword", "replace_text", "待发货-已递交", 2),
+        ("confirm_status_filter", "click", (120, 583), 3),
+    ]
+    if start_time is not None and end_time is not None:
+        steps.extend(
+            [
+                ("open_statistics_time_type", "click", (230, 418), 1),
+                ("select_order_time_type", "press", "home", 0.3),
+                ("confirm_order_time_type", "press", "enter", 1),
+                ("focus_order_time_start", "click", (82, 482), 1),
+                (
+                    "replace_order_time_start",
+                    "replace_text",
+                    _format_ui_datetime(start_time),
+                    1,
+                ),
+                ("focus_order_time_end", "click", (82, 520), 1),
+                (
+                    "replace_order_time_end",
+                    "replace_text",
+                    _format_ui_datetime(end_time),
+                    1,
+                ),
+            ]
+        )
+    steps.extend(
+        [
+        ("query_orders", "click", (629, 369), 3),
+        ("open_export_menu", "click", (1435, 175), 1),
+        ("hover_split_export", "hover", (1371, 220), 1),
+        ("click_export_current_page", "click", (1730, 220), 9),
+        ("focus_save_as_filename", "click", (1042, 802), 1),
+        ("replace_save_as_path", "replace_text", target_path, 1),
+        ("click_save_as_button", "click", (1321, 804), 3),
+        ("press_overwrite_yes", "press", "y", 1),
+        ("press_overwrite_yes_again", "press", "y", 1),
+        ]
+    )
+    return steps
+
+
+def _format_ui_datetime(value: datetime) -> str:
+    """Formats one datetime for the JiKeYun desktop filter inputs."""
+
+    return value.strftime("%Y-%m-%d %H:%M:%S")
+
+
+# === MODIFIED END ===
+
+
 def export_orders_to_xlsx(
     trace_id: str | None = None,
     xlsx_path: Path | str = Path("input") / "销售单查询.xlsx",
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
 ) -> None:
-    """从吉客云 OMS 桌面应用导出订单数据到 xlsx。
+    """Exports order data from the JiKeYun desktop app into an xlsx file."""
 
-    所有坐标均为相对窗口左上角的偏移量 (rx, ry)。
-    窗口位置变化或 DPI 缩放都不会影响操作。
-    """
     safe_trace_id = trace_id or _TRACE_ID
     target_path = Path(xlsx_path)
     start_epoch = time.time()
@@ -139,6 +259,8 @@ def export_orders_to_xlsx(
         {
             "trace_id": safe_trace_id,
             "xlsx_path": str(target_path),
+            "start_time": start_time.isoformat() if start_time else None,
+            "end_time": end_time.isoformat() if end_time else None,
         },
     )
 
@@ -155,33 +277,14 @@ def export_orders_to_xlsx(
         log_error("export_cancel", {"trace_id": safe_trace_id, "reason": "无法激活窗口"})
         return
 
-    # === 修改坐标从这里开始 ===
-    # 每个步骤的坐标是相对于窗口左上角的 (rx, ry)
-    # 如果发现点击位置不对，调整下面这些数字即可
-    steps: list[tuple[str, tuple[int, int] | str, float]] = [
-        ("click", (272, 171), 4),
-        ("click", (550, 172), 2),
-        ("type", "待发货-已递交", 2),
-        ("click", (540, 198), 3),
-        ("click", (629, 369), 3),
-        # ("click", (868, 368), 3),
-        ("click", (1592, 115), 1),
-        ("hover", (1726, 244), 1),
-        ("click", (1782, 300), 9),
-        ("click", (1436, 1019), 1),
-        ("click", (739, 131), 1),
-        ("click", (1325, 207), 3),
-        ("click", (1200, 715), 1),
-        ("click", (1000, 530), 1),
-        ("click", (950, 950), 1),
-    ]
-    # === 修改坐标到这里结束 ===
+    steps = _export_steps(target_path, start_time=start_time, end_time=end_time)
 
-    for index, (action, value, delay) in enumerate(steps, start=1):
+    for index, (step_name, action, value, delay) in enumerate(steps, start=1):
         payload = {
             "trace_id": safe_trace_id,
             "step_index": index,
             "step_count": len(steps),
+            "step_name": step_name,
             "action": action,
             "delay_seconds": delay,
         }
@@ -199,6 +302,10 @@ def export_orders_to_xlsx(
                 _click(win, rx, ry, safe_trace_id, delay)
         elif action == "type" and isinstance(value, str):
             _type(value, safe_trace_id, delay)
+        elif action == "replace_text" and isinstance(value, str):
+            _replace_text(value, safe_trace_id, delay)
+        elif action == "press" and isinstance(value, str):
+            _press(value, safe_trace_id, delay)
         log_info("export_step_complete", payload)
 
     log_info(

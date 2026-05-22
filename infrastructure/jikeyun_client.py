@@ -63,7 +63,7 @@ Clock = Callable[[], datetime]
 # === MODIFIED START ===
 # 原因：RPA 桌面导出通过依赖注入接入，避免基础取数客户端直接绑定 pyautogui。
 # 影响范围：JikeyunClient 初始化、fetch_orders 导出补数流程。
-RpaExporter = Callable[[str, Path], None]
+RpaExporter = Callable[[str, Path, datetime, datetime], None]
 LogInfo = Callable[[str, dict[str, object]], None]
 LogError = Callable[[str, dict[str, object]], None]
 # === MODIFIED END ===
@@ -256,7 +256,7 @@ class JikeyunClient:
         # === MODIFIED START ===
         # 原因：可选执行 RPA 导出，随后从配置的 XLSX 路径补齐订单地址信息。
         # 影响范围：fetch_orders 吉客云订单映射前置数据准备。
-        self._run_rpa_export(trace_id)
+        self._run_rpa_export(trace_id, start_time, end_time)
         xlsx_lookup = load_order_address_lookup(self.xlsx_path)
         self.log_info(
             "jikeyun_xlsx_lookup_loaded",
@@ -289,7 +289,12 @@ class JikeyunClient:
     # === MODIFIED START ===
     # 原因：隔离 RPA 异常处理，保证桌面自动化失败不会让 OpenAPI 拉单结果丢失。
     # 影响范围：fetch_orders 的可选 RPA 导出步骤。
-    def _run_rpa_export(self, trace_id: str) -> None:
+    def _run_rpa_export(
+        self,
+        trace_id: str,
+        start_time: datetime,
+        end_time: datetime,
+    ) -> None:
         """Runs the optional desktop exporter and logs recoverable failures."""
 
         if self.rpa_exporter is None:
@@ -298,6 +303,8 @@ class JikeyunClient:
                 {
                     "trace_id": trace_id,
                     "xlsx_path": str(self.xlsx_path),
+                    "start_time": start_time.isoformat(),
+                    "end_time": end_time.isoformat(),
                 },
             )
             return
@@ -307,15 +314,19 @@ class JikeyunClient:
             {
                 "trace_id": trace_id,
                 "xlsx_path": str(self.xlsx_path),
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
             },
         )
         try:
-            self.rpa_exporter(trace_id, self.xlsx_path)
+            self.rpa_exporter(trace_id, self.xlsx_path, start_time, end_time)
             self.log_info(
                 "jikeyun_rpa_export_succeeded",
                 {
                     "trace_id": trace_id,
                     "xlsx_path": str(self.xlsx_path),
+                    "start_time": start_time.isoformat(),
+                    "end_time": end_time.isoformat(),
                 },
             )
         except Exception as exc:
@@ -324,6 +335,8 @@ class JikeyunClient:
                 {
                     "trace_id": trace_id,
                     "xlsx_path": str(self.xlsx_path),
+                    "start_time": start_time.isoformat(),
+                    "end_time": end_time.isoformat(),
                     "error_type": exc.__class__.__name__,
                     "reason": str(exc)[:200],
                 },

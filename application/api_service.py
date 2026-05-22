@@ -587,10 +587,10 @@ class ApiService:
         return DailyFixedTimeScheduler(
             state_store=self.scheduler_state_store,
             task_runner=self._run_configured_task,
-            task_recorder=self.task_run_store.append,
+            task_recorder=lambda schedule, summary: self.task_run_store.append(summary),
         )
 
-    def _run_configured_task(self):
+    def _run_configured_task(self, schedule_config=None):
         """Runs one configured task without recording the summary."""
 
         return run_once(
@@ -612,6 +612,7 @@ class ApiService:
             # 影响范围：执行日志页面与下载接口。
             execution_log_path=self.execution_log_store.history_path,
             # === MODIFIED END ===
+            scheduled_run_at=schedule_config.run_at if schedule_config else None,
         )
 
     def _scheduler_loop_interval_seconds(self) -> int:

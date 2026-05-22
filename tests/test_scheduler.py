@@ -47,7 +47,10 @@ class SchedulerTests(TestCase):
         self.assertEqual(result.status, SchedulerStatus.RAN)
         self.assertTrue(result.should_run)
         self.assertEqual(result.summary.trace_id, "TRACE-SCHEDULED")
-        self.assertEqual([item.trace_id for item in runs], ["TRACE-SCHEDULED"])
+        self.assertEqual(
+            [(schedule.schedule_id, summary.trace_id) for schedule, summary in runs],
+            [("default", "TRACE-SCHEDULED")],
+        )
         state = SchedulerStateStore(state_path).load()
         self.assertEqual(state.last_run_date, "2026-04-30")
         self.assertEqual(state.last_trace_id, "TRACE-SCHEDULED")
@@ -113,7 +116,7 @@ class SchedulerTests(TestCase):
         self.assertEqual(runs, [])
 
     def test_tick_many_runs_each_due_schedule_once(self) -> None:
-        runs: list[RunSummary] = []
+        runs: list[tuple[str, RunSummary]] = []
         state_path = Path("tmp") / "test_scheduler" / "state_many.json"
         if state_path.exists():
             state_path.unlink()
@@ -142,7 +145,10 @@ class SchedulerTests(TestCase):
 
         self.assertTrue(payload["should_run"])
         self.assertEqual(payload["ran_count"], 2)
-        self.assertEqual([item.trace_id for item in runs], ["TRACE-SCHEDULED", "TRACE-SCHEDULED"])
+        self.assertEqual(
+            [(schedule.schedule_id, summary.trace_id) for schedule, summary in runs],
+            [("morning", "TRACE-SCHEDULED"), ("afternoon", "TRACE-SCHEDULED")],
+        )
         state = SchedulerStateStore(state_path).load()
         self.assertEqual(sorted(state.schedule_runs), ["afternoon", "morning"])
 
@@ -174,13 +180,16 @@ class SchedulerTests(TestCase):
 
         self.assertEqual(default_result.status, SchedulerStatus.ALREADY_RAN)
         self.assertEqual(other_result.status, SchedulerStatus.RAN)
-        self.assertEqual([item.trace_id for item in runs], ["TRACE-SCHEDULED"])
+        self.assertEqual(
+            [(schedule.schedule_id, summary.trace_id) for schedule, summary in runs],
+            [("extra", "TRACE-SCHEDULED")],
+        )
     # === MODIFIED END ===
 
 
 def make_scheduler(
     clock,
-    runs: list[RunSummary],
+    runs: list,
     state_path: Path | None = None,
 ) -> DailyFixedTimeScheduler:
     """Builds a deterministic scheduler for tests."""
@@ -190,8 +199,8 @@ def make_scheduler(
         path.unlink()
     return DailyFixedTimeScheduler(
         state_store=SchedulerStateStore(path),
-        task_runner=lambda: make_summary(),
-        task_recorder=runs.append,
+        task_runner=lambda schedule: make_summary(),
+        task_recorder=lambda schedule, summary: runs.append((schedule, summary)),
         clock=clock,
     )
 

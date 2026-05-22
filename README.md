@@ -157,6 +157,22 @@ export QIXIN_SECRET_KEY="your_key"
 
 # 运行订单处理
 python main.py
+启动方式取决于你用的包管理工具。
+
+启动命令
+
+项目用 uv 管理依赖（uv.lock/uv.toml），推荐：
+
+    cd C:\Users\666\projects\AI-DDTS
+    
+    # 方式一：uv（推荐）
+    uv run uvicorn interfaces.app:create_app --host 0.0.0.0 --port 8000 --factory
+    
+    # 方式二：直接 python
+    python -m uvicorn interfaces.app:create_app --host 0.0.0.0 --port 8000 --factory
+
+必须加 `--factory`，因为 interfaces/app.py 里没有全局的 app 变量，而是通过
+create_app() 函数返回 FastAPI 实例。
 ```
 
 ---

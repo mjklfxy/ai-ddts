@@ -136,6 +136,7 @@ def run_once(
     existing_task_codes_provider: Callable[[], Iterable[str]] | None = None,
     trace_id_generator: Callable[[], str] | None = None,
     clock: Callable[[], datetime] | None = None,
+    scheduled_run_at: str | None = None,
     # === MODIFIED END ===
 ) -> RunSummary:
     """Runs one configured task with configured rules."""
@@ -154,13 +155,18 @@ def run_once(
             existing_codes_provider=existing_task_codes_provider,
             clock=task_clock,
         )
+    window_start = now - timedelta(minutes=config.task.window_minutes)
+    window_end = now
+    if scheduled_run_at is not None:
+        window_end = _scheduled_window_end(now, scheduled_run_at)
+        window_start = window_end - timedelta(days=1)
     task_context = TaskService(
         trace_id_generator=task_trace_id_generator,
         clock=task_clock,
     ).create_task(
         task_name=config.task.name,
-        window_start=now - timedelta(minutes=config.task.window_minutes),
-        window_end=now,
+        window_start=window_start,
+        window_end=window_end,
     )
     # === MODIFIED END ===
     # === MODIFIED START ===
@@ -544,6 +550,19 @@ def fetch_orders_from_config(
         start_time=task_context.window_start,
         end_time=task_context.window_end,
     )
+
+
+# === MODIFIED START ===
+# 原因：定时任务需要按当前 schedule 的固定时间生成昨天到今天的 24 小时拉单窗口。
+# 影响范围：Scheduler 触发的任务上下文、API 拉单窗口、RPA 时间筛选窗口。
+def _scheduled_window_end(now: datetime, run_at: str) -> datetime:
+    """Returns today's scheduled end time for one fixed daily schedule."""
+
+    scheduled_time = datetime.strptime(run_at, "%H:%M").time()
+    return datetime.combine(now.date(), scheduled_time)
+
+
+# === MODIFIED END ===
 
 
 def build_order_source_client(

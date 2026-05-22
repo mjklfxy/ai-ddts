@@ -93,10 +93,15 @@ class JikeyunClientTests(TestCase):
         self.assertEqual(orders[0].order_lines[0].goods_summary, "Goods SKU-001")
 
     def test_fetch_orders_runs_injected_rpa_exporter_before_mapping(self) -> None:
-        calls: list[str] = []
+        calls: list[tuple[str, Path, datetime, datetime]] = []
 
-        def exporter(trace_id: str, xlsx_path: Path) -> None:
-            calls.append(f"{trace_id}:{xlsx_path}")
+        def exporter(
+            trace_id: str,
+            xlsx_path: Path,
+            start_time: datetime,
+            end_time: datetime,
+        ) -> None:
+            calls.append((trace_id, xlsx_path, start_time, end_time))
 
         client = make_client(
             transport=lambda request: JikeyunPageResult(
@@ -112,14 +117,29 @@ class JikeyunClientTests(TestCase):
             end_time=datetime(2026, 4, 30, 12, 0, 0),
         )
 
-        self.assertEqual(calls, ["TRACE-RPA:tmp\\test_jikeyun_missing.xlsx"])
+        self.assertEqual(
+            calls,
+            [
+                (
+                    "TRACE-RPA",
+                    Path("tmp/test_jikeyun_missing.xlsx"),
+                    datetime(2026, 4, 30, 8, 0, 0),
+                    datetime(2026, 4, 30, 12, 0, 0),
+                )
+            ],
+        )
         self.assertEqual([order.rule_context.order_no for order in orders], ["SO-RPA"])
 
     def test_fetch_orders_continues_when_rpa_exporter_fails(self) -> None:
         errors: list[tuple[str, dict[str, object]]] = []
 
-        def failing_exporter(trace_id: str, xlsx_path: Path) -> None:
-            _ = (trace_id, xlsx_path)
+        def failing_exporter(
+            trace_id: str,
+            xlsx_path: Path,
+            start_time: datetime,
+            end_time: datetime,
+        ) -> None:
+            _ = (trace_id, xlsx_path, start_time, end_time)
             raise RuntimeError("desktop unavailable")
 
         client = make_client(
@@ -144,10 +164,15 @@ class JikeyunClientTests(TestCase):
 
     def test_fetch_orders_logs_rpa_export_lifecycle_and_xlsx_lookup_path(self) -> None:
         infos: list[tuple[str, dict[str, object]]] = []
-        exporter_calls: list[tuple[str, Path]] = []
+        exporter_calls: list[tuple[str, Path, datetime, datetime]] = []
 
-        def exporter(trace_id: str, xlsx_path: Path) -> None:
-            exporter_calls.append((trace_id, xlsx_path))
+        def exporter(
+            trace_id: str,
+            xlsx_path: Path,
+            start_time: datetime,
+            end_time: datetime,
+        ) -> None:
+            exporter_calls.append((trace_id, xlsx_path, start_time, end_time))
 
         client = make_client(
             transport=lambda request: JikeyunPageResult(
@@ -165,7 +190,17 @@ class JikeyunClientTests(TestCase):
             end_time=datetime(2026, 4, 30, 12, 0, 0),
         )
 
-        self.assertEqual(exporter_calls, [("TRACE-RPA-LOG", Path("tmp/test_jikeyun_rpa_log.xlsx"))])
+        self.assertEqual(
+            exporter_calls,
+            [
+                (
+                    "TRACE-RPA-LOG",
+                    Path("tmp/test_jikeyun_rpa_log.xlsx"),
+                    datetime(2026, 4, 30, 8, 0, 0),
+                    datetime(2026, 4, 30, 12, 0, 0),
+                )
+            ],
+        )
         self.assertEqual([order.rule_context.order_no for order in orders], ["SO-RPA-LOG"])
         self.assertEqual(
             [event for event, _ in infos],
@@ -202,7 +237,13 @@ class JikeyunClientTests(TestCase):
             end_time=datetime(2026, 4, 30, 12, 0, 0),
         )
 
-        self.assertIn(("jikeyun_rpa_export_skipped", {"trace_id": "TRACE-RPA-SKIP", "xlsx_path": "tmp\\test_jikeyun_missing.xlsx"}), infos)
+        skipped_payload = next(
+            payload for event, payload in infos if event == "jikeyun_rpa_export_skipped"
+        )
+        self.assertEqual(skipped_payload["trace_id"], "TRACE-RPA-SKIP")
+        self.assertEqual(skipped_payload["xlsx_path"], "tmp\\test_jikeyun_missing.xlsx")
+        self.assertEqual(skipped_payload["start_time"], "2026-04-30T08:00:00")
+        self.assertEqual(skipped_payload["end_time"], "2026-04-30T12:00:00")
 
     def test_map_order_logs_contact_field_sources_from_xlsx(self) -> None:
         infos: list[tuple[str, dict[str, object]]] = []

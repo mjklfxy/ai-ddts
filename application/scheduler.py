@@ -149,8 +149,8 @@ class DailyFixedTimeScheduler:
     def __init__(
         self,
         state_store: SchedulerStateStore,
-        task_runner: Callable[[], RunSummary],
-        task_recorder: Callable[[RunSummary], None],
+        task_runner: Callable[[ScheduleConfig], RunSummary],
+        task_recorder: Callable[[ScheduleConfig, RunSummary], None],
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.state_store = state_store
@@ -253,8 +253,8 @@ class DailyFixedTimeScheduler:
                 schedule_name=schedule_config.name,
             )
 
-        summary = self.task_runner()
-        self.task_recorder(summary)
+        summary = self.task_runner(schedule_config)
+        self.task_recorder(schedule_config, summary)
         self.state_store.mark_run(
             run_date=now.date().isoformat(),
             run_at=schedule_config.run_at,
