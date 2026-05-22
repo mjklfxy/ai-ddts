@@ -20,6 +20,12 @@ pg.FAILSAFE = True
 pg.PAUSE = 0.05
 
 _TRACE_ID = f"db-to-xlsx-{os.getpid()}"
+# === MODIFIED START ===
+# 原因：RPA 导出文件名和统计时间类型需要集中定义，确保 API 与 Excel 回填窗口口径一致。
+# 影响范围：导出保存文件名、统计时间类型选择。
+DEFAULT_EXPORT_FILENAME = "销售单查询.xlsx"
+RPA_STATISTICS_TIME_TYPE = "复核时间"
+# === MODIFIED END ===
 
 
 # === MODIFIED START ===
@@ -156,7 +162,7 @@ def _type(text: str, trace_id: str, delay: float = 1) -> None:
 
 
 # === MODIFIED START ===
-# 原因：恢复可测试的 RPA 导出步骤，同时去掉时间筛选，只保留状态筛选、全量导出、另存为和覆盖确认。
+# 原因：恢复可测试的 RPA 导出步骤，并显式选择复核时间、状态筛选、合并导出当前页、另存为和覆盖确认。
 # 影响范围：吉客云桌面导出流程、RPA 回归测试。
 def _replace_text(text: str, trace_id: str, delay: float = 1) -> None:
     """Selects existing text and replaces it through the clipboard."""
@@ -181,26 +187,105 @@ def _press(key: str, trace_id: str, delay: float = 1) -> None:
     time.sleep(delay)
 
 
+def _export_target_path(xlsx_path: Path | str) -> Path:
+    """Returns the absolute XLSX path written into the Save As filename box."""
+
+    return Path(xlsx_path).resolve()
+
+
+def _confirm_overwrite_if_present(
+    trace_id: str,
+    timeout_seconds: float = 5,
+) -> bool:
+    """Confirms the Windows overwrite dialog only when it is actually present."""
+
+    deadline = time.time() + timeout_seconds
+    while time.time() <= deadline:
+        windows = gw.getWindowsWithTitle("确认另存为")
+        if windows:
+            dialog = windows[0]
+            dialog.activate()
+            time.sleep(0.2)
+            _click(dialog, dialog.left + 357, dialog.top + 170, trace_id, delay=0.2)
+            log_info(
+                "overwrite_confirmed",
+                {
+                    "trace_id": trace_id,
+                    "title": dialog.title,
+                    "screen": (dialog.left + 357, dialog.top + 170),
+                },
+            )
+            return True
+        time.sleep(0.3)
+    log_info(
+        "overwrite_not_present",
+        {"trace_id": trace_id, "timeout_seconds": timeout_seconds},
+    )
+    return False
+
+
+def _wait_for_window(
+    title: str,
+    trace_id: str,
+    timeout_seconds: float = 120,
+    poll_seconds: float = 0.5,
+) -> bool:
+    """Waits until a Windows dialog appears instead of relying on fixed delays."""
+
+    log_info(
+        "window_wait_start",
+        {
+            "trace_id": trace_id,
+            "title": title,
+            "timeout_seconds": timeout_seconds,
+            "poll_seconds": poll_seconds,
+        },
+    )
+    deadline = time.time() + timeout_seconds
+    while time.time() <= deadline:
+        windows = gw.getWindowsWithTitle(title)
+        if windows:
+            log_info(
+                "window_wait_found",
+                {
+                    "trace_id": trace_id,
+                    "title": title,
+                    "window_title": windows[0].title,
+                },
+            )
+            return True
+        time.sleep(poll_seconds)
+    log_error(
+        "window_wait_timeout",
+        {"trace_id": trace_id, "title": title, "timeout_seconds": timeout_seconds},
+    )
+    return False
+
+
 def _export_steps(
     xlsx_path: Path | str,
     start_time: datetime | None = None,
     end_time: datetime | None = None,
 ) -> list[tuple[str, str, tuple[int, int] | str, float]]:
-    """Builds the desktop RPA steps with an optional order-time window."""
+    """Builds the desktop RPA steps with an optional review-time window."""
 
-    target_path = str(Path(xlsx_path).resolve())
+    target_path = str(_export_target_path(xlsx_path))
     steps: list[tuple[str, str, tuple[int, int] | str, float]] = [
         ("open_order_status_filter", "click", (230, 583), 4),
-        ("focus_status_keyword", "click", (120, 583), 2),
-        ("replace_status_keyword", "replace_text", "待发货-已递交", 2),
-        ("confirm_status_filter", "click", (120, 583), 3),
+        ("replace_order_status_keyword", "replace_text", "待发货-待递交,待发货-递交中,待发货-已递交", 2),
+        ("confirm_order_status_keyword", "press", "enter", 3),
     ]
     if start_time is not None and end_time is not None:
         steps.extend(
             [
                 ("open_statistics_time_type", "click", (230, 418), 1),
-                ("select_order_time_type", "press", "home", 0.3),
-                ("confirm_order_time_type", "press", "enter", 1),
+                (
+                    "replace_statistics_time_type",
+                    "replace_text",
+                    RPA_STATISTICS_TIME_TYPE,
+                    1,
+                ),
+                ("confirm_statistics_time_type", "press", "enter", 1),
                 ("focus_order_time_start", "click", (82, 482), 1),
                 (
                     "replace_order_time_start",
@@ -219,15 +304,16 @@ def _export_steps(
         )
     steps.extend(
         [
-        ("query_orders", "click", (629, 369), 3),
-        ("open_export_menu", "click", (1435, 175), 1),
-        ("hover_split_export", "hover", (1371, 220), 1),
-        ("click_export_current_page", "click", (1730, 220), 9),
-        ("focus_save_as_filename", "click", (1042, 802), 1),
-        ("replace_save_as_path", "replace_text", target_path, 1),
-        ("click_save_as_button", "click", (1321, 804), 3),
-        ("press_overwrite_yes", "press", "y", 1),
-        ("press_overwrite_yes_again", "press", "y", 1),
+            ("apply_left_filters", "click", (68, 933), 9),
+            ("query_orders", "click", (629, 369), 3),
+            ("open_export_menu", "click", (1435, 175), 1),
+            ("hover_merge_export", "hover", (1371, 268), 1),
+            ("click_merge_export_current_page", "click", (1730, 268), 1),
+            ("wait_save_as_dialog", "wait_window", "另存为", 120),
+            ("focus_save_as_filename", "click", (1042, 802), 1),
+            ("replace_save_as_path", "replace_text", target_path, 1),
+            ("click_save_as_button", "click", (1321, 804), 3),
+            ("confirm_overwrite_if_present", "confirm_overwrite", "", 5),
         ]
     )
     return steps
@@ -244,14 +330,14 @@ def _format_ui_datetime(value: datetime) -> str:
 
 def export_orders_to_xlsx(
     trace_id: str | None = None,
-    xlsx_path: Path | str = Path("input") / "销售单查询.xlsx",
+    xlsx_path: Path | str = Path("input") / DEFAULT_EXPORT_FILENAME,
     start_time: datetime | None = None,
     end_time: datetime | None = None,
 ) -> None:
     """Exports order data from the JiKeYun desktop app into an xlsx file."""
 
     safe_trace_id = trace_id or _TRACE_ID
-    target_path = Path(xlsx_path)
+    target_path = _export_target_path(xlsx_path)
     start_epoch = time.time()
     log_info("export_start", {"trace_id": safe_trace_id})
     log_info(
@@ -306,6 +392,10 @@ def export_orders_to_xlsx(
             _replace_text(value, safe_trace_id, delay)
         elif action == "press" and isinstance(value, str):
             _press(value, safe_trace_id, delay)
+        elif action == "wait_window" and isinstance(value, str):
+            _wait_for_window(value, safe_trace_id, timeout_seconds=delay)
+        elif action == "confirm_overwrite":
+            _confirm_overwrite_if_present(safe_trace_id, timeout_seconds=delay)
         log_info("export_step_complete", payload)
 
     log_info(
