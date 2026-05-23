@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from time import time
+from time import sleep, time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -80,6 +80,8 @@ class JikeyunHttpTransport:
         api_url: str,
         timeout_seconds: float = 30,
         urlopen: Callable[..., Any] | None = None,
+        max_retries: int = 3,
+        retry_delay_seconds: float = 2,
     ) -> None:
         if not api_url.strip():
             raise ValueError("api_url must be a non-empty string")
@@ -89,6 +91,8 @@ class JikeyunHttpTransport:
         self.api_url = api_url.strip()
         self.timeout_seconds = timeout_seconds
         self.urlopen = urlopen or urllib.request.urlopen
+        self.max_retries = max_retries
+        self.retry_delay_seconds = retry_delay_seconds
 
     def __call__(self, request: JikeyunPageRequest) -> JikeyunPageResult:
         """Sends one request and converts the response into a page result."""
@@ -104,22 +108,27 @@ class JikeyunHttpTransport:
             method="POST",
         )
 
-        try:
-            response = self.urlopen(http_request, timeout=self.timeout_seconds)
+        last_exc: Exception | None = None
+        for attempt in range(1, self.max_retries + 1):
             try:
-                raw_body = response.read()
-            finally:
-                close = getattr(response, "close", None)
-                if callable(close):
-                    close()
-        except urllib.error.URLError as exc:
-            raise ValueError(
-                f"JackYun request failed: {exc.__class__.__name__}"
-            ) from exc
-
-        payload = _decode_response(raw_body)
-        _raise_for_api_error(payload)
-        return _page_result_from_payload(payload, page_size=request.page_size)
+                response = self.urlopen(http_request, timeout=self.timeout_seconds)
+                try:
+                    raw_body = response.read()
+                finally:
+                    close = getattr(response, "close", None)
+                    if callable(close):
+                        close()
+                payload = _decode_response(raw_body)
+                _raise_for_api_error(payload)
+                return _page_result_from_payload(payload, page_size=request.page_size)
+            except urllib.error.URLError as exc:
+                last_exc = exc
+                if attempt < self.max_retries:
+                    time.sleep(self.retry_delay_seconds * attempt)
+                    continue
+        raise ValueError(
+            f"JackYun request failed after {self.max_retries} retries: {last_exc.__class__.__name__}"
+        ) from last_exc
 
 
 # === MODIFIED END ===
