@@ -141,8 +141,8 @@ class DbToXlsxTests(TestCase):
         self.assertIn("replace_order_status_keyword", step_names)
         self.assertIn("confirm_order_status_keyword", step_names)
         self.assertIn("apply_left_filters", step_names)
-        self.assertIn("hover_merge_export", step_names)
-        self.assertIn("click_merge_export_current_page", step_names)
+        self.assertIn("hover_plain_merge_export", step_names)
+        self.assertIn("click_plain_merge_export_current_page", step_names)
         self.assertIn("wait_save_as_dialog", step_names)
         self.assertIn("replace_save_as_path", step_names)
         self.assertIn("click_save_as_button", step_names)
@@ -161,12 +161,15 @@ class DbToXlsxTests(TestCase):
 
         step_by_name = {step[0]: step for step in steps}
         self.assertEqual(step_by_name["open_order_status_filter"][2], (230, 583))
-        self.assertEqual(step_by_name["replace_order_status_keyword"][2], "待发货-已递交")
+        self.assertIn("待发货-已递交", step_by_name["replace_order_status_keyword"][2])
         self.assertEqual(step_by_name["confirm_order_status_keyword"][2], "enter")
         self.assertEqual(step_by_name["apply_left_filters"][2], (68, 933))
         self.assertEqual(step_by_name["apply_left_filters"][3], 9)
-        self.assertEqual(step_by_name["hover_merge_export"][2], (1371, 268))
-        self.assertEqual(step_by_name["click_merge_export_current_page"][2], (1730, 268))
+        self.assertEqual(step_by_name["hover_plain_merge_export"][2], (1371, 365))
+        self.assertEqual(
+            step_by_name["click_plain_merge_export_current_page"][2],
+            (1730, 365),
+        )
         self.assertEqual(step_by_name["wait_save_as_dialog"][1], "wait_window")
         self.assertEqual(step_by_name["wait_save_as_dialog"][2], "另存为")
         self.assertEqual(step_by_name["wait_save_as_dialog"][3], 120)

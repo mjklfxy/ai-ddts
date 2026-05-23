@@ -24,6 +24,7 @@ _TRACE_ID = f"db-to-xlsx-{os.getpid()}"
 # 原因：RPA 导出文件名和统计时间类型需要集中定义，确保 API 与 Excel 回填窗口口径一致。
 # 影响范围：导出保存文件名、统计时间类型选择。
 DEFAULT_EXPORT_FILENAME = "销售单查询.xlsx"
+RPA_ORDER_STATUS_FILTER = "待发货-待递交,待发货-递交中,待发货-已递交"
 RPA_STATISTICS_TIME_TYPE = "复核时间"
 # === MODIFIED END ===
 
@@ -162,7 +163,7 @@ def _type(text: str, trace_id: str, delay: float = 1) -> None:
 
 
 # === MODIFIED START ===
-# 原因：恢复可测试的 RPA 导出步骤，并显式选择复核时间、状态筛选、合并导出当前页、另存为和覆盖确认。
+# 原因：恢复可测试的 RPA 导出步骤，并显式选择复核时间、状态筛选、明文合并导出当前页、另存为和覆盖确认。
 # 影响范围：吉客云桌面导出流程、RPA 回归测试。
 def _replace_text(text: str, trace_id: str, delay: float = 1) -> None:
     """Selects existing text and replaces it through the clipboard."""
@@ -272,7 +273,7 @@ def _export_steps(
     target_path = str(_export_target_path(xlsx_path))
     steps: list[tuple[str, str, tuple[int, int] | str, float]] = [
         ("open_order_status_filter", "click", (230, 583), 4),
-        ("replace_order_status_keyword", "replace_text", "待发货-待递交,待发货-递交中,待发货-已递交", 2),
+        ("replace_order_status_keyword", "replace_text", RPA_ORDER_STATUS_FILTER, 2),
         ("confirm_order_status_keyword", "press", "enter", 3),
     ]
     if start_time is not None and end_time is not None:
@@ -307,8 +308,8 @@ def _export_steps(
             ("apply_left_filters", "click", (68, 933), 9),
             ("query_orders", "click", (629, 369), 3),
             ("open_export_menu", "click", (1435, 175), 1),
-            ("hover_merge_export", "hover", (1371, 268), 1),
-            ("click_merge_export_current_page", "click", (1730, 268), 1),
+            ("hover_plain_merge_export", "hover", (1371, 365), 1),
+            ("click_plain_merge_export_current_page", "click", (1730, 365), 1),
             ("wait_save_as_dialog", "wait_window", "另存为", 120),
             ("focus_save_as_filename", "click", (1042, 802), 1),
             ("replace_save_as_path", "replace_text", target_path, 1),
