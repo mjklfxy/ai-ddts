@@ -24,8 +24,7 @@ _TRACE_ID = f"db-to-xlsx-{os.getpid()}"
 # 原因：RPA 导出文件名和统计时间类型需要集中定义，确保 API 与 Excel 回填窗口口径一致。
 # 影响范围：导出保存文件名、统计时间类型选择。
 DEFAULT_EXPORT_FILENAME = "销售单查询.xlsx"
-RPA_ORDER_STATUS_FILTER = "待发货-待递交,待发货-递交中,待发货-已递交"
-RPA_STATISTICS_TIME_TYPE = "复核时间"
+RPA_STATISTICS_TIME_TYPE = "审核时间"
 # === MODIFIED END ===
 
 
@@ -129,6 +128,30 @@ def _click(win: gw.Win32Window, rx: int, ry: int, trace_id: str, delay: float = 
     time.sleep(delay)
 
 
+def _move_click(
+    win: gw.Win32Window, rx: int, ry: int, trace_id: str, delay: float = 1
+) -> None:
+    """Moves horizontally then vertically to the target, then clicks.
+
+    Used for Flutter submenus where diagonal movement can leave the menu area
+    and cause the submenu to close.
+    """
+
+    _ = win
+    cur_x, cur_y = pg.position()
+    target_x, target_y = rx, ry
+    log_info(
+        "move_click",
+        {"trace_id": trace_id, "from": (cur_x, cur_y), "to": (target_x, target_y)},
+    )
+    pg.moveTo(target_x, cur_y, duration=0.2)
+    time.sleep(0.1)
+    pg.moveTo(target_x, target_y, duration=0.2)
+    pg.mouseDown()
+    pg.mouseUp()
+    time.sleep(delay)
+
+
 def _hover(win: gw.Win32Window, rx: int, ry: int, trace_id: str, delay: float = 1) -> None:
     """Moves the mouse to one screen coordinate and waits for hover menus."""
 
@@ -177,6 +200,7 @@ def _replace_text(text: str, trace_id: str, delay: float = 1) -> None:
         },
     )
     pg.hotkey("ctrl", "a")
+    time.sleep(0.3)
     _type(text, trace_id, delay)
 
 
@@ -271,22 +295,22 @@ def _export_steps(
     """Builds the desktop RPA steps with an optional review-time window."""
 
     target_path = str(_export_target_path(xlsx_path))
+    # 订单状态是 Flutter 多选复选框下拉：先点击输入区域，再点箭头展开列表，逐个勾选复选框，点确认。
     steps: list[tuple[str, str, tuple[int, int] | str, float]] = [
-        ("open_order_status_filter", "click", (230, 583), 4),
-        ("replace_order_status_keyword", "replace_text", RPA_ORDER_STATUS_FILTER, 2),
-        ("confirm_order_status_keyword", "press", "enter", 3),
+        ("focus_order_status_input", "click", (277, 584), 1),
+        ("open_order_status_filter", "click", (188, 588), 1),
+        ("type_order_status_keyword", "type", "待发货", 1),
+        ("check_status_pending_submit", "click", (173, 656), 1),
+        ("check_status_submitting", "click", (173, 690), 1),
+        ("check_status_submitted", "click", (173, 723), 1),
+        ("confirm_order_status_filter", "click", (194, 866), 1),
     ]
     if start_time is not None and end_time is not None:
+        # Flutter combobox 下拉选择：点击展开列表，再点击列表项"审核时间"。
         steps.extend(
             [
-                ("open_statistics_time_type", "click", (230, 418), 1),
-                (
-                    "replace_statistics_time_type",
-                    "replace_text",
-                    RPA_STATISTICS_TIME_TYPE,
-                    1,
-                ),
-                ("confirm_statistics_time_type", "press", "enter", 1),
+                ("open_statistics_time_type", "click", (173, 411), 1),
+                ("click_statistics_time_type_item", "click", (142, 550), 1),
                 ("focus_order_time_start", "click", (82, 482), 1),
                 (
                     "replace_order_time_start",
@@ -307,11 +331,15 @@ def _export_steps(
         )
     steps.extend(
         [
+            ("pre_filter_click_1", "click", (522, 215), 1),
+            ("pre_filter_click_2", "click", (447, 247), 1),
+            ("pre_filter_click_3", "click", (447, 247), 1),
+            ("pre_filter_click_4", "click", (501, 360), 1),
+            ("pre_filter_click_5", "click", (688, 394), 3),
             ("apply_left_filters", "click", (68, 933), 9),
-            ("query_orders", "click", (629, 369), 3),
-            ("open_export_menu", "click", (1435, 175), 1),
-            ("hover_plain_merge_export", "hover", (1371, 365), 1),
-            ("click_plain_merge_export_current_page", "click", (1730, 365), 1),
+            ("open_export_menu", "click", (1383, 172), 2),
+            ("hover_plain_merge_export", "hover", (1384, 363), 2),
+            ("click_export_all_pages", "move_click", (1743, 461), 2),
             ("wait_save_as_dialog", "wait_window", "另存为", 120),
             ("focus_save_as_filename", "click", (1042, 802), 1),
             ("replace_save_as_path", "replace_text", target_path, 1),
@@ -383,10 +411,12 @@ def export_orders_to_xlsx(
             payload["text_preview"] = value[:12]
             payload["text_length"] = len(value)
         log_info("export_step_start", payload)
-        if action in ("hover", "click") and isinstance(value, tuple):
+        if action in ("hover", "click", "move_click") and isinstance(value, tuple):
             rx, ry = value
             if action == "hover":
                 _hover(win, rx, ry, safe_trace_id, delay)
+            elif action == "move_click":
+                _move_click(win, rx, ry, safe_trace_id, delay)
             else:
                 _click(win, rx, ry, safe_trace_id, delay)
         elif action == "type" and isinstance(value, str):
