@@ -25,7 +25,7 @@ class MessageAdapterTests(TestCase):
                 group_name="GROUP-A",
                 owner_mobile="",
                 user_id="",
-                file_path=Path("outputs/GROUP-A.csv"),
+                file_path=Path("outputs/GROUP-A.xlsx"),
             )
         )
 
@@ -59,7 +59,7 @@ class MessageAdapterTests(TestCase):
                 group_name="GROUP-A",
                 owner_mobile="",
                 user_id="",
-                file_path=Path("outputs/GROUP-A.csv"),
+                file_path=Path("outputs/GROUP-A.xlsx"),
             )
         )
 
@@ -84,7 +84,7 @@ class MessageAdapterTests(TestCase):
                     group_name="GROUP-A",
                     owner_mobile="",
                     user_id="",
-                    file_path=Path("outputs/GROUP-A.csv"),
+                    file_path=Path("outputs/GROUP-A.xlsx"),
                 )
             )
 

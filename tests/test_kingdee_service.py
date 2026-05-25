@@ -245,7 +245,7 @@ def make_delivery(group_name: str, order_no: str) -> PipelineBatchDelivery:
         ),
         generated_file=GeneratedFile(
             group_name=group_name,
-            file_path=Path("outputs") / f"{group_name}.csv",
+            file_path=Path("outputs") / f"{group_name}.xlsx",
             row_count=1,
         ),
         message_result=MessageSendResult(

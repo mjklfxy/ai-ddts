@@ -20,7 +20,11 @@ from application.execution_log_store import ExecutionLogRecord, ExecutionLogStor
 from application.exception_order_store import ExceptionOrderStore
 
 # === MODIFIED END ===
-from application.file_generator import CsvFileGenerator
+# === MODIFIED START ===
+# 原因：推送/上传订单文件统一改为 Excel。
+# 影响范围：Pipeline 构建和异常订单文件生成。
+from application.file_generator import ExcelFileGenerator
+# === MODIFIED END ===
 from application.order_splitter import OrderSplitter
 from application.pipeline import Pipeline, PipelineRunResult
 
@@ -245,7 +249,7 @@ def run_once(
             supplier_client=supplier_client,
         )
         # === MODIFIED START ===
-        # 原因：异常订单需要按厂家生成 error CSV 文件，供业务人员按群查看和处理。
+        # 原因：异常订单需要按厂家生成 error Excel 文件，供业务人员按群查看和处理。
         # 影响范围：/outputs/order_files/error/ 目录下的异常订单文件。
         _generate_error_files(
             enriched_exception_orders,
@@ -380,7 +384,7 @@ def build_pipeline_from_config(
     return Pipeline(
         rule_engine=rule_engine,
         order_splitter=OrderSplitter(sku_group_map=config.rules.sku_group_map),
-        file_generator=CsvFileGenerator(output_dir=config.output.order_file_dir),
+        file_generator=ExcelFileGenerator(output_dir=config.output.order_file_dir),
         message_sender=build_message_sender_from_config(config, env=env),
         kingdee_service=KingdeeService(
             transport=kingdee_transport
@@ -972,14 +976,14 @@ def _enrich_exception_orders(
 
 
 # === MODIFIED START ===
-# 原因：异常订单需要按厂家生成 error CSV 文件。
+# 原因：异常订单需要按厂家生成 error Excel 文件。
 # 影响范围：/outputs/order_files/error/ 目录。
 def _generate_error_files(
     exception_orders: tuple[ExceptionOrder, ...],
     output_dir: str | Path,
     clock: Callable[[], datetime] | None = None,
 ) -> None:
-    """Groups exception orders by group_name and generates one error CSV per group."""
+    """Groups exception orders by group_name and generates one error Excel per group."""
     if not exception_orders:
         return
 
@@ -988,7 +992,7 @@ def _generate_error_files(
         key = order.group_name or "unknown"
         grouped.setdefault(key, []).append(order)
 
-    generator = CsvFileGenerator(output_dir=output_dir, clock=clock)
+    generator = ExcelFileGenerator(output_dir=output_dir, clock=clock)
     for group_name, orders in sorted(grouped.items()):
         try:
             generated = generator.generate_error(

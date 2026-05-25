@@ -225,6 +225,11 @@ def _extract_message_id(payload: dict[str, Any]) -> str:
 
 
 ContentBuilder = Callable[[MessagePayload], str]
+# === MODIFIED START ===
+# 原因：推送/上传文件统一改为 Excel，消息内容没有 file_path 时也应使用 xlsx 兜底名。
+# 影响范围：祺信文本链接、上传链接、文件直推默认文件名。
+DEFAULT_ORDER_FILE_NAME = "orders.xlsx"
+# === MODIFIED END ===
 
 
 def build_download_url(base_url: str, filename: str, secret_key: str) -> str:
@@ -242,7 +247,7 @@ def make_link_content_builder(base_url: str, secret_key: str) -> ContentBuilder:
     """Returns a content builder that embeds a signed download link."""
 
     def _build(payload: MessagePayload) -> str:
-        file_name = payload.file_path.name if payload.file_path else "orders.csv"
+        file_name = payload.file_path.name if payload.file_path else DEFAULT_ORDER_FILE_NAME
         url = build_download_url(base_url, file_name, secret_key)
         return f"订单文件已生成：{file_name}\n下载链接：{url}\n请及时处理。"
 
@@ -253,7 +258,7 @@ def make_upload_content_builder() -> ContentBuilder:
     """Returns a content builder that uses a pre-uploaded file URL."""
 
     def _build(payload: MessagePayload) -> str:
-        file_name = payload.file_path.name if payload.file_path else "orders.csv"
+        file_name = payload.file_path.name if payload.file_path else DEFAULT_ORDER_FILE_NAME
         url = payload.file_url or ""
         return f"订单文件已生成：{file_name}\n下载链接：{url}\n请及时处理。"
 
@@ -261,7 +266,7 @@ def make_upload_content_builder() -> ContentBuilder:
 
 
 def _default_content(payload: MessagePayload) -> str:
-    file_name = payload.file_path.name if payload.file_path else "orders.csv"
+    file_name = payload.file_path.name if payload.file_path else DEFAULT_ORDER_FILE_NAME
     return f"订单文件已生成：{file_name}\n请及时处理。"
 
 
@@ -319,7 +324,7 @@ class QixinSender:
                 "file push mode requires a file_url on MessagePayload; "
                 "set download.base_url and DOWNLOAD_SECRET_KEY in config"
             )
-        file_name = payload.file_path.name if payload.file_path else "orders.csv"
+        file_name = payload.file_path.name if payload.file_path else DEFAULT_ORDER_FILE_NAME
         return self.client.send_file_to_group(
             group_name=payload.group_name,
             file_url=payload.file_url,

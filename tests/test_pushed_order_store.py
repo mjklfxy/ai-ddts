@@ -111,7 +111,7 @@ def make_delivery(order_no: str = "SO-001") -> PipelineBatchDelivery:
         ),
         generated_file=GeneratedFile(
             group_name="GROUP-A",
-            file_path=Path("tmp") / "GROUP-A.csv",
+            file_path=Path("tmp") / "GROUP-A.xlsx",
             row_count=1,
         ),
         message_result=MessageSendResult(

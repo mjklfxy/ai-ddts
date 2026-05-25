@@ -3,7 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from application.file_generator import CsvFileGenerator, GeneratedFile
+# === MODIFIED START ===
+# 原因：推送/上传订单文件统一改为 Excel。
+# 影响范围：Pipeline 文件生成器依赖类型。
+from application.file_generator import ExcelFileGenerator, GeneratedFile
+# === MODIFIED END ===
 from application.order_splitter import GroupOrderBatch, OrderLineForSplit, OrderSplitter
 from application.task_service import TaskContext
 from domain.enums.rule import RuleDecision
@@ -137,7 +141,7 @@ class Pipeline:
         self,
         rule_engine: RuleEngine,
         order_splitter: OrderSplitter,
-        file_generator: CsvFileGenerator,
+        file_generator: ExcelFileGenerator,
         message_sender: MessageSender,
         kingdee_service: KingdeeService,
         # === MODIFIED START ===

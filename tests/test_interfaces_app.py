@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import json
 import os
 from datetime import datetime
@@ -115,6 +117,30 @@ class InterfacesAppTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok"})
+
+    def test_order_file_download_allows_xlsx(self) -> None:
+        order_file_dir = Path("tmp") / "test_interfaces_app" / "order_files"
+        order_file_dir.mkdir(parents=True, exist_ok=True)
+        file_name = "GROUP-A_20260430110000.xlsx"
+        (order_file_dir / file_name).write_bytes(b"xlsx-bytes")
+        secret = "download-secret"
+        sig = hmac.HMAC(
+            secret.encode("utf-8"),
+            file_name.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+
+        with patch.dict(os.environ, {"DOWNLOAD_SECRET_KEY": secret}, clear=False):
+            response = self.client.get(
+                f"/order-files/download?filename={file_name}&sig={sig}"
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            response.headers["content-type"],
+        )
+        self.assertEqual(response.content, b"xlsx-bytes")
 
     # === MODIFIED START ===
     # 原因：后台管理入口需要在给定管理员密码后启用登录验证，避免未授权触发真实推送。

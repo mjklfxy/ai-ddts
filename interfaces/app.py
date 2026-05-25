@@ -18,6 +18,12 @@ from fastapi.staticfiles import StaticFiles
 from application.api_service import ApiService
 from application.config_service import ConfigService
 
+# === MODIFIED START ===
+# 原因：推送/上传订单文件统一改为 Excel，下载接口需要返回 Excel MIME。
+# 影响范围：/order-files/download。
+EXCEL_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+# === MODIFIED END ===
+
 
 # === MODIFIED START ===
 # 原因：后台管理入口需要可选登录验证，避免配置和任务触发接口暴露在无认证环境。
@@ -284,8 +290,12 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
         if not hmac.compare_digest(expected_sig, sig):
             raise HTTPException(status_code=403, detail="Invalid signature")
 
-        if not filename.endswith(".csv") or "/" in filename or "\\" in filename or ".." in filename:
+        # === MODIFIED START ===
+        # 原因：推送/上传文件统一改为 xlsx，下载入口只允许 Excel 订单文件。
+        # 影响范围：/order-files/download 文件名校验。
+        if not filename.endswith(".xlsx") or "/" in filename or "\\" in filename or ".." in filename:
             raise HTTPException(status_code=400, detail="Invalid filename")
+        # === MODIFIED END ===
 
         file_path = (_order_file_dir / filename).resolve()
         try:
@@ -296,7 +306,11 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
         if not file_path.is_file():
             raise HTTPException(status_code=404, detail="File not found")
 
-        return FileResponse(path=file_path, media_type="text/csv", filename=filename)
+        # === MODIFIED START ===
+        # 原因：推送/上传文件统一改为 Excel，下载响应需要匹配文件类型。
+        # 影响范围：/order-files/download 响应头。
+        return FileResponse(path=file_path, media_type=EXCEL_MEDIA_TYPE, filename=filename)
+        # === MODIFIED END ===
 
     @app.get("/config", tags=["config"])
     def get_config() -> dict[str, object]:

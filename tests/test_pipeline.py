@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from unittest import TestCase
 
-from application.file_generator import CsvFileGenerator
+from application.file_generator import ExcelFileGenerator
 from application.order_splitter import OrderSplitter
 from application.pipeline import Pipeline, PipelineBatchDelivery, PipelineOrder
 from application.task_service import TaskService
@@ -455,7 +455,7 @@ def build_pipeline(log_info, message_sender, kingdee_service, kingdee_enabled: b
             log_info=log_info,
         ),
         order_splitter=OrderSplitter(sku_group_map=sku_group_map),
-        file_generator=CsvFileGenerator(
+        file_generator=ExcelFileGenerator(
             output_dir=Path("tmp") / "test_pipeline",
             clock=lambda: datetime(2026, 4, 30, 12, 0, 0),
         ),

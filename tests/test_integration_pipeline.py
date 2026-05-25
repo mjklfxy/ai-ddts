@@ -1,11 +1,12 @@
-import csv
 import json
 import logging
 from datetime import datetime
 from pathlib import Path
 from unittest import TestCase
 
-from application.file_generator import CsvFileGenerator
+import openpyxl
+
+from application.file_generator import ExcelFileGenerator
 from application.order_splitter import OrderSplitter
 from application.pipeline import Pipeline, PipelineBatchDelivery, PipelineOrder
 from application.task_service import TaskService
@@ -95,7 +96,7 @@ class PipelineIntegrationTests(TestCase):
                     log_info=log_info,
                 ),
                 order_splitter=OrderSplitter(sku_group_map=sku_group_map),
-                file_generator=CsvFileGenerator(
+                file_generator=ExcelFileGenerator(
                     output_dir=output_dir,
                     clock=lambda: datetime(2026, 4, 30, 12, 0, 0),
                 ),
@@ -195,7 +196,8 @@ class PipelineIntegrationTests(TestCase):
         self.assertEqual(len(kingdee_service.submissions), 1)
         self.assertEqual(send_attempts, ["GROUP-A", "GROUP-A"])
 
-        rows = read_csv(result.deliveries[0].generated_file.file_path)
+        self.assertEqual(result.deliveries[0].generated_file.file_path.suffix, ".xlsx")
+        rows = read_xlsx(result.deliveries[0].generated_file.file_path)
         self.assertEqual(rows[1][0], "SO-PASS")
         self.assertEqual(rows[1][2], "Goods SKU-PASS")
 
@@ -241,11 +243,14 @@ def flaky_sender(group_name: str, send_attempts: list[str]) -> str:
     return f"MSG-{group_name}"
 
 
-def read_csv(file_path: Path) -> list[list[str]]:
-    """Reads a generated CSV file."""
+def read_xlsx(file_path: Path) -> list[list[object]]:
+    """Reads a generated Excel workbook."""
 
-    with file_path.open(newline="", encoding="utf-8-sig") as file:
-        return list(csv.reader(file))
+    wb = openpyxl.load_workbook(file_path, data_only=True)
+    ws = wb.active
+    rows = [list(row) for row in ws.iter_rows(values_only=True)]
+    wb.close()
+    return rows
 
 
 def attach_log_handler() -> RecordingLogHandler:

@@ -1,7 +1,13 @@
 import json
+from pathlib import Path
 from unittest import TestCase
 
-from infrastructure.qixin_client import QixinClient
+from infrastructure.message_adapter import MessagePayload
+from infrastructure.qixin_client import (
+    QixinClient,
+    make_link_content_builder,
+    make_upload_content_builder,
+)
 
 
 class FakeQixinResponse:
@@ -49,8 +55,8 @@ class QixinClientTests(TestCase):
 
         message_id = client.send_file_to_group(
             group_name="12121",
-            file_url="https://example.com/orders.csv",
-            file_name="orders.csv",
+            file_url="https://example.com/orders.xlsx",
+            file_name="orders.xlsx",
             user_id="15176152071",
         )
 
@@ -65,10 +71,43 @@ class QixinClientTests(TestCase):
             {
                 "userId": "15176152071",
                 "groupName": "12121",
-                "fileUrl": "https://example.com/orders.csv",
-                "fileName": "orders.csv",
+                "fileUrl": "https://example.com/orders.xlsx",
+                "fileName": "orders.xlsx",
             },
         )
         self.assertEqual(captured["headers"]["Callerid"], "10002")
         self.assertIn("Sign", captured["headers"])
+
+    def test_content_builders_default_to_xlsx_file_name(self) -> None:
+        payload = MessagePayload(
+            trace_id="TRACE-001",
+            group_name="12121",
+            owner_mobile="",
+            user_id="",
+            file_path=None,
+            file_url="https://example.com/orders.xlsx",
+        )
+
+        link_content = make_link_content_builder(
+            base_url="https://download.example.test",
+            secret_key="secret",
+        )(payload)
+        upload_content = make_upload_content_builder()(payload)
+
+        self.assertIn("orders.xlsx", link_content)
+        self.assertIn("orders.xlsx", upload_content)
+
+    def test_content_builders_keep_xlsx_payload_file_name(self) -> None:
+        payload = MessagePayload(
+            trace_id="TRACE-001",
+            group_name="12121",
+            owner_mobile="",
+            user_id="",
+            file_path=Path("outputs/order_files/GROUP-A_20260430110000.xlsx"),
+            file_url="https://example.com/GROUP-A_20260430110000.xlsx",
+        )
+
+        content = make_upload_content_builder()(payload)
+
+        self.assertIn("GROUP-A_20260430110000.xlsx", content)
     # === MODIFIED END ===
