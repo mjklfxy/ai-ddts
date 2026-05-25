@@ -294,6 +294,7 @@ def _export_steps(
                     _format_ui_datetime(start_time),
                     1,
                 ),
+                ("confirm_order_time_start", "press", "enter", 2),
                 ("focus_order_time_end", "click", (82, 520), 1),
                 (
                     "replace_order_time_end",
@@ -301,6 +302,7 @@ def _export_steps(
                     _format_ui_datetime(end_time),
                     1,
                 ),
+                ("confirm_order_time_end", "press", "enter", 2),
             ]
         )
     steps.extend(

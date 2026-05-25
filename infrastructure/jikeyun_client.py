@@ -124,7 +124,7 @@ class JikeyunHttpTransport:
             except urllib.error.URLError as exc:
                 last_exc = exc
                 if attempt < self.max_retries:
-                    time.sleep(self.retry_delay_seconds * attempt)
+                    sleep(self.retry_delay_seconds * attempt)
                     continue
         raise ValueError(
             f"JackYun request failed after {self.max_retries} retries: {last_exc.__class__.__name__}"

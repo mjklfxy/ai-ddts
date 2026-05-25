@@ -17,6 +17,13 @@
       "enabled": true,
       "run_at": "17:00",
       "check_interval_seconds": 60
+    },
+    {
+      "schedule_id": "schedule-2",
+      "name": "定时任务2",
+      "enabled": true,
+      "run_at": "09:20",
+      "check_interval_seconds": 60
     }
   ],
   "source": {
@@ -8013,6 +8020,7 @@
     ],
     "sku_group_map_enabled": true,
     "sku_group_map": {
+
       "蜂王浆冻干粉/天合人康恒亮牌蜂王浆冻干粉": {
         "group_name": "12121",
         "owner_mobile": "15176152071",

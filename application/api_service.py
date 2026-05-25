@@ -593,6 +593,12 @@ class ApiService:
     def _run_configured_task(self, schedule_config=None):
         """Runs one configured task without recording the summary."""
 
+        scheduled_last_run_at = None
+        if schedule_config:
+            state = self.scheduler_state_store.load()
+            if state.last_run_date and state.last_run_at:
+                scheduled_last_run_at = f"{state.last_run_date}T{state.last_run_at}:00"
+
         return run_once(
             config_path=self.config_path,
             supplier_mapping_path=self.supplier_mapping_path,
@@ -613,6 +619,11 @@ class ApiService:
             execution_log_path=self.execution_log_store.history_path,
             # === MODIFIED END ===
             scheduled_run_at=schedule_config.run_at if schedule_config else None,
+            # === MODIFIED START ===
+            # 原因：多定时任务需要以上次 run_at 作为窗口起点，避免拉单重复。
+            # 影响范围：Scheduler 触发的 run_once 动态窗口。
+            scheduled_last_run_at=scheduled_last_run_at,
+            # === MODIFIED END ===
         )
 
     def _scheduler_loop_interval_seconds(self) -> int:

@@ -138,6 +138,11 @@ def run_once(
     clock: Callable[[], datetime] | None = None,
     scheduled_run_at: str | None = None,
     # === MODIFIED END ===
+    # === MODIFIED START ===
+    # 原因：多定时任务需要以上次任务的 run_at 作为本次窗口起点，避免重复拉单。
+    # 影响范围：Scheduler 触发的 run_once 窗口计算。
+    scheduled_last_run_at: str | None = None,
+    # === MODIFIED END ===
 ) -> RunSummary:
     """Runs one configured task with configured rules."""
 
@@ -159,7 +164,10 @@ def run_once(
     window_end = now
     if scheduled_run_at is not None:
         window_end = _scheduled_window_end(now, scheduled_run_at)
-        window_start = window_end - timedelta(days=1)
+        if scheduled_last_run_at is not None:
+            window_start = datetime.fromisoformat(scheduled_last_run_at)
+        else:
+            window_start = window_end - timedelta(days=1)
     task_context = TaskService(
         trace_id_generator=task_trace_id_generator,
         clock=task_clock,

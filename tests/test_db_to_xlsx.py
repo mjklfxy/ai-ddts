@@ -200,13 +200,28 @@ class DbToXlsxTests(TestCase):
             step_by_name["replace_order_time_start"][2],
             "2026-05-21 09:30:00",
         )
+        self.assertEqual(step_by_name["confirm_order_time_start"][1], "press")
+        self.assertEqual(step_by_name["confirm_order_time_start"][2], "enter")
+        self.assertEqual(step_by_name["confirm_order_time_start"][3], 2)
         self.assertEqual(step_by_name["focus_order_time_end"][2], (82, 520))
         self.assertEqual(
             step_by_name["replace_order_time_end"][2],
             "2026-05-22 09:30:00",
         )
+        self.assertEqual(step_by_name["confirm_order_time_end"][1], "press")
+        self.assertEqual(step_by_name["confirm_order_time_end"][2], "enter")
+        self.assertEqual(step_by_name["confirm_order_time_end"][3], 2)
         self.assertEqual(step_by_name["apply_left_filters"][2], (68, 933))
         self.assertEqual(step_by_name["apply_left_filters"][3], 9)
+        step_names = [step[0] for step in steps]
+        self.assertLess(
+            step_names.index("confirm_order_time_start"),
+            step_names.index("focus_order_time_end"),
+        )
+        self.assertLess(
+            step_names.index("confirm_order_time_end"),
+            step_names.index("apply_left_filters"),
+        )
 
     def test_confirm_overwrite_only_clicks_when_dialog_exists(self) -> None:
         calls: list[tuple[str, object]] = []
