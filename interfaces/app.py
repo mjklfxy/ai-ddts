@@ -347,6 +347,16 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
         content = await file.read()
         return service.upload_sku_group_xlsx(content, file.filename or "upload.xlsx")
 
+    # === MODIFIED START ===
+    # 原因：规则配置页需要手动触发 SKU 群推送人配置同步，router 只负责委托应用服务。
+    # 影响范围：规则配置页同步按钮。
+    @app.post("/config/sku-groups/sync-caller-configs", tags=["config"])
+    def sync_sku_group_caller_configs() -> dict[str, object]:
+        """Synchronizes SKU group caller configs to push-center."""
+
+        return service.sync_sku_group_caller_configs()
+    # === MODIFIED END ===
+
     @app.post("/config/excluded-skus/upload-xlsx", tags=["config"])
     async def upload_excluded_sku_xlsx(file: UploadFile = File(...)) -> dict[str, object]:
         """Uploads an xlsx file, parses SKUs, and merges into excluded_skus."""

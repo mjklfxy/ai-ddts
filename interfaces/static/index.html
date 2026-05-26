@@ -279,7 +279,14 @@
                 原因：规则配置中心保存按钮文案按产品要求简化为“保存”。
                 影响范围：规则配置中心按钮展示文案。
                 === MODIFIED END === -->
-                <button class="primary-button" type="button" id="saveRulesButton">保存</button>
+                <!-- === MODIFIED START ===
+                原因：规则配置页需要在保存按钮左侧提供手动同步 SKU 群推送人配置入口。
+                影响范围：规则配置页顶部操作区。
+                === MODIFIED END === -->
+                <div class="panel-actions">
+                  <button class="ghost-button" type="button" id="syncSkuGroupCallerConfigsButton">同步推送配置</button>
+                  <button class="primary-button" type="button" id="saveRulesButton">保存</button>
+                </div>
               </div>
               <div class="rule-editor rule-config-scroll">
                 <!-- === MODIFIED START ===

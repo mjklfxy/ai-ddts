@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import json
 import os
+import time
 from datetime import datetime
 from pathlib import Path
 from unittest import TestCase
@@ -675,6 +676,185 @@ class InterfacesAppTests(TestCase):
         )
     # === MODIFIED END ===
 
+    # === MODIFIED START ===
+    # 原因：SKU 群配置同步 URL 为空时必须可观测地跳过，不能静默失败或误请求远端。
+    # 影响范围：/config/sku-groups/sync-caller-configs 与执行日志。
+    def test_sync_sku_group_caller_configs_skips_when_url_missing(self) -> None:
+        response = self.client.post("/config/sku-groups/sync-caller-configs")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["status"], "skipped")
+        self.assertEqual(payload["reason"], "product_caller_sync.api_url is empty")
+        logs = json.loads(self.execution_log_path.read_text(encoding="utf-8"))
+        self.assertEqual(logs[-1]["result"], "跳过")
+        self.assertIn("SKU群推送配置同步跳过", logs[-1]["summary"])
+
+    # 原因：前端按钮触发的同步接口需要解析手机号、POST 远端，并把远端返回体写回响应和执行日志。
+    # 影响范围：/config/sku-groups/sync-caller-configs。
+    def test_sync_sku_group_caller_configs_posts_payload_and_logs_result(self) -> None:
+        data = json.loads(self.config_path.read_text(encoding="utf-8"))
+        data["product_caller_sync"] = {
+            "api_url": "https://push-center.example.test/sync",
+            "timeout_seconds": 7,
+        }
+        data["rules"]["sku_group_map"] = {
+            "三只松鼠核桃": {
+                "group_name": "三只松鼠对接群",
+                "owner_mobile": "15176152071",
+                "user_id": "",
+            },
+            "雪中飞衣服": {
+                "group_name": "雪中飞产品对接群",
+                "owner_mobile": "15176152072",
+                "user_id": "",
+            },
+        }
+        self.config_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        captured: dict[str, object] = {}
+
+        def fake_userid_urlopen(request, timeout):
+            body = json.loads(request.data.decode("utf-8"))
+            return _JsonResponse({"userid": f"owner{body['mobile'][-3:]}"})
+
+        def fake_sync_urlopen(request, timeout):
+            captured["url"] = request.full_url
+            captured["timeout"] = timeout
+            captured["body"] = json.loads(request.data.decode("utf-8"))
+            return _JsonResponse(
+                {
+                    "code": 200,
+                    "data_id": captured["body"]["data_id"],
+                    "synced": 2,
+                    "created": 2,
+                    "updated": 0,
+                    "skipped": 0,
+                }
+            )
+
+        client = TestClient(
+            create_app(
+                ApiService(
+                    config_path=self.config_path,
+                    task_store_path=self.task_store_path,
+                    supplier_mapping_path=self.supplier_mapping_path,
+                    exception_order_path=self.exception_order_path,
+                    pushed_order_path=self.pushed_order_path,
+                    execution_log_path=self.execution_log_path,
+                    userid_urlopen=fake_userid_urlopen,
+                    product_caller_sync_urlopen=fake_sync_urlopen,
+                )
+            )
+        )
+
+        response = client.post("/config/sku-groups/sync-caller-configs")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["remote_response"]["synced"], 2)
+        self.assertEqual(captured["url"], "https://push-center.example.test/sync")
+        self.assertEqual(captured["timeout"], 7)
+        self.assertEqual(captured["body"]["count"], 2)
+        self.assertEqual(
+            captured["body"]["data"],
+            [
+                {
+                    "goods_name": "三只松鼠核桃",
+                    "group_name": "三只松鼠对接群",
+                    "user_id": "owner071",
+                },
+                {
+                    "goods_name": "雪中飞衣服",
+                    "group_name": "雪中飞产品对接群",
+                    "user_id": "owner072",
+                },
+            ],
+        )
+        logs = json.loads(self.execution_log_path.read_text(encoding="utf-8"))
+        self.assertEqual(logs[-1]["result"], "成功")
+        self.assertEqual(logs[-1]["details"]["remote_response"]["synced"], 2)
+
+    # 原因：SKU 群 Excel 上传保存后要异步触发同一套推送人配置同步。
+    # 影响范围：/config/sku-groups/upload-xlsx。
+    def test_upload_sku_group_xlsx_triggers_caller_config_sync(self) -> None:
+        data = json.loads(self.config_path.read_text(encoding="utf-8"))
+        data["product_caller_sync"] = {
+            "api_url": "https://push-center.example.test/sync",
+            "timeout_seconds": 7,
+        }
+        self.config_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        captured: dict[str, object] = {}
+
+        def fake_userid_urlopen(request, timeout):
+            body = json.loads(request.data.decode("utf-8"))
+            return _JsonResponse({"userid": f"owner{body['mobile'][-3:]}"})
+
+        def fake_sync_urlopen(request, timeout):
+            captured["body"] = json.loads(request.data.decode("utf-8"))
+            return _JsonResponse(
+                {
+                    "code": 200,
+                    "data_id": captured["body"]["data_id"],
+                    "synced": 1,
+                    "created": 1,
+                    "updated": 0,
+                    "skipped": 0,
+                }
+            )
+
+        client = TestClient(
+            create_app(
+                ApiService(
+                    config_path=self.config_path,
+                    task_store_path=self.task_store_path,
+                    supplier_mapping_path=self.supplier_mapping_path,
+                    exception_order_path=self.exception_order_path,
+                    pushed_order_path=self.pushed_order_path,
+                    execution_log_path=self.execution_log_path,
+                    userid_urlopen=fake_userid_urlopen,
+                    product_caller_sync_urlopen=fake_sync_urlopen,
+                )
+            )
+        )
+
+        with patch(
+            "application.api_service.load_sku_groups_from_bytes",
+            return_value=[
+                {
+                    "sku_code": "三只松鼠核桃",
+                    "group_name": "三只松鼠对接群",
+                    "owner_mobile": "15176152071",
+                }
+            ],
+        ):
+            response = client.post(
+                "/config/sku-groups/upload-xlsx",
+                files={
+                    "file": (
+                        "sku-groups.xlsx",
+                        b"placeholder",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    )
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        deadline = time.time() + 2
+        while "body" not in captured and time.time() < deadline:
+            time.sleep(0.01)
+        self.assertEqual(
+            captured["body"]["data"],
+            [
+                {
+                    "goods_name": "三只松鼠核桃",
+                    "group_name": "三只松鼠对接群",
+                    "user_id": "owner071",
+                }
+            ],
+        )
+    # === MODIFIED END ===
+
     def test_update_rule_config_rejects_unknown_key(self) -> None:
         response = self.client.put("/config/rules", json={"unknown": []})
 
@@ -1093,4 +1273,21 @@ def write_supplier_mappings() -> Path:
         encoding="utf-8",
     )
     return mapping_path
+# === MODIFIED END ===
+
+
+# === MODIFIED START ===
+# 原因：SKU 群推送人配置同步测试需要替代 urllib 响应，避免访问真实外部接口。
+# 影响范围：接口层同步测试。
+class _JsonResponse:
+    """Minimal urllib response double returning a JSON payload."""
+
+    def __init__(self, payload: dict[str, object]) -> None:
+        self.payload = payload
+
+    def read(self) -> bytes:
+        return json.dumps(self.payload, ensure_ascii=False).encode("utf-8")
+
+    def close(self) -> None:
+        return None
 # === MODIFIED END ===

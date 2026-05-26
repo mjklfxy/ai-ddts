@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 import json
+import threading
+from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # === MODIFIED START ===
 # 原因：复用配置服务的统一序列化，避免 API 返回结构和落盘结构分叉。
 # 影响范围：接口配置读取与更新返回。
 from application.config_service import AppConfig, ConfigService, to_dict
 # === MODIFIED END ===
+from domain.enums.execution_log import ExecutionLogResult, ExecutionLogStage
 from domain.rules.region_rule import RestrictedRegion
 # === MODIFIED START ===
 # 原因：API 需要提供可视化执行日志查询和下载能力。
 # 影响范围：执行日志接口服务。
-from application.execution_log_store import ExecutionLogStore, execution_logs_to_payload
+from application.execution_log_store import ExecutionLogRecord, ExecutionLogStore, execution_logs_to_payload
 # === MODIFIED END ===
 # === MODIFIED START ===
 # 原因：异常订单需要从 API 查询和下载。
@@ -50,6 +55,11 @@ from application.supplier_mapping_store import (
 from application.task_run_store import TaskRunStore, run_summary_to_dict
 # === MODIFIED END ===
 from infrastructure.cloud_warehouse_client import CloudWarehouseClient
+from infrastructure.product_caller_sync_client import (
+    ProductCallerConfigSyncClient,
+    ProductCallerConfigSyncError,
+)
+from infrastructure.qixin_client import RemoteUserResolver, RemoteUserResolverError
 from infrastructure.xlsx_region_parser import load_restricted_regions_from_bytes
 from infrastructure.xlsx_sku_group_parser import load_sku_groups_from_bytes
 from infrastructure.xlsx_sku_parser import load_skus_from_bytes
@@ -100,6 +110,12 @@ class ApiService:
         # 影响范围：执行日志查询、下载和任务运行。
         execution_log_path: str | Path = Path("outputs") / "execution_logs.json",
         execution_log_export_dir: str | Path = Path("outputs") / "execution_log_exports",
+        # === MODIFIED END ===
+        # === MODIFIED START ===
+        # 原因：SKU 群推送人配置同步需要在测试中替换外部 HTTP 调用，生产默认使用 urllib。
+        # 影响范围：ApiService 同步逻辑依赖注入。
+        userid_urlopen: Callable[..., Any] | None = None,
+        product_caller_sync_urlopen: Callable[..., Any] | None = None,
         # === MODIFIED END ===
     ) -> None:
         self.config_path = Path(config_path)
@@ -156,6 +172,12 @@ class ApiService:
             export_dir=execution_log_export_dir,
         )
         # === MODIFIED END ===
+        # === MODIFIED START ===
+        # 原因：保存外部 HTTP 调用注入点，避免 SKU 群同步测试访问真实接口。
+        # 影响范围：ApiService._sync_sku_group_caller_configs。
+        self.userid_urlopen = userid_urlopen
+        self.product_caller_sync_urlopen = product_caller_sync_urlopen
+        # === MODIFIED END ===
     # === MODIFIED END ===
 
     def get_config(self) -> dict[str, object]:
@@ -178,6 +200,25 @@ class ApiService:
 
         config = ConfigService().update_rules(self.config_path, payload)
         return serialize_config(config)
+
+    # === MODIFIED START ===
+    # 原因：前端需要主动触发商品推送人配置同步，router 只能委托应用服务。
+    # 影响范围：/config/sku-groups/sync-caller-configs。
+    def sync_sku_group_caller_configs(self) -> dict[str, object]:
+        """Synchronizes current SKU group caller configs to push-center."""
+
+        config = ConfigService().load(self.config_path)
+        items = [
+            {
+                "sku_code": sku_code,
+                "group_name": info.group_name,
+                "owner_mobile": info.owner_mobile,
+                "user_id": info.user_id,
+            }
+            for sku_code, info in config.rules.sku_group_map.items()
+        ]
+        return self._sync_sku_group_caller_configs(items=items, trigger="manual")
+    # === MODIFIED END ===
 
     def upload_region_xlsx(self, file_bytes: bytes, filename: str) -> dict[str, object]:
         """Parses an xlsx file, merges restricted regions into config (overwrite by key)."""
@@ -293,6 +334,11 @@ class ApiService:
             for sku, info in existing.items()
         }
         config_service.save(self.config_path, config_service.from_dict(data))
+        # === MODIFIED START ===
+        # 原因：SKU 群配置导入后需要异步同步商品推送人配置，避免阻塞上传解析响应。
+        # 影响范围：SKU 群 Excel 上传后的后台同步。
+        self._sync_sku_group_caller_configs_async(parsed, trigger="upload")
+        # === MODIFIED END ===
         return {
             "count": len(parsed),
             "before": before,
@@ -332,6 +378,210 @@ class ApiService:
             "modified": len(parsed) - added,
             "total": len(merged),
         }
+
+    # === MODIFIED START ===
+    # 原因：SKU 群配置上传后需要后台同步商品推送人配置，按钮触发需要同步返回远端结果。
+    # 影响范围：SKU 群配置上传、手动同步按钮、执行日志。
+    def _sync_sku_group_caller_configs_async(
+        self,
+        items: list[dict[str, str]] | tuple[dict[str, str], ...],
+        trigger: str,
+    ) -> None:
+        """Runs product caller config sync in a daemon thread."""
+
+        safe_items = tuple(dict(item) for item in items)
+        thread = threading.Thread(
+            target=self._sync_sku_group_caller_configs,
+            kwargs={"items": safe_items, "trigger": trigger},
+            daemon=True,
+        )
+        thread.start()
+
+    def _sync_sku_group_caller_configs(
+        self,
+        items: list[dict[str, str]] | tuple[dict[str, str], ...],
+        trigger: str,
+    ) -> dict[str, object]:
+        """Builds product caller config rows, posts them, and records logs."""
+
+        data_id = int(datetime.now().strftime("%y%m%d%H%M"))
+        trace_id = f"sku-group-caller-sync-{data_id}"
+        try:
+            config = ConfigService().load(self.config_path)
+            if not config.product_caller_sync.api_url:
+                return self._record_sku_group_caller_sync_result(
+                    trace_id=trace_id,
+                    data_id=data_id,
+                    trigger=trigger,
+                    status="skipped",
+                    result=ExecutionLogResult.SKIPPED,
+                    summary="SKU群推送配置同步跳过",
+                    reason="product_caller_sync.api_url is empty",
+                    count=0,
+                )
+
+            sync_data, resolve_failed_count = self._build_sku_group_caller_sync_data(
+                config=config,
+                items=items,
+            )
+            if not sync_data:
+                return self._record_sku_group_caller_sync_result(
+                    trace_id=trace_id,
+                    data_id=data_id,
+                    trigger=trigger,
+                    status="skipped",
+                    result=ExecutionLogResult.SKIPPED,
+                    summary="SKU群推送配置同步跳过",
+                    reason="no resolved user_id",
+                    count=0,
+                    details={"resolve_failed_count": resolve_failed_count},
+                )
+
+            client = ProductCallerConfigSyncClient(
+                api_url=config.product_caller_sync.api_url,
+                timeout_seconds=config.product_caller_sync.timeout_seconds,
+                urlopen=self.product_caller_sync_urlopen,
+            )
+            remote_response = client.sync(data_id=data_id, data=sync_data)
+            return self._record_sku_group_caller_sync_result(
+                trace_id=trace_id,
+                data_id=data_id,
+                trigger=trigger,
+                status="success",
+                result=ExecutionLogResult.SUCCESS,
+                summary="SKU群推送配置同步完成",
+                reason="",
+                count=len(sync_data),
+                details={
+                    "remote_response": remote_response,
+                    "resolve_failed_count": resolve_failed_count,
+                },
+            )
+        except (ProductCallerConfigSyncError, RemoteUserResolverError, ValueError) as exc:
+            return self._record_sku_group_caller_sync_result(
+                trace_id=trace_id,
+                data_id=data_id,
+                trigger=trigger,
+                status="failed",
+                result=ExecutionLogResult.FAILED,
+                summary="SKU群推送配置同步失败",
+                reason=f"{exc.__class__.__name__}: {exc}",
+                count=0,
+            )
+        except Exception as exc:
+            return self._record_sku_group_caller_sync_result(
+                trace_id=trace_id,
+                data_id=data_id,
+                trigger=trigger,
+                status="failed",
+                result=ExecutionLogResult.FAILED,
+                summary="SKU群推送配置同步失败",
+                reason=f"{exc.__class__.__name__}: {exc}",
+                count=0,
+            )
+
+    def _build_sku_group_caller_sync_data(
+        self,
+        config: AppConfig,
+        items: list[dict[str, str]] | tuple[dict[str, str], ...],
+    ) -> tuple[list[dict[str, str]], int]:
+        """Resolves user ids and builds push-center sync rows."""
+
+        resolver = RemoteUserResolver(
+            api_url=config.qixin.userid_api_url,
+            timeout_seconds=config.qixin.timeout_seconds,
+            urlopen=self.userid_urlopen,
+        )
+        cache: dict[str, str] = {}
+        sync_data: list[dict[str, str]] = []
+        resolve_failed_count = 0
+        for item in items:
+            goods_name = str(item.get("sku_code", "")).strip()
+            group_name = str(item.get("group_name", "")).strip()
+            owner_mobile = str(item.get("owner_mobile", "")).strip()
+            user_id = ""
+            if owner_mobile:
+                if owner_mobile not in cache:
+                    try:
+                        cache[owner_mobile] = resolver.get_userid_by_mobile(owner_mobile)
+                    except (RemoteUserResolverError, ValueError):
+                        cache[owner_mobile] = ""
+                        resolve_failed_count += 1
+                user_id = cache[owner_mobile]
+            if not user_id:
+                user_id = str(item.get("user_id", "")).strip()
+            if goods_name and group_name and user_id:
+                sync_data.append(
+                    {
+                        "goods_name": goods_name,
+                        "group_name": group_name,
+                        "user_id": user_id,
+                    }
+                )
+        return sync_data, resolve_failed_count
+
+    def _record_sku_group_caller_sync_result(
+        self,
+        trace_id: str,
+        data_id: int,
+        trigger: str,
+        status: str,
+        result: ExecutionLogResult,
+        summary: str,
+        reason: str,
+        count: int,
+        details: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        """Writes console and execution-log records for SKU group caller sync."""
+
+        payload: dict[str, object] = {
+            "trace_id": trace_id,
+            "data_id": data_id,
+            "trigger": trigger,
+            "status": status,
+            "count": count,
+        }
+        if reason:
+            payload["reason"] = reason
+        if details:
+            payload.update(details)
+        if result is ExecutionLogResult.FAILED:
+            log_error("sku_group_caller_sync_failed", payload)
+        elif result is ExecutionLogResult.SKIPPED:
+            log_info("sku_group_caller_sync_skipped", payload)
+        else:
+            log_info("sku_group_caller_sync_done", payload)
+
+        self.execution_log_store.append(
+            ExecutionLogRecord(
+                created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                trace_id=trace_id,
+                task_name="SKU群推送配置同步",
+                stage=ExecutionLogStage.MESSAGE,
+                result=result,
+                summary=summary,
+                impact=f"同步配置 {count} 条",
+                suggestion="" if result is ExecutionLogResult.SUCCESS else reason,
+                details={
+                    "data_id": data_id,
+                    "trigger": trigger,
+                    "status": status,
+                    "count": count,
+                    **(details or {}),
+                },
+            )
+        )
+        response: dict[str, object] = {
+            "status": status,
+            "data_id": data_id,
+            "count": count,
+        }
+        if reason:
+            response["reason"] = reason
+        if details:
+            response.update(details)
+        return response
+    # === MODIFIED END ===
     # === MODIFIED END ===
 
     # === MODIFIED START ===

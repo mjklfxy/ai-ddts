@@ -62,6 +62,11 @@ function bindEvents() {
   // === MODIFIED END ===
   document.getElementById("saveRulesButton").addEventListener("click", saveRules);
   // === MODIFIED START ===
+  // 原因：规则配置页新增手动同步 SKU 群推送人配置按钮。
+  // 影响范围：规则配置页顶部操作区。
+  document.getElementById("syncSkuGroupCallerConfigsButton").addEventListener("click", syncSkuGroupCallerConfigs);
+  // === MODIFIED END ===
+  // === MODIFIED START ===
   // 原因：定时任务配置支持在规则配置中心新增多条记录。
   // 影响范围：定时任务配置表格交互。
   document.getElementById("addScheduleButton").addEventListener("click", addScheduleRow);
@@ -345,6 +350,29 @@ async function saveRules() {
     setBusy(false);
   }
 }
+
+// === MODIFIED START ===
+// 原因：规则配置页需要主动触发 SKU 群推送人配置同步，并把后端返回体反馈给用户。
+// 影响范围：规则配置页同步按钮。
+async function syncSkuGroupCallerConfigs() {
+  setBusy(true);
+  try {
+    const result = await api("/config/sku-groups/sync-caller-configs", { method: "POST" });
+    if (result.status === "success") {
+      const remote = result.remote_response || {};
+      showNotice(`同步完成：${remote.synced ?? result.count ?? 0} 条`);
+    } else if (result.status === "skipped") {
+      showNotice(`同步跳过：${result.reason || "未配置同步地址"}`, true);
+    } else {
+      showNotice(`同步失败：${result.reason || "请查看执行日志"}`, true);
+    }
+  } catch (error) {
+    showNotice(error.message || "同步失败", true);
+  } finally {
+    setBusy(false);
+  }
+}
+// === MODIFIED END ===
 
 async function uploadReceipt() {
   if (!state.selectedReceiptTask) {
@@ -1463,6 +1491,11 @@ function setBusy(isBusy) {
   // === MODIFIED END ===
   document.getElementById("refreshButton").disabled = isBusy;
   document.getElementById("saveRulesButton").disabled = isBusy;
+  // === MODIFIED START ===
+  // 原因：规则配置页新增同步按钮，需要纳入全局忙碌态防止重复提交。
+  // 影响范围：规则配置页顶部操作区。
+  document.getElementById("syncSkuGroupCallerConfigsButton").disabled = isBusy;
+  // === MODIFIED END ===
   // === MODIFIED START ===
   // 原因：执行日志下载按钮需要跟随全局忙碌态。
   // 影响范围：执行日志页面交互。

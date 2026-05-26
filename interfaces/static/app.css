@@ -442,6 +442,18 @@ h2 {
   font-size: 13px;
 }
 
+/* === MODIFIED START ===
+原因：规则配置页新增手动同步按钮，和保存按钮并排展示以不改变主布局。
+影响范围：规则配置页顶部操作区。
+=== MODIFIED END === */
+.panel-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .table-wrap {
   overflow: auto;
   border: 1px solid var(--line);

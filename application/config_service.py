@@ -248,6 +248,20 @@ class UploadConfig:
     timeout_seconds: float
 
 
+# === MODIFIED START ===
+# 原因：商品推送人配置同步接口 URL 需要配置化；缺失时应用层打日志跳过。
+# 影响范围：配置解析、规则配置页同步按钮、SKU 群上传后同步。
+@dataclass(frozen=True, slots=True)
+class ProductCallerSyncConfig:
+    """Configuration for push-center product caller config synchronization."""
+
+    api_url: str
+    timeout_seconds: float
+
+
+# === MODIFIED END ===
+
+
 # === MODIFIED END ===
 
 
@@ -292,6 +306,11 @@ class AppConfig:
     output: OutputConfig
     download: DownloadConfig
     upload: UploadConfig
+    # === MODIFIED START ===
+    # 原因：商品推送人配置同步需要从 config 读取远端地址，避免写死 URL。
+    # 影响范围：AppConfig、ApiService 同步逻辑。
+    product_caller_sync: ProductCallerSyncConfig
+    # === MODIFIED END ===
 
 
 class ConfigService:
@@ -379,6 +398,11 @@ class ConfigService:
         rules = data.get("rules", {})
         message = data.get("message", {})
         output = data.get("output", {})
+        # === MODIFIED START ===
+        # 原因：商品推送人配置同步接口配置独立解析；旧配置缺失时保持空地址跳过。
+        # 影响范围：配置解析、SKU 群同步。
+        product_caller_sync = data.get("product_caller_sync", {})
+        # === MODIFIED END ===
 
         task_config = TaskConfig(
             name=_required_string(task, "name", "task.name"),
@@ -677,6 +701,19 @@ class ConfigService:
             ),
         )
         # === MODIFIED END ===
+        # === MODIFIED START ===
+        # 原因：商品推送人配置同步接口地址可为空；为空时由应用层记录跳过日志。
+        # 影响范围：ProductCallerSyncConfig 构造。
+        product_caller_sync_config = ProductCallerSyncConfig(
+            api_url=_optional_blankable_string(product_caller_sync, "api_url"),
+            timeout_seconds=_optional_positive_number(
+                product_caller_sync,
+                "timeout_seconds",
+                30,
+                "product_caller_sync.timeout_seconds",
+            ),
+        )
+        # === MODIFIED END ===
         return AppConfig(
             task=task_config,
             # === MODIFIED START ===
@@ -715,6 +752,11 @@ class ConfigService:
             output=output_config,
             download=download_config,
             upload=upload_config,
+            # === MODIFIED START ===
+            # 原因：把商品推送人配置同步设置交给应用服务。
+            # 影响范围：ApiService 同步逻辑。
+            product_caller_sync=product_caller_sync_config,
+            # === MODIFIED END ===
         )
 
 
@@ -1307,5 +1349,13 @@ def to_dict(config: AppConfig) -> dict[str, object]:
             "api_url": config.upload.api_url,
             "timeout_seconds": config.upload.timeout_seconds,
         },
+        # === MODIFIED START ===
+        # 原因：配置 API 需要输出商品推送人配置同步地址，供保存配置时保持字段不丢失。
+        # 影响范围：/config 响应和配置落盘。
+        "product_caller_sync": {
+            "api_url": config.product_caller_sync.api_url,
+            "timeout_seconds": config.product_caller_sync.timeout_seconds,
+        },
+        # === MODIFIED END ===
     }
 # === MODIFIED END ===

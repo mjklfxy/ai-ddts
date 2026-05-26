@@ -157,6 +157,12 @@ class ConfigServiceTests(TestCase):
         self.assertEqual(config.output.order_file_dir, Path("outputs/order_files"))
         self.assertFalse(config.rpa.enabled)
         self.assertEqual(config.rpa.xlsx_path, Path("input") / "销售单查询.xlsx")
+        # === MODIFIED START ===
+        # 原因：商品推送人配置同步 URL 必须可配置；旧配置缺失时默认跳过同步。
+        # 影响范围：ConfigService 默认兼容与 SKU 群同步任务。
+        self.assertEqual(config.product_caller_sync.api_url, "")
+        self.assertEqual(config.product_caller_sync.timeout_seconds, 30)
+        # === MODIFIED END ===
 
     def test_from_dict_parses_full_config(self) -> None:
         config = ConfigService().from_dict(
@@ -229,6 +235,14 @@ class ConfigServiceTests(TestCase):
                     "extra_headers": {
                         "X-App": "direct-order",
                     },
+                },
+                # === MODIFIED END ===
+                # === MODIFIED START ===
+                # 原因：商品推送人配置同步接口地址需要从 config 读取，避免写死远端 URL。
+                # 影响范围：完整配置解析。
+                "product_caller_sync": {
+                    "api_url": "https://push-center.example.test/sync",
+                    "timeout_seconds": 9,
                 },
                 # === MODIFIED END ===
                 "rules": {
@@ -324,6 +338,12 @@ class ConfigServiceTests(TestCase):
         self.assertEqual(config.message.max_attempts, 2)
         self.assertEqual(config.message.retry_interval_seconds, 1.5)
         self.assertEqual(config.output.order_file_dir, Path("tmp/orders"))
+        # === MODIFIED START ===
+        # 原因：断言商品推送人配置同步接口配置已解析。
+        # 影响范围：完整配置解析。
+        self.assertEqual(config.product_caller_sync.api_url, "https://push-center.example.test/sync")
+        self.assertEqual(config.product_caller_sync.timeout_seconds, 9)
+        # === MODIFIED END ===
 
     def test_invalid_task_name_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "task.name"):
