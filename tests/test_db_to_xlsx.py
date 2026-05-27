@@ -308,6 +308,7 @@ class DbToXlsxTests(TestCase):
         original_log_info = db_to_xlsx.log_info
         original_log_error = db_to_xlsx.log_error
         original_user32 = db_to_xlsx.user32
+        original_kernel32 = db_to_xlsx.kernel32
 
         class FakeWindow:
             """Represents the JiKeYun desktop window."""
@@ -359,11 +360,30 @@ class DbToXlsxTests(TestCase):
                 calls.append(("GetForegroundWindow", None))
                 return 888
 
+            def GetWindowThreadProcessId(self, hwnd, proc_id):
+                return 999
+
+            def AttachThreadInput(self, tid1, tid2, attach):
+                calls.append(("AttachThreadInput", (tid1, tid2, attach)))
+                return 1
+
+            def SystemParametersInfoW(self, action, param, vparam, winini):
+                calls.append(("SystemParametersInfoW", action))
+
+            def SendInput(self, count, inputs, size):
+                calls.append(("SendInput", count))
+
         class FakePyAutoGui:
             """Provides a deterministic mouse position for activation verification."""
 
             def position(self):
                 return (20, 30)
+
+        class FakeKernel32:
+            """Provides deterministic thread ID for foreground stealing."""
+
+            def GetCurrentThreadId(self):
+                return 111
 
         try:
             db_to_xlsx.pg = FakePyAutoGui()
@@ -371,6 +391,7 @@ class DbToXlsxTests(TestCase):
             db_to_xlsx.log_info = lambda event, payload: logs.append((event, payload))
             db_to_xlsx.log_error = lambda event, payload: logs.append((event, payload))
             db_to_xlsx.user32 = FakeUser32()
+            db_to_xlsx.kernel32 = FakeKernel32()
 
             activated = _activate_window(FakeWindow(), "TRACE-FG")
         finally:
@@ -379,6 +400,7 @@ class DbToXlsxTests(TestCase):
             db_to_xlsx.log_info = original_log_info
             db_to_xlsx.log_error = original_log_error
             db_to_xlsx.user32 = original_user32
+            db_to_xlsx.kernel32 = original_kernel32
 
         self.assertTrue(activated)
         self.assertIn(("ShowWindow", (888, 9)), calls)
