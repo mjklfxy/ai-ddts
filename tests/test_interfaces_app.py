@@ -661,7 +661,8 @@ class InterfacesAppTests(TestCase):
                 }
             ],
         ):
-            response = self.client.post(
+            # Step 1: preview
+            preview_resp = self.client.post(
                 "/config/sku-groups/upload-xlsx",
                 files={
                     "file": (
@@ -672,7 +673,17 @@ class InterfacesAppTests(TestCase):
                 },
             )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(preview_resp.status_code, 200)
+        preview = preview_resp.json()
+        self.assertEqual(len(preview["new_rules"]), 1)
+
+        # Step 2: confirm
+        confirm_resp = self.client.post(
+            "/config/sku-groups/confirm",
+            json={"rules": preview["new_rules"]},
+        )
+        self.assertEqual(confirm_resp.status_code, 200)
+
         persisted = json.loads(self.config_path.read_text(encoding="utf-8"))
         self.assertEqual(
             persisted["rules"]["sku_group_map"]["SKU-PASS"],
@@ -836,7 +847,8 @@ class InterfacesAppTests(TestCase):
                 }
             ],
         ):
-            response = client.post(
+            # Step 1: preview
+            preview_resp = client.post(
                 "/config/sku-groups/upload-xlsx",
                 files={
                     "file": (
@@ -847,7 +859,14 @@ class InterfacesAppTests(TestCase):
                 },
             )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(preview_resp.status_code, 200)
+
+        # Step 2: confirm (triggers sync)
+        confirm_resp = client.post(
+            "/config/sku-groups/confirm",
+            json={"rules": preview_resp.json()["new_rules"]},
+        )
+        self.assertEqual(confirm_resp.status_code, 200)
         deadline = time.time() + 2
         while "body" not in captured and time.time() < deadline:
             time.sleep(0.01)

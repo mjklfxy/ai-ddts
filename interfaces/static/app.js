@@ -1360,6 +1360,11 @@ function collectRegionsFromText() {
   return regions;
 }
 
+// === MODIFIED START ===
+// 原因：限发区域上传改为两步流程 — 上传预览 → 用户确认 → 写入。
+// 影响范围：限发区域 Excel 上传交互。
+let regionPreviewData = null;
+
 async function uploadRegionXlsx() {
   const fileInput = document.getElementById("regionXlsxInput");
   const statusEl = document.getElementById("regionXlsxStatus");
@@ -1375,6 +1380,7 @@ async function uploadRegionXlsx() {
   }
   setBusy(true);
   statusEl.textContent = "上传解析中...";
+  regionPreviewData = null;
   try {
     const formData = new FormData();
     formData.append("file", file);
@@ -1382,20 +1388,16 @@ async function uploadRegionXlsx() {
       method: "POST",
       body: formData,
     });
-    // === MODIFIED START ===
-    // 原因：上传接口未登录时需要跳回登录页，保持后台会话行为一致。
-    // 影响范围：限发区域 Excel 上传。
     if (handleUnauthorizedResponse(response)) return;
-    // === MODIFIED END ===
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
       throw new Error(errorBody.detail || `HTTP ${response.status}`);
     }
     const result = await response.json();
-    statusEl.textContent = `原有 ${result.before} 条，新增 ${result.added} 条，修改 ${result.modified} 条（共 ${result.total} 条限发规则）`;
+    regionPreviewData = result;
+    renderRegionPreview(result);
     fileInput.value = "";
-    showNotice(`导入成功：${result.count} 条记录（新增 ${result.added} 条，修改 ${result.modified} 条）`);
-    await loadApp();
+    showNotice(`解析完成：${result.new_rules.length} 条规则，请确认后导入`);
   } catch (error) {
     statusEl.textContent = "";
     showNotice(error.message || "上传失败", true);
@@ -1403,6 +1405,84 @@ async function uploadRegionXlsx() {
     setBusy(false);
   }
 }
+
+function renderRegionPreview(result) {
+  const container = document.getElementById("regionXlsxPreview");
+  const statusEl = document.getElementById("regionXlsxStatus");
+  const diff = result.diff || {};
+  const added = diff.added || [];
+  const unchanged = diff.unchanged || [];
+  const removed = diff.removed || [];
+
+  statusEl.textContent = `现有 ${result.current_count} 条 → 解析出 ${result.new_rules.length} 条（新增 ${added.length}，不变 ${unchanged.length}，移除 ${removed.length}）`;
+
+  let html = `<div class="preview-summary">`;
+  html += `<p><strong>预览：</strong>新增 ${added.length} 条，不变 ${unchanged.length} 条，移除 ${removed.length} 条</p>`;
+  html += `</div>`;
+
+  if (added.length > 0) {
+    html += `<div class="preview-section"><h4>新增规则（${added.length} 条）</h4><table class="preview-table"><tr><th>产品名称</th><th>省</th><th>市</th></tr>`;
+    for (const r of added) {
+      html += `<tr class="preview-added"><td>${escapeHtml(r.sku_code)}</td><td>${escapeHtml(r.province)}</td><td>${escapeHtml(r.city || "")}</td></tr>`;
+    }
+    html += `</table></div>`;
+  }
+
+  if (removed.length > 0) {
+    html += `<div class="preview-section"><h4>将被移除（${removed.length} 条）</h4><table class="preview-table"><tr><th>产品名称</th><th>省</th><th>市</th></tr>`;
+    for (const r of removed) {
+      html += `<tr class="preview-removed"><td>${escapeHtml(r.sku_code)}</td><td>${escapeHtml(r.province)}</td><td>${escapeHtml(r.city || "")}</td></tr>`;
+    }
+    html += `</table></div>`;
+  }
+
+  html += `<div class="preview-actions">`;
+  html += `<button type="button" id="confirmRegionImportButton" onclick="confirmRegionImport()">确认导入 ${result.new_rules.length} 条规则</button>`;
+  html += `<button type="button" onclick="cancelRegionPreview()">取消</button>`;
+  html += `</div>`;
+
+  container.innerHTML = html;
+  container.classList.remove("is-hidden");
+}
+
+async function confirmRegionImport() {
+  if (!regionPreviewData || !regionPreviewData.new_rules) return;
+  setBusy(true);
+  try {
+    const response = await fetch("/config/regions/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rules: regionPreviewData.new_rules }),
+    });
+    if (handleUnauthorizedResponse(response)) return;
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      throw new Error(errorBody.detail || `HTTP ${response.status}`);
+    }
+    const result = await response.json();
+    showNotice(`导入成功：${result.count} 条规则（共 ${result.total} 条）`);
+    regionPreviewData = null;
+    document.getElementById("regionXlsxPreview").classList.add("is-hidden");
+    document.getElementById("regionXlsxStatus").textContent = "";
+    await loadApp();
+  } catch (error) {
+    showNotice(error.message || "确认导入失败", true);
+  } finally {
+    setBusy(false);
+  }
+}
+
+function cancelRegionPreview() {
+  regionPreviewData = null;
+  document.getElementById("regionXlsxPreview").classList.add("is-hidden");
+  document.getElementById("regionXlsxStatus").textContent = "已取消";
+}
+// === MODIFIED END ===
+
+// === MODIFIED START ===
+// 原因：SKU 群上传改为两步流程 — 上传预览 → 用户确认 → 写入。
+// 影响范围：SKU 群 Excel 上传交互。
+let skuGroupPreviewData = null;
 
 async function uploadSkuGroupXlsx() {
   const fileInput = document.getElementById("skuGroupXlsxInput");
@@ -1419,6 +1499,7 @@ async function uploadSkuGroupXlsx() {
   }
   setBusy(true);
   statusEl.textContent = "上传解析中...";
+  skuGroupPreviewData = null;
   try {
     const formData = new FormData();
     formData.append("file", file);
@@ -1426,20 +1507,16 @@ async function uploadSkuGroupXlsx() {
       method: "POST",
       body: formData,
     });
-    // === MODIFIED START ===
-    // 原因：上传接口未登录时需要跳回登录页，保持后台会话行为一致。
-    // 影响范围：SKU 群 Excel 上传。
     if (handleUnauthorizedResponse(response)) return;
-    // === MODIFIED END ===
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
       throw new Error(errorBody.detail || `HTTP ${response.status}`);
     }
     const result = await response.json();
-    statusEl.textContent = `原有 ${result.before} 个SKU群，新增 ${result.added} 个，修改 ${result.modified} 个（共 ${result.total} 个SKU群）`;
+    skuGroupPreviewData = result;
+    renderSkuGroupPreview(result);
     fileInput.value = "";
-    showNotice(`导入成功：${result.count} 条记录（新增 ${result.added} 个，修改 ${result.modified} 个）`);
-    await loadApp();
+    showNotice(`解析完成：${result.new_rules.length} 条规则，请确认后导入`);
   } catch (error) {
     statusEl.textContent = "";
     showNotice(error.message || "上传失败", true);
@@ -1447,6 +1524,79 @@ async function uploadSkuGroupXlsx() {
     setBusy(false);
   }
 }
+
+function renderSkuGroupPreview(result) {
+  const container = document.getElementById("skuGroupXlsxPreview");
+  const statusEl = document.getElementById("skuGroupXlsxStatus");
+  const diff = result.diff || {};
+  const added = diff.added || [];
+  const modified = diff.modified || [];
+  const unchanged = diff.unchanged || [];
+
+  statusEl.textContent = `现有 ${result.current_count} 个SKU群 → 解析出 ${result.new_rules.length} 个（新增 ${added.length}，修改 ${modified.length}，不变 ${unchanged.length}）`;
+
+  let html = `<div class="preview-summary">`;
+  html += `<p><strong>预览：</strong>新增 ${added.length} 个，修改 ${modified.length} 个，不变 ${unchanged.length} 个</p>`;
+  html += `</div>`;
+
+  if (added.length > 0) {
+    html += `<div class="preview-section"><h4>新增（${added.length} 个）</h4><table class="preview-table"><tr><th>产品名称</th><th>群名称</th><th>群主手机号</th></tr>`;
+    for (const r of added) {
+      html += `<tr class="preview-added"><td>${escapeHtml(r.sku_code)}</td><td>${escapeHtml(r.group_name)}</td><td>${escapeHtml(r.owner_mobile)}</td></tr>`;
+    }
+    html += `</table></div>`;
+  }
+
+  if (modified.length > 0) {
+    html += `<div class="preview-section"><h4>修改（${modified.length} 个）</h4><table class="preview-table"><tr><th>产品名称</th><th>旧群名</th><th>新群名</th><th>旧手机号</th><th>新手机号</th></tr>`;
+    for (const r of modified) {
+      html += `<tr class="preview-modified"><td>${escapeHtml(r.sku_code)}</td><td>${escapeHtml(r.old.group_name)}</td><td>${escapeHtml(r.new.group_name)}</td><td>${escapeHtml(r.old.owner_mobile)}</td><td>${escapeHtml(r.new.owner_mobile)}</td></tr>`;
+    }
+    html += `</table></div>`;
+  }
+
+  html += `<div class="preview-actions">`;
+  html += `<button type="button" id="confirmSkuGroupImportButton" onclick="confirmSkuGroupImport()">确认导入 ${result.new_rules.length} 条规则</button>`;
+  html += `<button type="button" onclick="cancelSkuGroupPreview()">取消</button>`;
+  html += `</div>`;
+
+  container.innerHTML = html;
+  container.classList.remove("is-hidden");
+}
+
+async function confirmSkuGroupImport() {
+  if (!skuGroupPreviewData || !skuGroupPreviewData.new_rules) return;
+  setBusy(true);
+  try {
+    const response = await fetch("/config/sku-groups/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rules: skuGroupPreviewData.new_rules }),
+    });
+    if (handleUnauthorizedResponse(response)) return;
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      throw new Error(errorBody.detail || `HTTP ${response.status}`);
+    }
+    const result = await response.json();
+    showNotice(`导入成功：${result.count} 个SKU群（新增 ${result.added}，修改 ${result.modified}，共 ${result.total} 个）`);
+    skuGroupPreviewData = null;
+    document.getElementById("skuGroupXlsxPreview").classList.add("is-hidden");
+    document.getElementById("skuGroupXlsxStatus").textContent = "";
+    await loadApp();
+  } catch (error) {
+    showNotice(error.message || "确认导入失败", true);
+  } finally {
+    setBusy(false);
+  }
+}
+
+function cancelSkuGroupPreview() {
+  skuGroupPreviewData = null;
+  document.getElementById("skuGroupXlsxPreview").classList.add("is-hidden");
+  document.getElementById("skuGroupXlsxStatus").textContent = "已取消";
+}
+// === MODIFIED END ===
 
 async function uploadExcludedSkuXlsx() {
   const fileInput = document.getElementById("excludedSkuXlsxInput");

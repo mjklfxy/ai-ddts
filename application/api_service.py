@@ -235,127 +235,158 @@ class ApiService:
         return self._sync_sku_group_caller_configs(items=items, trigger="manual")
     # === MODIFIED END ===
 
-    def upload_region_xlsx(self, file_bytes: bytes, filename: str) -> dict[str, object]:
-        """Parses an xlsx file, merges restricted regions into config (overwrite by key)."""
+    def preview_region_xlsx(self, file_bytes: bytes, filename: str) -> dict[str, object]:
+        """Parses an xlsx file and returns a diff preview without writing."""
 
         parsed = load_restricted_regions_from_bytes(file_bytes, filename)
         if not parsed:
             raise ValueError("未能从文件中解析出任何限发区域记录")
 
+        config = ConfigService().load(self.config_path)
+        existing = list(config.rules.restricted_regions)
+
+        existing_keys: set[tuple[str, str, str]] = set()
+        for r in existing:
+            existing_keys.add((r.sku_code, r.province, r.city or ""))
+
+        new_keys: set[tuple[str, str, str]] = set()
+        for r in parsed:
+            new_keys.add((r["sku_code"], r["province"], r["city"] or ""))
+
+        added = [r for r in parsed if (r["sku_code"], r["province"], r["city"] or "") not in existing_keys]
+        unchanged = [r for r in parsed if (r["sku_code"], r["province"], r["city"] or "") in existing_keys]
+
+        affected_skus = {r["sku_code"] for r in parsed}
+        removed = [
+            {"sku_code": r.sku_code, "province": r.province, "city": r.city}
+            for r in existing
+            if r.sku_code in affected_skus and (r.sku_code, r.province, r.city or "") not in new_keys
+        ]
+
+        return {
+            "new_rules": parsed,
+            "diff": {
+                "added": added,
+                "unchanged": unchanged,
+                "removed": removed,
+            },
+            "current_count": len(existing),
+        }
+
+    def confirm_region_import(self, rules: list[dict[str, str | None]]) -> dict[str, object]:
+        """Writes confirmed region rules to config (overwrite by affected SKU)."""
+
+        if not rules:
+            raise ValueError("确认列表为空")
+
         config_service = ConfigService()
         config = config_service.load(self.config_path)
-
         existing = list(config.rules.restricted_regions)
         before = len(existing)
-        existing_map: dict[tuple[str, str, str], int] = {}
-        for idx, region in enumerate(existing):
-            key = (region.sku_code, region.province, region.city or "")
-            existing_map[key] = idx
 
-        added = 0
-        modified = 0
-        for item in parsed:
-            sku_code = item["sku_code"]
-            province = item["province"]
-            city = item["city"] or ""
-            key = (sku_code, province, city)
-            if key in existing_map:
-                existing[existing_map[key]] = RestrictedRegion(
-                    sku_code=sku_code,
-                    province=province,
-                    city=item["city"],
-                )
-                modified += 1
-            else:
-                existing.append(RestrictedRegion(
-                    sku_code=sku_code,
-                    province=province,
-                    city=item["city"],
-                ))
-                existing_map[key] = len(existing) - 1
-                added += 1
+        affected_skus = {r["sku_code"] for r in rules}
+        kept = [r for r in existing if r.sku_code not in affected_skus]
+
+        for r in rules:
+            kept.append(RestrictedRegion(
+                sku_code=r["sku_code"],
+                province=r["province"],
+                city=r.get("city"),
+            ))
 
         data = json.loads(self.config_path.read_text(encoding="utf-8"))
-        rules = data.setdefault("rules", {})
-        rules["restricted_regions"] = [
-            {
-                "sku_code": r.sku_code,
-                "province": r.province,
-                "city": r.city,
-                "district": r.district,
-            }
-            for r in existing
+        data.setdefault("rules", {})["restricted_regions"] = [
+            {"sku_code": r.sku_code, "province": r.province, "city": r.city, "district": r.district}
+            for r in kept
         ]
         config_service.save(self.config_path, config_service.from_dict(data))
         return {
-            "count": len(parsed),
+            "success": True,
+            "count": len(rules),
             "before": before,
-            "added": added,
-            "modified": modified,
-            "total": len(existing),
+            "total": len(kept),
         }
 
-    def upload_sku_group_xlsx(self, file_bytes: bytes, filename: str) -> dict[str, object]:
-        """Parses an xlsx file, merges SKU groups into config (upsert by SKU)."""
+    def preview_sku_group_xlsx(self, file_bytes: bytes, filename: str) -> dict[str, object]:
+        """Parses an xlsx file and returns a diff preview without writing."""
 
         parsed = load_sku_groups_from_bytes(file_bytes, filename)
         if not parsed:
             raise ValueError("未能从文件中解析出任何SKU群配置记录")
 
+        config = ConfigService().load(self.config_path)
+        existing = dict(config.rules.sku_group_map)
+
+        added: list[dict[str, str]] = []
+        modified: list[dict[str, object]] = []
+        unchanged: list[dict[str, str]] = []
+
+        for item in parsed:
+            sku = item["sku_code"]
+            if sku not in existing:
+                added.append(item)
+            else:
+                info = existing[sku]
+                if info.group_name != item["group_name"] or info.owner_mobile != item["owner_mobile"]:
+                    modified.append({
+                        "sku_code": sku,
+                        "old": {"group_name": info.group_name, "owner_mobile": info.owner_mobile},
+                        "new": {"group_name": item["group_name"], "owner_mobile": item["owner_mobile"]},
+                    })
+                else:
+                    unchanged.append(item)
+
+        return {
+            "new_rules": parsed,
+            "diff": {
+                "added": added,
+                "modified": modified,
+                "unchanged": unchanged,
+            },
+            "current_count": len(existing),
+        }
+
+    def confirm_sku_group_import(self, rules: list[dict[str, str]]) -> dict[str, object]:
+        """Writes confirmed SKU group rules to config (upsert by SKU, preserve user_id)."""
+
+        if not rules:
+            raise ValueError("确认列表为空")
+
         config_service = ConfigService()
         config = config_service.load(self.config_path)
-
         existing = dict(config.rules.sku_group_map)
         before = len(existing)
 
         added = 0
         modified = 0
-        for item in parsed:
+        for item in rules:
             sku_code = item["sku_code"]
-            group_name = item["group_name"]
-            owner_mobile = item["owner_mobile"]
-            # === MODIFIED START ===
-            # 原因：XLSX 导入只更新群名和手机号时，需要保留已有 user_id 以免真实推送身份丢失。
-            # 影响范围：SKU 群上传接口和后续 MessagePayload.user_id。
             existing_info = existing.get(sku_code)
             user_id = existing_info.user_id if existing_info is not None else ""
-            # === MODIFIED END ===
             if sku_code in existing:
                 modified += 1
             else:
                 added += 1
             existing[sku_code] = SkuGroupInfo(
-                group_name=group_name,
-                owner_mobile=owner_mobile,
-                # === MODIFIED START ===
-                # 原因：保留已有 user_id，避免手机号配置更新后覆盖直接推送身份。
-                # 影响范围：SKU 群上传接口。
+                group_name=item["group_name"],
+                owner_mobile=item["owner_mobile"],
                 user_id=user_id,
-                # === MODIFIED END ===
             )
 
         data = json.loads(self.config_path.read_text(encoding="utf-8"))
-        rules = data.setdefault("rules", {})
-        rules["sku_group_map"] = {
-            # === MODIFIED START ===
-            # 原因：完整持久化 SKU 群映射字段，避免 user_id 在保存时丢失。
-            # 影响范围：config.rules.sku_group_map。
+        data.setdefault("rules", {})["sku_group_map"] = {
             sku: {
                 "group_name": info.group_name,
                 "owner_mobile": info.owner_mobile,
                 "user_id": info.user_id,
             }
-            # === MODIFIED END ===
             for sku, info in existing.items()
         }
         config_service.save(self.config_path, config_service.from_dict(data))
-        # === MODIFIED START ===
-        # 原因：SKU 群配置导入后需要异步同步商品推送人配置，避免阻塞上传解析响应。
-        # 影响范围：SKU 群 Excel 上传后的后台同步。
-        self._sync_sku_group_caller_configs_async(parsed, trigger="upload")
-        # === MODIFIED END ===
+        self._sync_sku_group_caller_configs_async(rules, trigger="confirm")
         return {
-            "count": len(parsed),
+            "success": True,
+            "count": len(rules),
             "before": before,
             "added": added,
             "modified": modified,

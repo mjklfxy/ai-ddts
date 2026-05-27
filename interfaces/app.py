@@ -13,16 +13,44 @@ from urllib.parse import parse_qs, urlencode
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 # === MODIFIED END ===
 
 from application.api_service import ApiService
 from application.config_service import ConfigService
+from infrastructure.xlsx_region_parser import ImportRuleError
 from shared.env import get_env, load_dotenv
 
 # === MODIFIED START ===
 # 原因：推送/上传订单文件统一改为 Excel，下载接口需要返回 Excel MIME。
 # 影响范围：/order-files/download。
 EXCEL_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+# === MODIFIED END ===
+
+
+# === MODIFIED START ===
+# 原因：限发区域和 SKU 群配置的确认导入接口需要请求体校验。
+# 影响范围：/config/regions/confirm、/config/sku-groups/confirm。
+class RegionRuleItem(BaseModel):
+    sku_code: str
+    province: str
+    city: str | None = None
+
+
+class RegionConfirmRequest(BaseModel):
+    rules: list[RegionRuleItem]
+
+
+class SkuGroupRuleItem(BaseModel):
+    sku_code: str
+    group_name: str
+    owner_mobile: str
+
+
+class SkuGroupConfirmRequest(BaseModel):
+    rules: list[SkuGroupRuleItem]
+
+
 # === MODIFIED END ===
 
 
@@ -270,6 +298,25 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
 
     # === MODIFIED END ===
 
+    # === MODIFIED START ===
+    # 原因：限发区域 Excel 导入需要结构化错误信息，方便前端展示行号、列名、原因和建议。
+    # 影响范围：/config/regions/upload-xlsx 接口的错误响应。
+    @app.exception_handler(ImportRuleError)
+    def import_rule_error_handler(_request: Request, exc: ImportRuleError) -> JSONResponse:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "success": False,
+                "message": str(exc),
+                "row": exc.row,
+                "column": exc.column,
+                "reason": exc.reason,
+                "suggestion": exc.suggestion,
+            },
+        )
+
+    # === MODIFIED END ===
+
     @app.get("/health", tags=["system"])
     def health() -> dict[str, str]:
         """Returns service health status."""
@@ -348,17 +395,29 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
 
     @app.post("/config/regions/upload-xlsx", tags=["config"])
     async def upload_region_xlsx(file: UploadFile = File(...)) -> dict[str, object]:
-        """Uploads an xlsx file, parses restricted regions, and merges into config."""
+        """Uploads an xlsx file, parses restricted regions, returns diff preview."""
 
         content = await file.read()
-        return service.upload_region_xlsx(content, file.filename or "upload.xlsx")
+        return service.preview_region_xlsx(content, file.filename or "upload.xlsx")
+
+    @app.post("/config/regions/confirm", tags=["config"])
+    def confirm_region_import(body: RegionConfirmRequest) -> dict[str, object]:
+        """Writes confirmed region rules to config."""
+
+        return service.confirm_region_import([r.model_dump() for r in body.rules])
 
     @app.post("/config/sku-groups/upload-xlsx", tags=["config"])
     async def upload_sku_group_xlsx(file: UploadFile = File(...)) -> dict[str, object]:
-        """Uploads an xlsx file, parses SKU groups, and merges into config."""
+        """Uploads an xlsx file, parses SKU groups, returns diff preview."""
 
         content = await file.read()
-        return service.upload_sku_group_xlsx(content, file.filename or "upload.xlsx")
+        return service.preview_sku_group_xlsx(content, file.filename or "upload.xlsx")
+
+    @app.post("/config/sku-groups/confirm", tags=["config"])
+    def confirm_sku_group_import(body: SkuGroupConfirmRequest) -> dict[str, object]:
+        """Writes confirmed SKU group rules to config."""
+
+        return service.confirm_sku_group_import([r.model_dump() for r in body.rules])
 
     # === MODIFIED START ===
     # 原因：规则配置页需要手动触发 SKU 群推送人配置同步，router 只负责委托应用服务。

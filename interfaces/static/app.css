@@ -1240,6 +1240,91 @@ tbody tr:hover {
   color: var(--success, #2e7d32);
 }
 
+.upload-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.upload-preview.is-hidden {
+  display: none;
+}
+
+.preview-summary {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.preview-section {
+  margin-bottom: 12px;
+}
+
+.preview-section h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--ink-700);
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.preview-table th,
+.preview-table td {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.preview-table th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.preview-added {
+  background: #f0fdf4;
+}
+
+.preview-removed {
+  background: #fef2f2;
+}
+
+.preview-modified {
+  background: #fffbeb;
+}
+
+.preview-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.preview-actions button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.preview-actions button:first-child {
+  background: var(--blue-600);
+  color: #fff;
+}
+
+.preview-actions button:first-child:hover {
+  background: var(--blue-700);
+}
+
+.preview-actions button:last-child {
+  background: var(--line);
+  color: var(--ink-700);
+}
+
 /* === MODIFIED END === */
 .rule-schedule-table table {
   min-width: 920px;

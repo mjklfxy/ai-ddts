@@ -27,7 +27,8 @@
       "Bash(.venv/Scripts/python.exe -c ' *)",
       "Bash(python scripts/manual_push_group.py)",
       "Bash(powershell -NoProfile -Command '$PROFILE.AllUsersAllHosts; $PROFILE.CurrentUserAllHosts; Test-Path $PROFILE.CurrentUserAllHosts')",
-      "Bash(uv run python -c ' *)"
+      "Bash(uv run python -c ' *)",
+      "Bash(python -m pytest tests/test_xlsx_config_parsers.py tests/test_config_service.py -v)"
     ]
   }
 }
