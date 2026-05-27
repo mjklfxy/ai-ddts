@@ -16,27 +16,11 @@ from shared.logging.logger import log_error, log_info
 user32 = ctypes.windll.user32
 user32.SetProcessDPIAware()
 kernel32 = ctypes.windll.kernel32
-# === MODIFIED START ===
-# 原因：定时任务触发 RPA 时需要把吉客云桌面窗口强制恢复、置前并短暂置顶，避免后台窗口吞掉坐标点击。
-# 影响范围：吉客云 RPA 导出前的窗口激活与校验。
-SW_RESTORE = 9
-SW_MAXIMIZE = 3
-HWND_TOPMOST = -1
-HWND_NOTOPMOST = -2
-SWP_NOSIZE = 0x0001
-SWP_NOMOVE = 0x0002
-SWP_SHOWWINDOW = 0x0040
-FORCE_FOREGROUND_FLAGS = SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW
-# === MODIFIED START ===
-# 原因：AttachThreadInput 需要同步输入队列才能生效。
-# 影响范围：强制前台窗口激活。
-ATTACH_THREAD_INPUT = 0x0001
 SPI_GETFOREGROUNDLOCKTIMEOUT = 0x2000
 SPI_SETFOREGROUNDLOCKTIMEOUT = 0x2001
 SPIF_SENDCHANGE = 0x0002
 INPUT_KEYBOARD = 1
 KEYEVENTF_KEYUP = 0x0002
-# === MODIFIED END ===
 
 pg.FAILSAFE = True
 pg.PAUSE = 0.05
@@ -92,287 +76,81 @@ def _find_window(substring: str, trace_id: str) -> gw.Win32Window | None:
 def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
     """Activates the target window before sending simulated input."""
 
-    # === MODIFIED START ===
-    # 原因：定时任务在后台触发时 pygetwindow.activate() 可能不会真正抢到 Windows 前台。
-    # 影响范围：吉客云窗口激活、后续坐标点击可靠性。
-    hwnd = _window_handle(win)
-    # === MODIFIED END ===
-    log_info(
-        "window_activate",
-        {
-            "trace_id": trace_id,
-            "title": win.title,
-            "left": win.left,
-            "top": win.top,
-            "width": win.width,
-            "height": win.height,
-            "minimized": win.isMinimized,
-            # === MODIFIED START ===
-            # 原因：记录窗口句柄，方便排查强制置前失败的具体窗口。
-            # 影响范围：RPA 调试日志。
-            "hwnd": hwnd,
-            # === MODIFIED END ===
-        },
-    )
+    hwnd = getattr(win, "_hWnd", None) or getattr(win, "hWnd", None)
+    if not (isinstance(hwnd, int) and hwnd > 0):
+        hwnd = None
+    log_info("window_activate", {"trace_id": trace_id, "title": win.title, "hwnd": hwnd})
+
     if win.isMinimized:
         win.restore()
-        time.sleep(0.3)
-    # === MODIFIED START ===
-    # 原因：先使用 Windows API 恢复、置前、短暂置顶，再保留 pygetwindow.activate() 作为兼容补充。
-    # 影响范围：定时任务触发的吉客云 RPA 前台准备。
+
     if hwnd is not None:
-        _force_window_foreground(hwnd, trace_id)
-    _maximize_window(win, hwnd, trace_id)
-    try:
-        win.activate()
-    except Exception as e:
-        log_error(
-            "window_activate_fallback_failed",
-            {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)},
-        )
-    time.sleep(0.5)
-    if hwnd is not None and not _is_foreground_window(hwnd):
-        log_error(
-            "window_foreground_verify_failed",
-            {
-                "trace_id": trace_id,
-                "hwnd": hwnd,
-                "foreground_hwnd": _foreground_window_handle(),
-                "title": win.title,
-            },
-        )
-        # === MODIFIED START ===
-        # 原因：首次尝试失败后再次暴力抢前台，覆盖锁屏/远程桌面等极端场景。
-        # 影响范围：RPA 窗口激活容错。
-        _steal_foreground(hwnd, trace_id)
-        time.sleep(0.3)
-        if not _is_foreground_window(hwnd):
-            log_error(
-                "window_foreground_retry_failed",
-                {
-                    "trace_id": trace_id,
-                    "hwnd": hwnd,
-                    "foreground_hwnd": _foreground_window_handle(),
-                },
-            )
-            return False
-        # === MODIFIED END ===
-    try:
-        cur = pg.position()
-        log_info("mouse_position", {"trace_id": trace_id, "position": cur})
-    except Exception as e:
-        log_error("pyautogui_error", {"trace_id": trace_id, "error": str(e)})
-        return False
-    if hwnd is not None:
-        log_info(
-            "window_foreground_verified",
-            {
-                "trace_id": trace_id,
-                "hwnd": hwnd,
-                "title": win.title,
-                "maximized": _is_window_maximized(win),
-                "left": win.left,
-                "top": win.top,
-                "width": win.width,
-                "height": win.height,
-            },
-        )
-    return True
-    # === MODIFIED END ===
+        _force_foreground(hwnd)
+    if not win.isMaximized:
+        win.maximize()
+
+    time.sleep(0.3)
+    ok = hwnd is not None and user32.GetForegroundWindow() == hwnd
+    if not ok:
+        log_error("window_activate_failed", {"trace_id": trace_id, "hwnd": hwnd})
+    return ok
 
 
-# === MODIFIED START ===
-# 原因：封装 Windows 前台控制细节，避免 RPA 主流程直接依赖 Win32 常量和异常处理。
-# 影响范围：吉客云 RPA 窗口激活。
-def _window_handle(win: gw.Win32Window) -> int | None:
-    """Returns the native Windows handle exposed by pygetwindow."""
+def _force_foreground(hwnd: int) -> None:
+    """Forces a window to foreground via AttachThreadInput + Alt key simulation."""
 
-    hwnd = getattr(win, "_hWnd", None) or getattr(win, "hWnd", None)
-    if isinstance(hwnd, int) and hwnd > 0:
-        return hwnd
-    return None
+    target_tid = user32.GetWindowThreadProcessId(hwnd, None)
+    current_tid = kernel32.GetCurrentThreadId()
 
+    timeout = ctypes.c_uint(0)
+    user32.SystemParametersInfoW(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, ctypes.byref(timeout), 0)
+    user32.SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, 0, SPIF_SENDCHANGE)
 
-def _force_window_foreground(hwnd: int, trace_id: str) -> None:
-    """Restores, foregrounds, and briefly topmost-pins a target window."""
+    attached = target_tid != current_tid and bool(
+        user32.AttachThreadInput(current_tid, target_tid, True)
+    )
 
-    try:
-        user32.ShowWindow(hwnd, SW_RESTORE)
-        user32.BringWindowToTop(hwnd)
-        # === MODIFIED START ===
-        # 原因：AttachThreadInput 绕过前台锁超时，模拟键鼠输入解锁 SetForegroundWindow 限制。
-        # 影响范围：锁屏/远程桌面/后台定时任务场景的窗口强制置前。
-        _steal_foreground(hwnd, trace_id)
-        # === MODIFIED END ===
-        user32.SetWindowPos(
-            hwnd,
-            HWND_TOPMOST,
-            0,
-            0,
-            0,
-            0,
-            FORCE_FOREGROUND_FLAGS,
-        )
-        user32.SetWindowPos(
-            hwnd,
-            HWND_NOTOPMOST,
-            0,
-            0,
-            0,
-            0,
-            FORCE_FOREGROUND_FLAGS,
-        )
-        log_info("window_force_foreground", {"trace_id": trace_id, "hwnd": hwnd})
-    except Exception as e:
-        log_error(
-            "window_force_foreground_failed",
-            {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)},
-        )
+    user32.SetForegroundWindow(hwnd)
+    user32.BringWindowToTop(hwnd)
+
+    if user32.GetForegroundWindow() != hwnd:
+        user32.SendInput(2, ctypes.byref(_ALT_INPUTS), ctypes.sizeof(_INPUT))
+
+    if attached:
+        user32.AttachThreadInput(current_tid, target_tid, False)
+    user32.SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, timeout.value, 0, SPIF_SENDCHANGE)
 
 
-def _steal_foreground(hwnd: int, trace_id: str) -> None:
-    """Aggressively forces a window to foreground using AttachThreadInput + input simulation."""
-
-    try:
-        target_tid = user32.GetWindowThreadProcessId(hwnd, None)
-        current_tid = kernel32.GetCurrentThreadId()
-
-        # 绕过前台锁超时：临时设为 0（禁止 Windows 阻止前台切换）
-        timeout = ctypes.c_uint(0)
-        user32.SystemParametersInfoW(
-            SPI_GETFOREGROUNDLOCKTIMEOUT, 0, ctypes.byref(timeout), 0
-        )
-        user32.SystemParametersInfoW(
-            SPI_SETFOREGROUNDLOCKTIMEOUT, 0, 0, SPIF_SENDCHANGE
-        )
-
-        # 挂载到目标窗口的输入队列，让 Windows 认为当前进程拥有前台
-        attached = False
-        if target_tid != current_tid:
-            attached = bool(user32.AttachThreadInput(current_tid, target_tid, True))
-
-        user32.SetForegroundWindow(hwnd)
-        user32.BringWindowToTop(hwnd)
-
-        # 如果 SetForegroundWindow 仍然没生效，用模拟按键解锁
-        if user32.GetForegroundWindow() != hwnd:
-            # 模拟 Alt 键按下/释放 — Windows 允许在 "用户输入" 后抢占前台
-            _simulate_alt_key()
-            user32.SetForegroundWindow(hwnd)
-
-        if attached:
-            user32.AttachThreadInput(current_tid, target_tid, False)
-
-        # 恢复前台锁超时
-        user32.SystemParametersInfoW(
-            SPI_SETFOREGROUNDLOCKTIMEOUT, timeout.value, 0, SPIF_SENDCHANGE
-        )
-        log_info("steal_foreground_done", {"trace_id": trace_id, "hwnd": hwnd})
-    except Exception as e:
-        log_error(
-            "steal_foreground_failed",
-            {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)},
-        )
+class _KEYBDINPUT(ctypes.Structure):
+    _fields_ = [
+        ("wVk", ctypes.c_ushort),
+        ("wScan", ctypes.c_ushort),
+        ("dwFlags", ctypes.c_ulong),
+        ("time", ctypes.c_ulong),
+        ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+    ]
 
 
-def _simulate_alt_key() -> None:
-    """Simulates Alt key press+release to satisfy Windows foreground lock."""
-
-    import ctypes.wintypes
-
-    class KEYBDINPUT(ctypes.Structure):
-        _fields_ = [
-            ("wVk", ctypes.wintypes.WORD),
-            ("wScan", ctypes.wintypes.WORD),
-            ("dwFlags", ctypes.wintypes.DWORD),
-            ("time", ctypes.wintypes.DWORD),
-            ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
-        ]
-
-    class INPUT(ctypes.Structure):
-        class _INPUT_UNION(ctypes.Union):
-            _fields_ = [("ki", KEYBDINPUT)]
-
-        _fields_ = [
-            ("type", ctypes.wintypes.DWORD),
-            ("union", _INPUT_UNION),
-        ]
-
-    VK_MENU = 0x12  # Alt key
-
-    def _make_input(vk: int, flags: int) -> INPUT:
-        inp = INPUT()
-        inp.type = INPUT_KEYBOARD
-        inp.union.ki.wVk = vk
-        inp.union.ki.dwFlags = flags
-        return inp
-
-    inputs = (_make_input(VK_MENU, 0), _make_input(VK_MENU, KEYEVENTF_KEYUP))
-    arr = (INPUT * 2)(*inputs)
-    user32.SendInput(2, ctypes.byref(arr), ctypes.sizeof(INPUT))
+class _INPUT_UNION(ctypes.Union):
+    _fields_ = [("ki", _KEYBDINPUT)]
 
 
-def _maximize_window(win: gw.Win32Window, hwnd: int | None, trace_id: str) -> None:
-    """Maximizes the target window before fixed-coordinate automation."""
-
-    try:
-        if not _is_window_maximized(win):
-            win.maximize()
-            time.sleep(0.3)
-        log_info(
-            "window_maximized",
-            {
-                "trace_id": trace_id,
-                "hwnd": hwnd,
-                "title": win.title,
-                "left": win.left,
-                "top": win.top,
-                "width": win.width,
-                "height": win.height,
-                "maximized": _is_window_maximized(win),
-            },
-        )
-    except Exception as e:
-        log_error(
-            "window_maximize_failed",
-            {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)},
-        )
-        if hwnd is not None:
-            try:
-                user32.ShowWindow(hwnd, SW_MAXIMIZE)
-                time.sleep(0.3)
-                log_info("window_maximized_win32", {"trace_id": trace_id, "hwnd": hwnd})
-            except Exception as win32_error:
-                log_error(
-                    "window_maximize_win32_failed",
-                    {
-                        "trace_id": trace_id,
-                        "hwnd": hwnd,
-                        "error": str(win32_error),
-                    },
-                )
+class _INPUT(ctypes.Structure):
+    _fields_ = [
+        ("type", ctypes.c_ulong),
+        ("union", _INPUT_UNION),
+    ]
 
 
-def _is_window_maximized(win: gw.Win32Window) -> bool:
-    return bool(getattr(win, "isMaximized", False))
+def _make_alt_input(flags: int) -> _INPUT:
+    inp = _INPUT()
+    inp.type = INPUT_KEYBOARD
+    inp.union.ki.wVk = 0x12  # VK_MENU (Alt)
+    inp.union.ki.dwFlags = flags
+    return inp
 
 
-def _foreground_window_handle() -> int | None:
-    """Returns the current foreground window handle when available."""
-
-    try:
-        hwnd = user32.GetForegroundWindow()
-    except Exception:
-        return None
-    if isinstance(hwnd, int) and hwnd > 0:
-        return hwnd
-    return None
-
-
-def _is_foreground_window(hwnd: int) -> bool:
-    """Returns whether the expected window is currently foreground."""
-
-    return _foreground_window_handle() == hwnd
+_ALT_INPUTS = (_make_alt_input(0), _make_alt_input(KEYEVENTF_KEYUP))
 # === MODIFIED END ===
 
 

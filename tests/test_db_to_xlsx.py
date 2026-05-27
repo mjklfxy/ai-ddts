@@ -403,22 +403,13 @@ class DbToXlsxTests(TestCase):
             db_to_xlsx.kernel32 = original_kernel32
 
         self.assertTrue(activated)
-        self.assertIn(("ShowWindow", (888, 9)), calls)
-        self.assertIn(("BringWindowToTop", 888), calls)
+        self.assertIn(("restore", None), calls)
         self.assertIn(("SetForegroundWindow", 888), calls)
+        self.assertIn(("BringWindowToTop", 888), calls)
         self.assertIn(("maximize", None), calls)
-        self.assertIn(
-            ("SetWindowPos", (888, -1, 0x0043)),
-            calls,
-        )
-        self.assertIn(
-            ("SetWindowPos", (888, -2, 0x0043)),
-            calls,
-        )
-        self.assertIn(("GetForegroundWindow", None), calls)
-        self.assertIn("maximized", logs[-1][1])
-        self.assertTrue(logs[-1][1]["maximized"])
-        self.assertEqual(logs[-1][0], "window_foreground_verified")
+        self.assertIn(("AttachThreadInput", (111, 999, True)), calls)
+        self.assertIn(("AttachThreadInput", (111, 999, False)), calls)
+        self.assertEqual(logs[0][0], "window_activate")
 
     def test_confirm_overwrite_does_not_type_when_dialog_absent(self) -> None:
         calls: list[tuple[str, object]] = []
