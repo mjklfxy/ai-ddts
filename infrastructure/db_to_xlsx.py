@@ -15,6 +15,17 @@ from shared.logging.logger import log_error, log_info
 
 user32 = ctypes.windll.user32
 user32.SetProcessDPIAware()
+# === MODIFIED START ===
+# 原因：定时任务触发 RPA 时需要把吉客云桌面窗口强制恢复、置前并短暂置顶，避免后台窗口吞掉坐标点击。
+# 影响范围：吉客云 RPA 导出前的窗口激活与校验。
+SW_RESTORE = 9
+HWND_TOPMOST = -1
+HWND_NOTOPMOST = -2
+SWP_NOSIZE = 0x0001
+SWP_NOMOVE = 0x0002
+SWP_SHOWWINDOW = 0x0040
+FORCE_FOREGROUND_FLAGS = SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW
+# === MODIFIED END ===
 
 pg.FAILSAFE = True
 pg.PAUSE = 0.05
@@ -70,6 +81,11 @@ def _find_window(substring: str, trace_id: str) -> gw.Win32Window | None:
 def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
     """Activates the target window before sending simulated input."""
 
+    # === MODIFIED START ===
+    # 原因：定时任务在后台触发时 pygetwindow.activate() 可能不会真正抢到 Windows 前台。
+    # 影响范围：吉客云窗口激活、后续坐标点击可靠性。
+    hwnd = _window_handle(win)
+    # === MODIFIED END ===
     log_info(
         "window_activate",
         {
@@ -80,20 +96,117 @@ def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
             "width": win.width,
             "height": win.height,
             "minimized": win.isMinimized,
+            # === MODIFIED START ===
+            # 原因：记录窗口句柄，方便排查强制置前失败的具体窗口。
+            # 影响范围：RPA 调试日志。
+            "hwnd": hwnd,
+            # === MODIFIED END ===
         },
     )
     if win.isMinimized:
         win.restore()
         time.sleep(0.3)
-    win.activate()
+    # === MODIFIED START ===
+    # 原因：先使用 Windows API 恢复、置前、短暂置顶，再保留 pygetwindow.activate() 作为兼容补充。
+    # 影响范围：定时任务触发的吉客云 RPA 前台准备。
+    if hwnd is not None:
+        _force_window_foreground(hwnd, trace_id)
+    try:
+        win.activate()
+    except Exception as e:
+        log_error(
+            "window_activate_fallback_failed",
+            {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)},
+        )
     time.sleep(0.5)
+    if hwnd is not None and not _is_foreground_window(hwnd):
+        log_error(
+            "window_foreground_verify_failed",
+            {
+                "trace_id": trace_id,
+                "hwnd": hwnd,
+                "foreground_hwnd": _foreground_window_handle(),
+                "title": win.title,
+            },
+        )
+        return False
     try:
         cur = pg.position()
         log_info("mouse_position", {"trace_id": trace_id, "position": cur})
     except Exception as e:
         log_error("pyautogui_error", {"trace_id": trace_id, "error": str(e)})
         return False
+    if hwnd is not None:
+        log_info(
+            "window_foreground_verified",
+            {"trace_id": trace_id, "hwnd": hwnd, "title": win.title},
+        )
     return True
+    # === MODIFIED END ===
+
+
+# === MODIFIED START ===
+# 原因：封装 Windows 前台控制细节，避免 RPA 主流程直接依赖 Win32 常量和异常处理。
+# 影响范围：吉客云 RPA 窗口激活。
+def _window_handle(win: gw.Win32Window) -> int | None:
+    """Returns the native Windows handle exposed by pygetwindow."""
+
+    hwnd = getattr(win, "_hWnd", None) or getattr(win, "hWnd", None)
+    if isinstance(hwnd, int) and hwnd > 0:
+        return hwnd
+    return None
+
+
+def _force_window_foreground(hwnd: int, trace_id: str) -> None:
+    """Restores, foregrounds, and briefly topmost-pins a target window."""
+
+    try:
+        user32.ShowWindow(hwnd, SW_RESTORE)
+        user32.BringWindowToTop(hwnd)
+        user32.SetForegroundWindow(hwnd)
+        user32.SetWindowPos(
+            hwnd,
+            HWND_TOPMOST,
+            0,
+            0,
+            0,
+            0,
+            FORCE_FOREGROUND_FLAGS,
+        )
+        user32.SetWindowPos(
+            hwnd,
+            HWND_NOTOPMOST,
+            0,
+            0,
+            0,
+            0,
+            FORCE_FOREGROUND_FLAGS,
+        )
+        log_info("window_force_foreground", {"trace_id": trace_id, "hwnd": hwnd})
+    except Exception as e:
+        log_error(
+            "window_force_foreground_failed",
+            {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)},
+        )
+
+
+def _foreground_window_handle() -> int | None:
+    """Returns the current foreground window handle when available."""
+
+    try:
+        hwnd = user32.GetForegroundWindow()
+    except Exception:
+        return None
+    if isinstance(hwnd, int) and hwnd > 0:
+        return hwnd
+    return None
+
+
+def _is_foreground_window(hwnd: int) -> bool:
+    """Returns whether the expected window is currently foreground."""
+
+    return _foreground_window_handle() == hwnd
+# === MODIFIED END ===
 
 
 # === MODIFIED START ===

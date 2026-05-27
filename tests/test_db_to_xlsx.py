@@ -7,6 +7,7 @@ from datetime import datetime
 
 import infrastructure.db_to_xlsx as db_to_xlsx
 from infrastructure.db_to_xlsx import (
+    _activate_window,
     _click,
     _confirm_overwrite_if_present,
     _export_steps,
@@ -298,6 +299,92 @@ class DbToXlsxTests(TestCase):
         self.assertTrue(confirmed)
         self.assertIn(("moveTo", (1040, 523, 0.2)), calls)
         self.assertEqual(logs[-1][0], "overwrite_confirmed")
+
+    def test_activate_window_forces_jikeyun_to_topmost_and_verifies_foreground(self) -> None:
+        calls: list[tuple[str, object]] = []
+        logs: list[tuple[str, dict[str, object]]] = []
+        original_pg = db_to_xlsx.pg
+        original_sleep = db_to_xlsx.time.sleep
+        original_log_info = db_to_xlsx.log_info
+        original_log_error = db_to_xlsx.log_error
+        original_user32 = db_to_xlsx.user32
+
+        class FakeWindow:
+            """Represents the JiKeYun desktop window."""
+
+            title = "吉客云OMS"
+            left = 10
+            top = 20
+            width = 1600
+            height = 900
+            isMinimized = True
+            _hWnd = 888
+
+            def restore(self):
+                calls.append(("restore", None))
+                self.isMinimized = False
+
+            def activate(self):
+                calls.append(("activate", None))
+
+        class FakeUser32:
+            """Captures Windows foreground API calls."""
+
+            def ShowWindow(self, hwnd, command):
+                calls.append(("ShowWindow", (hwnd, command)))
+                return 1
+
+            def BringWindowToTop(self, hwnd):
+                calls.append(("BringWindowToTop", hwnd))
+                return 1
+
+            def SetForegroundWindow(self, hwnd):
+                calls.append(("SetForegroundWindow", hwnd))
+                return 1
+
+            def SetWindowPos(self, hwnd, insert_after, x, y, cx, cy, flags):
+                calls.append(("SetWindowPos", (hwnd, insert_after, flags)))
+                return 1
+
+            def GetForegroundWindow(self):
+                calls.append(("GetForegroundWindow", None))
+                return 888
+
+        class FakePyAutoGui:
+            """Provides a deterministic mouse position for activation verification."""
+
+            def position(self):
+                return (20, 30)
+
+        try:
+            db_to_xlsx.pg = FakePyAutoGui()
+            db_to_xlsx.time.sleep = lambda delay: calls.append(("sleep", delay))
+            db_to_xlsx.log_info = lambda event, payload: logs.append((event, payload))
+            db_to_xlsx.log_error = lambda event, payload: logs.append((event, payload))
+            db_to_xlsx.user32 = FakeUser32()
+
+            activated = _activate_window(FakeWindow(), "TRACE-FG")
+        finally:
+            db_to_xlsx.pg = original_pg
+            db_to_xlsx.time.sleep = original_sleep
+            db_to_xlsx.log_info = original_log_info
+            db_to_xlsx.log_error = original_log_error
+            db_to_xlsx.user32 = original_user32
+
+        self.assertTrue(activated)
+        self.assertIn(("ShowWindow", (888, 9)), calls)
+        self.assertIn(("BringWindowToTop", 888), calls)
+        self.assertIn(("SetForegroundWindow", 888), calls)
+        self.assertIn(
+            ("SetWindowPos", (888, -1, 0x0043)),
+            calls,
+        )
+        self.assertIn(
+            ("SetWindowPos", (888, -2, 0x0043)),
+            calls,
+        )
+        self.assertIn(("GetForegroundWindow", None), calls)
+        self.assertEqual(logs[-1][0], "window_foreground_verified")
 
     def test_confirm_overwrite_does_not_type_when_dialog_absent(self) -> None:
         calls: list[tuple[str, object]] = []
