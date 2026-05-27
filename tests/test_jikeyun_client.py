@@ -130,7 +130,7 @@ class JikeyunClientTests(TestCase):
         )
         self.assertEqual([order.rule_context.order_no for order in orders], ["SO-RPA"])
 
-    def test_fetch_orders_continues_when_rpa_exporter_fails(self) -> None:
+    def test_fetch_orders_propagates_rpa_exporter_failure(self) -> None:
         errors: list[tuple[str, dict[str, object]]] = []
 
         def failing_exporter(
@@ -151,13 +151,13 @@ class JikeyunClientTests(TestCase):
             log_error=lambda event, payload: errors.append((event, payload)),
         )
 
-        orders = client.fetch_orders(
-            trace_id="TRACE-RPA",
-            start_time=datetime(2026, 4, 30, 8, 0, 0),
-            end_time=datetime(2026, 4, 30, 12, 0, 0),
-        )
+        with self.assertRaises(RuntimeError):
+            client.fetch_orders(
+                trace_id="TRACE-RPA",
+                start_time=datetime(2026, 4, 30, 8, 0, 0),
+                end_time=datetime(2026, 4, 30, 12, 0, 0),
+            )
 
-        self.assertEqual([order.rule_context.order_no for order in orders], ["SO-RPA-FAIL"])
         self.assertEqual(errors[0][0], "jikeyun_rpa_export_failed")
         self.assertEqual(errors[0][1]["trace_id"], "TRACE-RPA")
         self.assertEqual(errors[0][1]["xlsx_path"], "tmp\\test_jikeyun_missing.xlsx")

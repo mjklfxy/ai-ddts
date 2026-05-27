@@ -300,7 +300,7 @@ class DbToXlsxTests(TestCase):
         self.assertIn(("moveTo", (1040, 523, 0.2)), calls)
         self.assertEqual(logs[-1][0], "overwrite_confirmed")
 
-    def test_activate_window_forces_jikeyun_to_topmost_and_verifies_foreground(self) -> None:
+    def test_activate_window_forces_jikeyun_to_topmost_maximizes_and_verifies_foreground(self) -> None:
         calls: list[tuple[str, object]] = []
         logs: list[tuple[str, dict[str, object]]] = []
         original_pg = db_to_xlsx.pg
@@ -318,11 +318,20 @@ class DbToXlsxTests(TestCase):
             width = 1600
             height = 900
             isMinimized = True
+            isMaximized = False
             _hWnd = 888
 
             def restore(self):
                 calls.append(("restore", None))
                 self.isMinimized = False
+
+            def maximize(self):
+                calls.append(("maximize", None))
+                self.isMaximized = True
+                self.left = 0
+                self.top = 0
+                self.width = 1920
+                self.height = 1080
 
             def activate(self):
                 calls.append(("activate", None))
@@ -375,6 +384,7 @@ class DbToXlsxTests(TestCase):
         self.assertIn(("ShowWindow", (888, 9)), calls)
         self.assertIn(("BringWindowToTop", 888), calls)
         self.assertIn(("SetForegroundWindow", 888), calls)
+        self.assertIn(("maximize", None), calls)
         self.assertIn(
             ("SetWindowPos", (888, -1, 0x0043)),
             calls,
@@ -384,6 +394,8 @@ class DbToXlsxTests(TestCase):
             calls,
         )
         self.assertIn(("GetForegroundWindow", None), calls)
+        self.assertIn("maximized", logs[-1][1])
+        self.assertTrue(logs[-1][1]["maximized"])
         self.assertEqual(logs[-1][0], "window_foreground_verified")
 
     def test_confirm_overwrite_does_not_type_when_dialog_absent(self) -> None:

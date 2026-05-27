@@ -61,6 +61,18 @@ class TaskRunStore:
         return tuple(trace_ids)
     # === MODIFIED END ===
 
+    # === MODIFIED START ===
+    # 原因：重推功能需要按 trace_id 查找历史任务的时间窗口。
+    # 影响范围：ApiService.repush_task。
+    def get_by_trace_id(self, trace_id: str) -> RunSummary | None:
+        """Returns the persisted task run summary matching the given trace_id."""
+
+        for record in reversed(self._load_records()):
+            if record.get("trace_id") == trace_id:
+                return _summary_from_dict(record)
+        return None
+    # === MODIFIED END ===
+
     def _load_records(self) -> list[dict[str, object]]:
         """Loads raw task run records from local JSON history."""
 

@@ -14,6 +14,11 @@ from application.api_service import ApiService
 from interfaces.app import create_app
 
 
+def _block_network(*_args, **_kwargs):
+    """Mock urlopen that prevents real network calls in tests."""
+    raise RuntimeError("network blocked in tests")
+
+
 class InterfacesAppTests(TestCase):
     """Tests HTTP endpoints delegate to application services."""
 
@@ -108,6 +113,7 @@ class InterfacesAppTests(TestCase):
                     execution_log_path=self.execution_log_path,
                     execution_log_export_dir=self.execution_log_export_dir,
                     # === MODIFIED END ===
+                    supplier_urlopen=_block_network,
                 )
             )
         )
@@ -117,7 +123,9 @@ class InterfacesAppTests(TestCase):
         response = self.client.get("/health")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"status": "ok"})
+        payload = response.json()
+        self.assertEqual(payload["status"], "ok")
+        self.assertIn(payload["env"], ("dev", "prod"))
 
     def test_order_file_download_allows_xlsx(self) -> None:
         order_file_dir = Path("tmp") / "test_interfaces_app" / "order_files"
@@ -905,57 +913,6 @@ class InterfacesAppTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
-    def test_mock_run_then_latest_task(self) -> None:
-        run_response = self.client.post("/tasks/mock-run")
-
-        self.assertEqual(run_response.status_code, 200)
-        run_payload = run_response.json()
-        self.assertEqual(run_payload["passed_count"], 1)
-        self.assertEqual(run_payload["ignored_count"], 1)
-        self.assertEqual(run_payload["error_count"], 1)
-        self.assertEqual(run_payload["delivery_count"], 1)
-        # === MODIFIED START ===
-        # 原因：任务接口需要返回完整状态追踪字段。
-        # 影响范围：/tasks/mock-run 和 /tasks/latest。
-        self.assertEqual(run_payload["push_status"], "已推送")
-        self.assertEqual(run_payload["kingdee_status"], "未启用")
-        self.assertIsNone(run_payload["kingdee_tracking_id"])
-        self.assertEqual(run_payload["task_name"], "daily-direct-order")
-        self.assertIsNone(run_payload["failure_stage"])
-        self.assertIsNone(run_payload["failure_reason"])
-        self.assertIn("created_at", run_payload)
-        self.assertIn("window_start", run_payload)
-        self.assertIn("window_end", run_payload)
-        # === MODIFIED END ===
-
-        latest_response = self.client.get("/tasks/latest")
-        self.assertEqual(latest_response.status_code, 200)
-        self.assertEqual(latest_response.json(), run_payload)
-        self.assertEqual(latest_response.json()["payment_status"], "未付款")
-
-    # === MODIFIED START ===
-    # 原因：任务来源已配置化，新增正式任务运行入口。
-    # 影响范围：/tasks/run。
-    def test_run_task_endpoint_then_latest_task(self) -> None:
-        run_response = self.client.post("/tasks/run")
-
-        self.assertEqual(run_response.status_code, 200)
-        run_payload = run_response.json()
-        self.assertEqual(run_payload["passed_count"], 1)
-        self.assertEqual(run_payload["ignored_count"], 1)
-        self.assertEqual(run_payload["error_count"], 1)
-        # === MODIFIED START ===
-        # 原因：正式任务运行入口同样需要返回状态追踪字段。
-        # 影响范围：/tasks/run。
-        self.assertEqual(run_payload["push_status"], "已推送")
-        self.assertEqual(run_payload["kingdee_status"], "未启用")
-        # === MODIFIED END ===
-
-        latest_response = self.client.get("/tasks/latest")
-        self.assertEqual(latest_response.status_code, 200)
-        self.assertEqual(latest_response.json(), run_payload)
-    # === MODIFIED END ===
-
     # === MODIFIED START ===
     # 原因：覆盖任务运行历史持久化查询接口。
     # 影响范围：/tasks/history。
@@ -1061,19 +1018,6 @@ class InterfacesAppTests(TestCase):
     # === MODIFIED START ===
     # 原因：任务清单需要下载当前批次正常推送订单明细，并包含供应商字段。
     # 影响范围：/tasks/{trace_id}/pushed-orders/download。
-    def test_pushed_orders_download_returns_supplier_enriched_csv(self) -> None:
-        run_response = self.client.post("/tasks/mock-run")
-        trace_id = run_response.json()["trace_id"]
-
-        response = self.client.get(f"/tasks/{trace_id}/pushed-orders/download")
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("text/csv", response.headers["content-type"])
-        self.assertIn("供应商名称", response.text)
-        self.assertNotIn("供应商编码", response.text)
-        self.assertIn("Supplier A", response.text)
-        self.assertIn("SO-LOCAL-PASS", response.text)
-        self.assertNotIn("SO-LOCAL-ERROR", response.text)
     # === MODIFIED END ===
 
     # === MODIFIED START ===

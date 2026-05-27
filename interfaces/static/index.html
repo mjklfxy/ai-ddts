@@ -23,6 +23,11 @@
             <strong>厂直订单推送中心</strong>
             <span>Direct Order Hub</span>
           </div>
+          <!-- === MODIFIED START ===
+          原因：生产/开发环境分离后需要在页面上标识当前环境，避免误操作。
+          影响范围：侧边栏品牌区域。
+          === MODIFIED END -->
+          <span id="envBadge" class="env-badge" style="display:none;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:auto;"></span>
         </div>
         <nav class="nav-list" aria-label="主导航">
           <button class="nav-item is-active" data-view="dashboard">
@@ -77,6 +82,15 @@
           </label>
           <div class="top-actions">
             <span class="task-time" id="taskTime">--</span>
+            <!-- === MODIFIED START ===
+            原因：RPA 桌面导出需要前端可控开关，实时切换 rpa.enabled。
+            影响范围：顶部操作栏。
+            === MODIFIED END === -->
+            <label class="rpa-toggle" title="控制 RPA 桌面导出（开=桌面导出+XLSX回填，关=纯API拉单）">
+              <input type="checkbox" id="rpaToggle" />
+              <span>RPA</span>
+            </label>
+            <!-- === MODIFIED END === -->
             <button class="ghost-button" type="button" id="refreshButton">刷新</button>
           </div>
         </header>
@@ -512,5 +526,22 @@
       </aside>
     </div>
     <script src="/static/app.js?v=20260511-cn-buttons" defer></script>
+    <script>
+      fetch('/health').then(r => r.json()).then(d => {
+        const badge = document.getElementById('envBadge');
+        if (!badge || !d.env) return;
+        badge.style.display = 'inline-block';
+        if (d.env === 'prod') {
+          badge.textContent = 'PROD';
+          badge.style.background = '#ef4444';
+          badge.style.color = '#fff';
+        } else {
+          badge.textContent = 'DEV';
+          badge.style.background = '#22c55e';
+          badge.style.color = '#fff';
+        }
+        document.title = '[' + d.env.toUpperCase() + '] ' + document.title;
+      }).catch(() => {});
+    </script>
   </body>
 </html>

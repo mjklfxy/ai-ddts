@@ -195,6 +195,43 @@ class PipelineTests(TestCase):
         self.assertTrue(all(payload["trace_id"] == task.trace_id for _, payload in logs))
         self.assertIn("pipeline_finished", [event for event, _ in logs])
 
+    # === MODIFIED START ===
+    # 原因：整单异常会把同订单正常 SKU 一并带入异常明细，连坐行需要说明真正异常的 SKU 和原因。
+    # 影响范围：Pipeline 规则异常明细原因。
+    def test_co_order_exception_reason_points_to_root_sku(self) -> None:
+        task = make_task()
+        pipeline = build_pipeline(
+            log_info=lambda event, payload: None,
+            message_sender=RecordingMessageSender(),
+            kingdee_service=RecordingKingdeeService(),
+        )
+
+        result = pipeline.run(
+            task_context=task,
+            orders=[
+                PipelineOrder(
+                    rule_context=RuleContext(
+                        order_no="SO-MULTI",
+                        trace_id=task.trace_id,
+                        warehouse_code="WH-OK",
+                        sku_codes=("SKU-001", "SKU-002"),
+                    ),
+                    order_lines=(
+                        make_order_line(order_no="SO-MULTI", sku_code="SKU-001"),
+                        make_order_line(order_no="SO-MULTI", sku_code="SKU-002"),
+                    ),
+                ),
+            ],
+        )
+
+        reasons = {item.sku_code: item.reason for item in result.exception_orders}
+
+        self.assertEqual(reasons["SKU-002"], "\u672a\u914d\u7f6e\u63a8\u9001\u7fa4")
+        self.assertIn("\u540c\u8ba2\u5355\u5176\u4ed6SKU\u5f02\u5e38", reasons["SKU-001"])
+        self.assertIn("SKU-002", reasons["SKU-001"])
+        self.assertIn("\u672a\u914d\u7f6e\u63a8\u9001\u7fa4", reasons["SKU-001"])
+    # === MODIFIED END ===
+
     def test_no_passed_orders_skip_delivery_and_kingdee(self) -> None:
         logs: list[tuple[str, dict[str, object]]] = []
         task = make_task()

@@ -142,6 +142,50 @@ class SchedulerStateStore:
             encoding="utf-8",
         )
 
+    # === MODIFIED START ===
+    # 原因：定时任务失败后需要强行修改上次运行时间，允许重新触发。
+    # 影响范围：/scheduler/state PUT。
+    def update_schedule_state(
+        self,
+        schedule_id: str,
+        *,
+        last_run_date: str | None = None,
+        last_run_at: str | None = None,
+        last_trace_id: str | None = None,
+    ) -> None:
+        """Force-updates the persisted state for one schedule."""
+
+        schedule_key = _required_string(schedule_id, "schedule_id")
+        state = self.load()
+        existing = state.schedule_runs.get(schedule_key, SchedulerRunState())
+
+        schedule_runs = {
+            key: {
+                "last_run_date": run_state.last_run_date,
+                "last_run_at": run_state.last_run_at,
+                "last_trace_id": run_state.last_trace_id,
+            }
+            for key, run_state in state.schedule_runs.items()
+        }
+        schedule_runs[schedule_key] = {
+            "last_run_date": last_run_date if last_run_date is not None else existing.last_run_date,
+            "last_run_at": last_run_at if last_run_at is not None else existing.last_run_at,
+            "last_trace_id": last_trace_id if last_trace_id is not None else existing.last_trace_id,
+        }
+        latest = schedule_runs[schedule_key]
+        state = {
+            "last_run_date": latest["last_run_date"],
+            "last_run_at": latest["last_run_at"],
+            "last_trace_id": latest["last_trace_id"],
+            "schedule_runs": schedule_runs,
+        }
+        self.state_path.parent.mkdir(parents=True, exist_ok=True)
+        self.state_path.write_text(
+            json.dumps(state, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    # === MODIFIED END ===
+
 
 class DailyFixedTimeScheduler:
     """Evaluates one fixed daily run time and triggers the task when due."""

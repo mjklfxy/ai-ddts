@@ -55,6 +55,11 @@ function bindEvents() {
   });
   document.getElementById("refreshButton").addEventListener("click", loadApp);
   // === MODIFIED START ===
+  // 原因：RPA 桌面导出需要前端可控开关，实时切换 rpa.enabled。
+  // 影响范围：顶部操作栏 RPA toggle。
+  document.getElementById("rpaToggle").addEventListener("change", toggleRpa);
+  // === MODIFIED END ===
+  // === MODIFIED START ===
   // 原因：页面顶部删除“立即执行”入口，任务执行改由调度/后端流程触发。
   // 影响范围：前端初始化事件绑定。
   const runTaskButton = document.getElementById("runTaskButton");
@@ -128,6 +133,12 @@ async function loadApp() {
     state.scheduler = scheduler;
     state.config = config;
     state.suppliers = Array.isArray(suppliers.items) ? suppliers.items : [];
+    // === MODIFIED START ===
+    // 原因：刷新配置后同步 RPA toggle 状态。
+    // 影响范围：顶部 RPA 开关。
+    const rpaToggle = document.getElementById("rpaToggle");
+    if (rpaToggle && state.config) rpaToggle.checked = !!state.config.rpa?.enabled;
+    // === MODIFIED END ===
     // === MODIFIED START ===
     // 原因：执行日志接口返回 items 结构，前端需要落到统一状态。
     // 影响范围：执行日志页面刷新。
@@ -288,6 +299,26 @@ async function runTask() {
     setBusy(false);
   }
 }
+
+// === MODIFIED START ===
+// 原因：RPA 桌面导出需要前端可控开关，实时切换 rpa.enabled。
+// 影响范围：顶部 RPA 开关。
+async function toggleRpa() {
+  const toggle = document.getElementById("rpaToggle");
+  const enabled = toggle.checked;
+  try {
+    await api("/config/rpa", {
+      method: "PUT",
+      body: JSON.stringify({ enabled }),
+    });
+    state.config.rpa.enabled = enabled;
+    showNotice(enabled ? "RPA 已开启（桌面导出+XLSX回填）" : "RPA 已关闭（纯API拉单）");
+  } catch (err) {
+    toggle.checked = !enabled;
+    showNotice(`RPA 开关切换失败：${err.message}`, true);
+  }
+}
+// === MODIFIED END ===
 
 async function saveRules() {
   if (!state.config) {
@@ -943,6 +974,14 @@ function handleActionClick(event) {
     return;
   }
   // === MODIFIED END ===
+  // === MODIFIED START ===
+  // 原因：任务清单新增复推按钮，按原时间窗口重新拉单+RPA+推送。
+  // 影响范围：任务行复推操作。
+  if (target.dataset.action === "repush") {
+    repushTask(task);
+    return;
+  }
+  // === MODIFIED END ===
   if (target.dataset.action === "detail") {
     openDrawer(task);
   }
@@ -982,6 +1021,28 @@ function triggerDownload(url) {
   document.body.appendChild(link);
   link.click();
   link.remove();
+}
+// === MODIFIED END ===
+
+// === MODIFIED START ===
+// 原因：任务清单新增复推按钮，按原时间窗口重新拉单+RPA+推送。
+// 影响范围：任务行复推操作。
+async function repushTask(task) {
+  const trace = encodeURIComponent(task.trace_id || "");
+  if (!task.window_start || !task.window_end) {
+    showNotice("当前任务缺少时间窗口信息，无法复推", true);
+    return;
+  }
+  const ok = confirm(`确认用原时间窗口复推？\n\n时间窗口：${task.window_start} → ${task.window_end}`);
+  if (!ok) return;
+  showNotice(`正在复推：${shortId(task.trace_id)}...`);
+  try {
+    const result = await api(`/tasks/${trace}/repush`, { method: "POST" });
+    showNotice(`复推完成：${shortId(result.trace_id)}，通过 ${result.passed_count || 0} 单`);
+    loadApp();
+  } catch (err) {
+    showNotice(`复推失败：${err.message}`, true);
+  }
 }
 // === MODIFIED END ===
 
@@ -1196,6 +1257,7 @@ function taskActions(task) {
       === MODIFIED END === -->
       ${exceptionDownload}
       ${pushedDownload}
+      <button type="button" data-action="repush" data-trace="${escapeAttr(task.trace_id)}">复推</button>
     </div>
   `;
 }

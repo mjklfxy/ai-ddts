@@ -271,6 +271,36 @@ h2 {
   font-size: 13px;
 }
 
+/* === MODIFIED START ===
+原因：RPA 桌面导出需要前端可控开关，样式与 ghost-button 一致，激活时绿色。
+影响范围：顶部操作栏 RPA toggle。
+=== MODIFIED END === */
+.rpa-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-500);
+  user-select: none;
+  transition: all 0.15s;
+}
+.rpa-toggle:has(input:checked) {
+  color: #16a34a;
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+.rpa-toggle input {
+  margin: 0;
+  cursor: pointer;
+}
+
 .ghost-button,
 .primary-button,
 .link-button,

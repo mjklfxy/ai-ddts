@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Protocol
 
 # === MODIFIED START ===
@@ -80,6 +80,18 @@ class PipelineOrderEvaluation:
 
     order_no: str
     engine_result: RuleEngineResult
+
+
+# === MODIFIED START ===
+# 原因：整单异常会连带同订单其他 SKU 进入异常明细，需要保留真正触发 ERROR 的 SKU 和规则结果。
+# 影响范围：Pipeline 规则异常明细原因生成。
+@dataclass(frozen=True, slots=True)
+class PipelineLineRuleFailure:
+    """Rule failure identified by re-evaluating one SKU line in an errored order."""
+
+    sku_code: str
+    rule_result: RuleResult
+# === MODIFIED END ===
 
 
 @dataclass(frozen=True, slots=True)
@@ -397,12 +409,13 @@ class Pipeline:
                 # === MODIFIED START ===
                 # 原因：规则失败代表整单异常，将订单行转为可查询/可下载的异常明细。
                 # 影响范围：异常订单生成。
+                # 原因：连坐异常行需要写明同订单中真正触发异常的 SKU 和原因。
+                # 影响范围：异常订单 reason 字段。
                 exception_orders.extend(
-                    ExceptionOrder.from_rule_result(
-                        source=self._exception_source_from_order_line(order_line),
-                        rule_result=engine_result.final_result,
+                    self._exception_orders_for_rule_failure(
+                        order=order,
+                        engine_result=engine_result,
                     )
-                    for order_line in order.order_lines
                 )
                 # === MODIFIED END ===
                 self._log_info(
@@ -416,6 +429,72 @@ class Pipeline:
                 )
 
         return passed_orders, ignored_orders, error_orders, exception_orders, passed_lines
+
+    # === MODIFIED START ===
+    # 原因：整单异常生成明细时，需要区分“本 SKU 真异常”和“同订单其他 SKU 异常导致连坐”。
+    # 影响范围：Pipeline 规则异常明细 reason。
+    def _exception_orders_for_rule_failure(
+        self,
+        order: PipelineOrder,
+        engine_result: RuleEngineResult,
+    ) -> tuple[ExceptionOrder, ...]:
+        """Builds exception details and annotates co-order rows with root SKU failures."""
+
+        line_failures = self._line_rule_failures(order)
+        if not line_failures:
+            return tuple(
+                ExceptionOrder.from_rule_result(
+                    source=self._exception_source_from_order_line(order_line),
+                    rule_result=engine_result.final_result,
+                )
+                for order_line in order.order_lines
+            )
+
+        failures_by_sku = {failure.sku_code: failure for failure in line_failures}
+        failure_summary = _line_failure_summary(line_failures)
+        co_order_rule_result = RuleResult(
+            decision=RuleDecision.ERROR,
+            rule_name=engine_result.final_result.rule_name,
+            reason=f"同订单其他SKU异常：{failure_summary}"[:500],
+            message=(
+                f"Order {order.rule_context.order_no} failed because other SKU lines "
+                f"failed rules: {failure_summary}."
+            ),
+        )
+
+        exception_orders: list[ExceptionOrder] = []
+        for order_line in order.order_lines:
+            sku_code = order_line.sku_code.strip()
+            failure = failures_by_sku.get(sku_code)
+            exception_orders.append(
+                ExceptionOrder.from_rule_result(
+                    source=self._exception_source_from_order_line(order_line),
+                    rule_result=failure.rule_result if failure else co_order_rule_result,
+                )
+            )
+        return tuple(exception_orders)
+
+    def _line_rule_failures(self, order: PipelineOrder) -> tuple[PipelineLineRuleFailure, ...]:
+        """Finds SKU lines that fail rules independently from their co-order lines."""
+
+        failures: list[PipelineLineRuleFailure] = []
+        seen_skus: set[str] = set()
+        for order_line in order.order_lines:
+            sku_code = order_line.sku_code.strip()
+            if not sku_code or sku_code in seen_skus:
+                continue
+            seen_skus.add(sku_code)
+            line_context = replace(order.rule_context, sku_codes=(sku_code,))
+            line_result = self.rule_engine.evaluate(line_context, log_hits=False)
+            if line_result.is_error:
+                failures.append(
+                    PipelineLineRuleFailure(
+                        sku_code=sku_code,
+                        rule_result=line_result.final_result,
+                    )
+                )
+        return tuple(failures)
+    # === MODIFIED END ===
 
     def _deliver_batches(
         self,
@@ -641,6 +720,25 @@ class Pipeline:
     @staticmethod
     def _noop_log(event: str, payload: dict[str, object]) -> None:
         _ = (event, payload)
+
+
+# === MODIFIED START ===
+# 原因：连坐异常原因需要把真正失败的 SKU、规则和原因压缩成人可读摘要。
+# 影响范围：异常订单 reason 字段。
+def _line_failure_summary(failures: tuple[PipelineLineRuleFailure, ...]) -> str:
+    """Builds a compact human-readable summary of root SKU rule failures."""
+
+    parts: list[str] = []
+    seen: set[tuple[str, str, str]] = set()
+    for failure in failures:
+        reason = failure.rule_result.reason or failure.rule_result.rule_name
+        key = (failure.sku_code, failure.rule_result.rule_name, reason)
+        if key in seen:
+            continue
+        seen.add(key)
+        parts.append(f"{failure.sku_code}（{reason}）")
+    return "；".join(parts)[:460]
+# === MODIFIED END ===
 
 
 # === MODIFIED START ===

@@ -1,0 +1,21 @@
+[project]
+name = "ai-ddts"
+version = "0.1.0"
+description = "AI Direct Distribution Task System"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.136.1",
+    "httpx>=0.28.0",
+    "openpyxl>=3.1.0",
+    "python-multipart>=0.0.20",
+    "requests>=2.31.0",
+    "uvicorn>=0.46.0",
+    "pyautogui>=0.9.54",
+    "pygetwindow>=0.0.9",
+    "pyperclip>=1.9.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx",
+]

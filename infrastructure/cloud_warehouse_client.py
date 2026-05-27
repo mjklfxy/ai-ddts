@@ -26,12 +26,14 @@ class CloudWarehouseClient:
         url: str = DEFAULT_URL,
         local_path: str | Path = DEFAULT_LOCAL_PATH,
         clock: Clock | None = None,
+        urlopen: Callable[..., object] | None = None,
     ) -> None:
         if not url.strip():
             raise ValueError("url must be a non-empty string")
         self.url = url.strip()
         self.local_path = Path(local_path)
         self.clock = clock or datetime.now
+        self._urlopen = urlopen
         self._mapping: dict[str, str] = {}
         self._loaded = False
 
@@ -124,9 +126,10 @@ class CloudWarehouseClient:
         )
 
     def _fetch_csv(self) -> str:
+        urlopen = self._urlopen or urllib.request.urlopen
         request = urllib.request.Request(self.url, method="GET")
         try:
-            response = urllib.request.urlopen(request, timeout=30)
+            response = urlopen(request, timeout=30)
             try:
                 raw_body = response.read()
                 content_type = response.headers.get("Content-Type", "")

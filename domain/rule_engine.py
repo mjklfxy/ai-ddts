@@ -47,13 +47,22 @@ class RuleEngine:
         self.rules = tuple(rules)
         self.log_info = log_info or self._noop_log_info
 
-    def evaluate(self, context: RuleContext) -> RuleEngineResult:
+    # === MODIFIED START ===
+    # 原因：Pipeline 需要对整单异常做单 SKU 静默复算以定位连坐根因，不能额外污染规则命中日志。
+    # 影响范围：RuleEngine.evaluate 调用方；默认仍记录日志保持兼容。
+    def evaluate(self, context: RuleContext, log_hits: bool = True) -> RuleEngineResult:
+    # === MODIFIED END ===
         results: list[RuleResult] = []
 
         for rule in self.rules:
             result = rule.evaluate(context)
             results.append(result)
-            self._log_rule_hit(context=context, result=result)
+            # === MODIFIED START ===
+            # 原因：单 SKU 根因复算属于内部诊断，不应产生重复 rule_hit。
+            # 影响范围：连坐异常原因计算。
+            if log_hits:
+                self._log_rule_hit(context=context, result=result)
+            # === MODIFIED END ===
 
             if result.decision is not RuleDecision.PASS:
                 return RuleEngineResult(

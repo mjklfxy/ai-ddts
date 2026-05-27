@@ -19,6 +19,7 @@ user32.SetProcessDPIAware()
 # 原因：定时任务触发 RPA 时需要把吉客云桌面窗口强制恢复、置前并短暂置顶，避免后台窗口吞掉坐标点击。
 # 影响范围：吉客云 RPA 导出前的窗口激活与校验。
 SW_RESTORE = 9
+SW_MAXIMIZE = 3
 HWND_TOPMOST = -1
 HWND_NOTOPMOST = -2
 SWP_NOSIZE = 0x0001
@@ -111,6 +112,7 @@ def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
     # 影响范围：定时任务触发的吉客云 RPA 前台准备。
     if hwnd is not None:
         _force_window_foreground(hwnd, trace_id)
+    _maximize_window(win, hwnd, trace_id)
     try:
         win.activate()
     except Exception as e:
@@ -139,7 +141,16 @@ def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
     if hwnd is not None:
         log_info(
             "window_foreground_verified",
-            {"trace_id": trace_id, "hwnd": hwnd, "title": win.title},
+            {
+                "trace_id": trace_id,
+                "hwnd": hwnd,
+                "title": win.title,
+                "maximized": _is_window_maximized(win),
+                "left": win.left,
+                "top": win.top,
+                "width": win.width,
+                "height": win.height,
+            },
         )
     return True
     # === MODIFIED END ===
@@ -188,6 +199,51 @@ def _force_window_foreground(hwnd: int, trace_id: str) -> None:
             "window_force_foreground_failed",
             {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)},
         )
+
+
+def _maximize_window(win: gw.Win32Window, hwnd: int | None, trace_id: str) -> None:
+    """Maximizes the target window before fixed-coordinate automation."""
+
+    try:
+        if not _is_window_maximized(win):
+            win.maximize()
+            time.sleep(0.3)
+        log_info(
+            "window_maximized",
+            {
+                "trace_id": trace_id,
+                "hwnd": hwnd,
+                "title": win.title,
+                "left": win.left,
+                "top": win.top,
+                "width": win.width,
+                "height": win.height,
+                "maximized": _is_window_maximized(win),
+            },
+        )
+    except Exception as e:
+        log_error(
+            "window_maximize_failed",
+            {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)},
+        )
+        if hwnd is not None:
+            try:
+                user32.ShowWindow(hwnd, SW_MAXIMIZE)
+                time.sleep(0.3)
+                log_info("window_maximized_win32", {"trace_id": trace_id, "hwnd": hwnd})
+            except Exception as win32_error:
+                log_error(
+                    "window_maximize_win32_failed",
+                    {
+                        "trace_id": trace_id,
+                        "hwnd": hwnd,
+                        "error": str(win32_error),
+                    },
+                )
+
+
+def _is_window_maximized(win: gw.Win32Window) -> bool:
+    return bool(getattr(win, "isMaximized", False))
 
 
 def _foreground_window_handle() -> int | None:
@@ -501,11 +557,11 @@ def export_orders_to_xlsx(
         log_error(
             "export_cancel", {"trace_id": safe_trace_id, "reason": "吉客云窗口未找到"}
         )
-        return
+        raise RuntimeError("吉客云窗口未找到，请确认客户端已打开")
 
     if not _activate_window(win, safe_trace_id):
         log_error("export_cancel", {"trace_id": safe_trace_id, "reason": "无法激活窗口"})
-        return
+        raise RuntimeError("无法激活吉客云窗口，请将客户端置于前台")
 
     steps = _export_steps(target_path, start_time=start_time, end_time=end_time)
 

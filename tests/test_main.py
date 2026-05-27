@@ -8,6 +8,11 @@ from application.manual_runner import build_jikeyun_client_from_config, build_ki
 from application.task_service import TaskService
 from domain.enums.status import KingdeeStatus, PushStatus
 from infrastructure.jikeyun_client import JikeyunPageResult
+
+
+def _block_network(*_args, **_kwargs):
+    """Mock urlopen that prevents real network calls in tests."""
+    raise RuntimeError("network blocked in tests")
 from infrastructure.kingdee_service import KingdeeService
 from main import RunSummary, run_once
 
@@ -68,6 +73,7 @@ class MainRunTests(TestCase):
             # 影响范围：手动运行测试。
             execution_log_path=execution_log_path,
             # === MODIFIED END ===
+            supplier_urlopen=_block_network,
         )
 
         self.assertIsInstance(summary, RunSummary)
@@ -155,6 +161,7 @@ class MainRunTests(TestCase):
             # === MODIFIED END ===
             trace_id_generator=lambda: "TRACE-MISSING-SUPPLIER",
             clock=lambda: datetime(2026, 4, 30, 12, 0, 0),
+            supplier_urlopen=_block_network,
         )
 
         self.assertEqual(summary.passed_count, 4)

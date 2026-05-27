@@ -17,6 +17,7 @@ from fastapi.staticfiles import StaticFiles
 
 from application.api_service import ApiService
 from application.config_service import ConfigService
+from shared.env import get_env, load_dotenv
 
 # === MODIFIED START ===
 # 原因：推送/上传订单文件统一改为 Excel，下载接口需要返回 Excel MIME。
@@ -126,6 +127,7 @@ class NoCacheStaticFiles(StaticFiles):
 def create_app(api_service: ApiService | None = None) -> FastAPI:
     """Creates the FastAPI app and delegates work to application services."""
 
+    load_dotenv()
     service = api_service or ApiService()
 
     # Load once at startup for the download endpoint.
@@ -272,7 +274,7 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
     def health() -> dict[str, str]:
         """Returns service health status."""
 
-        return {"status": "ok"}
+        return {"status": "ok", "env": get_env()}
 
     @app.get("/order-files/download", tags=["order-files"])
     def download_order_file(filename: str, sig: str) -> FileResponse:
@@ -332,6 +334,17 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
         """Updates rule configuration fields."""
 
         return service.update_rule_config(payload)
+
+    # === MODIFIED START ===
+    # 原因：前端 RPA 开关需要只修改 rpa.enabled 字段。
+    # 影响范围：RPA 配置更新接口。
+    @app.put("/config/rpa", tags=["config"])
+    def update_rpa_config(payload: dict[str, object]) -> dict[str, object]:
+        """Updates only the rpa.enabled field."""
+
+        return service.update_rpa_config(payload)
+
+    # === MODIFIED END ===
 
     @app.post("/config/regions/upload-xlsx", tags=["config"])
     async def upload_region_xlsx(file: UploadFile = File(...)) -> dict[str, object]:
@@ -497,6 +510,27 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
     # === MODIFIED END ===
 
     # === MODIFIED START ===
+    # 原因：定时任务失败后需要强行修改上次运行时间，允许重新触发。
+    # 影响范围：Scheduler 状态修改接口。
+    @app.put("/scheduler/state", tags=["scheduler"])
+    def update_scheduler_state(
+        schedule_id: str = "default",
+        last_run_date: str | None = None,
+        last_run_at: str | None = None,
+        last_trace_id: str | None = None,
+    ) -> dict[str, object]:
+        """Force-updates the persisted scheduler state."""
+
+        return service.update_scheduler_state(
+            schedule_id,
+            last_run_date=last_run_date,
+            last_run_at=last_run_at,
+            last_trace_id=last_trace_id,
+        )
+
+    # === MODIFIED END ===
+
+    # === MODIFIED START ===
     # 原因：任务来源已配置化，提供不带 mock 语义的正式运行入口。
     # 影响范围：FastAPI 任务运行接口。
     @app.post("/tasks/run", tags=["tasks"])
@@ -510,6 +544,17 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
         """Runs one configured task through a backward-compatible endpoint."""
 
         return service.run_mock_task()
+
+    # === MODIFIED END ===
+
+    # === MODIFIED START ===
+    # 原因：定时任务失败后需要按原时间窗口重新执行。
+    # 影响范围：FastAPI 任务重推接口。
+    @app.post("/tasks/{trace_id}/repush", tags=["tasks"])
+    def repush_task(trace_id: str) -> dict[str, object]:
+        """Re-runs a task using the same time window as a previous run."""
+
+        return service.repush_task(trace_id)
 
     # === MODIFIED END ===
 

@@ -367,6 +367,21 @@ class ConfigService:
         return self.replace(path, data)
     # === MODIFIED END ===
 
+    # === MODIFIED START ===
+    # 原因：前端 RPA 开关需要只修改 rpa.enabled 字段，不替换整个配置。
+    # 影响范围：/config/rpa PUT。
+    def update_rpa(self, config_path: str | Path, enabled: bool) -> AppConfig:
+        """Updates only the rpa.enabled field in config."""
+
+        path = Path(config_path)
+        data = json.loads(path.read_text(encoding="utf-8"))
+        rpa = data.setdefault("rpa", {})
+        if not isinstance(rpa, dict):
+            raise ValueError("rpa must be an object")
+        rpa["enabled"] = bool(enabled)
+        return self.replace(path, data)
+    # === MODIFIED END ===
+
     def from_dict(self, data: dict[str, Any]) -> AppConfig:
         task = data.get("task", {})
         # === MODIFIED START ===

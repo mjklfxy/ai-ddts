@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import re
+
+_CITY_REMARKS = {"新增", "新加", "备注", "新增区域", "新增限发"}
 
 
 def load_restricted_regions_from_xlsx(xlsx_path: str | Path) -> list[dict[str, str | None]]:
@@ -61,30 +64,39 @@ def _load_via_openpyxl(path: Path) -> list[dict[str, str | None]]:
     wb = openpyxl.load_workbook(str(path))
     ws = wb.active
 
-    raw_rows: list[tuple[str, str, str]] = []
-    last_sku = ""
-    last_province = ""
-    last_city = ""
+    # === MODIFIED START ===
+    # 原因：限发区域 Excel 的产品、省、市三列都可能存在合并单元格；逐行 forward-fill 会重复展开，
+    #       且会把“新增”等备注误当作市区。
+    # 影响范围：限发区域 XLSX 上传解析。
+    try:
+        merged_lookup = _merged_lookup(ws)
+        raw_rows: list[tuple[str, str, str]] = []
+        seen_product_blocks: set[tuple[int, int]] = set()
 
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        sku_original = _cell_str(row, 0)
-        province_original = _cell_str(row, 1)
-        city_original = _cell_str(row, 2)
+        for row_idx in range(2, ws.max_row + 1):
+            product_anchor = _merged_anchor(merged_lookup, row_idx, 1)
+            if product_anchor in seen_product_blocks:
+                continue
+            seen_product_blocks.add(product_anchor)
 
-        if not sku_original and not province_original and not city_original:
-            continue
+            sku_text = _cell_value(ws, merged_lookup, row_idx, 1)
+            if not sku_text:
+                continue
 
-        sku_text = sku_original or last_sku
-        province = province_original or last_province
-        city = city_original or last_city
+            start_row, end_row = _row_span(merged_lookup, row_idx, 1)
+            for region_row_idx in range(start_row, end_row + 1):
+                province = _cell_value(ws, merged_lookup, region_row_idx, 2)
+                city = _normalized_city(
+                    _cell_value(ws, merged_lookup, region_row_idx, 3)
+                )
+                if not province:
+                    continue
+                raw_rows.append((sku_text, province, city))
 
-        last_sku = sku_text
-        last_province = province
-        last_city = city
-        raw_rows.append((sku_text, province, city))
-
-    wb.close()
-    return _expand_products(raw_rows)
+        return _dedupe_regions(_expand_products(raw_rows))
+    finally:
+        wb.close()
+    # === MODIFIED END ===
 
 
 def _cell_str(row: tuple[Any, ...], index: int) -> str:
@@ -107,20 +119,117 @@ def _cell_str_xls(ws, row_idx: int, col_idx: int) -> str:
 
 
 def _expand_products(raw_rows: list[tuple[str, str, str]]) -> list[dict[str, str | None]]:
+    # === MODIFIED START ===
+    # 原因：同一个产品块需要先拆 SKU，再套用块内全部限发区域，避免输出顺序和合并行数耦合。
+    # 影响范围：限发区域 XLS/XLSX 上传解析。
     result: list[dict[str, str | None]] = []
+    grouped_rows: list[tuple[str, list[tuple[str, str]]]] = []
     for sku_text, province, city in raw_rows:
+        if grouped_rows and grouped_rows[-1][0] == sku_text:
+            grouped_rows[-1][1].append((province, city))
+        else:
+            grouped_rows.append((sku_text, [(province, city)]))
+
+    for sku_text, regions in grouped_rows:
         for product in _split_products(sku_text):
-            result.append({
-                "sku_code": product,
-                "province": province or None,
-                "city": city or None,
-            })
+            for province, city in regions:
+                result.append({
+                    "sku_code": product,
+                    "province": province or None,
+                    "city": city or None,
+                })
     return result
+    # === MODIFIED END ===
 
 
 def _split_products(text: str) -> list[str]:
     """Split products by newline within a cell."""
-    return [part.strip() for part in text.split("\n") if part.strip()]
+    # === MODIFIED START ===
+    # 原因：Excel 粘贴数据可能用超长空白分隔 SKU；普通空格可能是 SKU 名称的一部分，不能拆。
+    # 影响范围：限发区域 XLS/XLSX 上传解析。
+    normalized = text.replace("\u00a0", " ").replace("\u3000", " ")
+    return [
+        part.strip()
+        for part in re.split(r"(?:\r\n|\r|\n|\t| {8,})+", normalized)
+        if part.strip()
+    ]
+    # === MODIFIED END ===
+
+
+# === MODIFIED START ===
+# 原因：集中处理 XLSX 合并单元格、备注市区和重复限发区域，避免上传解析生成错误配置。
+# 影响范围：限发区域 XLSX 上传解析。
+def _merged_lookup(ws) -> dict[tuple[int, int], tuple[int, int, int, int]]:
+    lookup: dict[tuple[int, int], tuple[int, int, int, int]] = {}
+    for cell_range in ws.merged_cells.ranges:
+        bounds = (
+            cell_range.min_row,
+            cell_range.min_col,
+            cell_range.max_row,
+            cell_range.max_col,
+        )
+        for row_idx in range(cell_range.min_row, cell_range.max_row + 1):
+            for col_idx in range(cell_range.min_col, cell_range.max_col + 1):
+                lookup[(row_idx, col_idx)] = bounds
+    return lookup
+
+
+def _merged_anchor(
+    merged_lookup: dict[tuple[int, int], tuple[int, int, int, int]],
+    row_idx: int,
+    col_idx: int,
+) -> tuple[int, int]:
+    bounds = merged_lookup.get((row_idx, col_idx))
+    if bounds is None:
+        return (row_idx, col_idx)
+    return (bounds[0], bounds[1])
+
+
+def _row_span(
+    merged_lookup: dict[tuple[int, int], tuple[int, int, int, int]],
+    row_idx: int,
+    col_idx: int,
+) -> tuple[int, int]:
+    bounds = merged_lookup.get((row_idx, col_idx))
+    if bounds is None:
+        return (row_idx, row_idx)
+    return (bounds[0], bounds[2])
+
+
+def _cell_value(
+    ws,
+    merged_lookup: dict[tuple[int, int], tuple[int, int, int, int]],
+    row_idx: int,
+    col_idx: int,
+) -> str:
+    anchor_row, anchor_col = _merged_anchor(merged_lookup, row_idx, col_idx)
+    value = ws.cell(anchor_row, anchor_col).value
+    if value is None:
+        return ""
+    return str(value).strip()
+
+
+def _normalized_city(city: str) -> str:
+    if city in _CITY_REMARKS:
+        return ""
+    return city
+
+
+def _dedupe_regions(items: list[dict[str, str | None]]) -> list[dict[str, str | None]]:
+    result: list[dict[str, str | None]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for item in items:
+        key = (
+            item["sku_code"] or "",
+            item["province"] or "",
+            item["city"] or "",
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(item)
+    return result
+# === MODIFIED END ===
 
 
 def load_restricted_regions_from_bytes(data: bytes, filename: str = "upload.xlsx") -> list[dict[str, str | None]]:

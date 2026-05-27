@@ -64,6 +64,7 @@ from infrastructure.xlsx_region_parser import load_restricted_regions_from_bytes
 from infrastructure.xlsx_sku_group_parser import load_sku_groups_from_bytes
 from infrastructure.xlsx_sku_parser import load_skus_from_bytes
 from domain.sku_group_info import SkuGroupInfo
+from shared.env import resolve_config_path
 from shared.logging.logger import log_error, log_info
 
 
@@ -75,7 +76,7 @@ class ApiService:
     # 影响范围：任务运行和查询接口。
     def __init__(
         self,
-        config_path: str | Path = Path("config") / "config.json",
+        config_path: str | Path = resolve_config_path(),
         task_store_path: str | Path = Path("outputs") / "task_runs.json",
         # === MODIFIED START ===
         # 原因：API 需要维护 ERP 同步来的 SKU-供应商对照数据。
@@ -116,6 +117,7 @@ class ApiService:
         # 影响范围：ApiService 同步逻辑依赖注入。
         userid_urlopen: Callable[..., Any] | None = None,
         product_caller_sync_urlopen: Callable[..., Any] | None = None,
+        supplier_urlopen: Callable[..., Any] | None = None,
         # === MODIFIED END ===
     ) -> None:
         self.config_path = Path(config_path)
@@ -125,7 +127,7 @@ class ApiService:
         # 影响范围：/supplier-mappings 与 /tasks/mock-run。
         self.supplier_mapping_path = Path(supplier_mapping_path)
         self.supplier_mapping_store = SupplierMappingStore(self.supplier_mapping_path)
-        self.supplier_client = CloudWarehouseClient(local_path=self.supplier_mapping_path)
+        self.supplier_client = CloudWarehouseClient(local_path=self.supplier_mapping_path, urlopen=supplier_urlopen)
         # === MODIFIED END ===
         # === MODIFIED START ===
         # 原因：API 需要复用同一个异常订单存储。
@@ -200,6 +202,19 @@ class ApiService:
 
         config = ConfigService().update_rules(self.config_path, payload)
         return serialize_config(config)
+
+    # === MODIFIED START ===
+    # 原因：前端 RPA 开关需要只修改 rpa.enabled，不替换整个配置。
+    # 影响范围：/config/rpa PUT。
+    def update_rpa_config(self, payload: dict[str, object]) -> dict[str, object]:
+        """Updates only the rpa.enabled field."""
+
+        enabled = payload.get("enabled")
+        if not isinstance(enabled, bool):
+            raise ValueError("enabled must be a boolean")
+        config = ConfigService().update_rpa(self.config_path, enabled)
+        return serialize_config(config)
+    # === MODIFIED END ===
 
     # === MODIFIED START ===
     # 原因：前端需要主动触发商品推送人配置同步，router 只能委托应用服务。
@@ -714,6 +729,28 @@ class ApiService:
         return self._build_scheduler().status_many(config.schedules)
         # === MODIFIED END ===
 
+    # === MODIFIED START ===
+    # 原因：定时任务失败后需要强行修改上次运行时间，允许重新触发。
+    # 影响范围：/scheduler/state PUT。
+    def update_scheduler_state(
+        self,
+        schedule_id: str = "default",
+        *,
+        last_run_date: str | None = None,
+        last_run_at: str | None = None,
+        last_trace_id: str | None = None,
+    ) -> dict[str, object]:
+        """Force-updates the persisted scheduler state for one schedule."""
+
+        self.scheduler_state_store.update_schedule_state(
+            schedule_id,
+            last_run_date=last_run_date,
+            last_run_at=last_run_at,
+            last_trace_id=last_trace_id,
+        )
+        return self.get_scheduler_status()
+    # === MODIFIED END ===
+
     def tick_scheduler(self) -> dict[str, object]:
         """Runs one scheduler tick and returns whether a task was triggered."""
 
@@ -788,6 +825,36 @@ class ApiService:
         """Runs one configured task through the backward-compatible mock-run endpoint."""
 
         return self.run_task()
+    # === MODIFIED END ===
+
+    # === MODIFIED START ===
+    # 原因：定时任务失败后需要按原时间窗口重新拉单+RPA+推送。
+    # 影响范围：/tasks/{trace_id}/repush。
+    def repush_task(self, trace_id: str) -> dict[str, object]:
+        """Re-runs a task using the same time window as a previous run."""
+
+        from datetime import datetime as _dt
+
+        summary = self.task_run_store.get_by_trace_id(trace_id)
+        if summary is None:
+            raise ValueError(f"任务 {trace_id} 不存在")
+        if not summary.window_start or not summary.window_end:
+            raise ValueError(f"任务 {trace_id} 缺少时间窗口信息")
+
+        window_start = _dt.fromisoformat(summary.window_start)
+        window_end = _dt.fromisoformat(summary.window_end)
+
+        new_summary = run_once(
+            config_path=self.config_path,
+            supplier_mapping_path=self.supplier_mapping_path,
+            existing_task_codes_provider=self.task_run_store.list_trace_ids,
+            exception_order_path=self.exception_order_path,
+            pushed_order_path=self.pushed_order_path,
+            execution_log_path=self.execution_log_store.history_path,
+            window_override=(window_start, window_end),
+        )
+        self.task_run_store.append(new_summary)
+        return self._summary_payload(new_summary)
     # === MODIFIED END ===
 
     def get_latest_summary(self) -> dict[str, object] | None:

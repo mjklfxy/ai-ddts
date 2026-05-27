@@ -23,7 +23,11 @@
       "Bash(curl -s http://localhost:8000/scheduler/loop/status)",
       "Bash(curl -s -X POST http://localhost:8000/tasks/run)",
       "Bash(git checkout *)",
-      "Bash(git merge *)"
+      "Bash(git merge *)",
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(python scripts/manual_push_group.py)",
+      "Bash(powershell -NoProfile -Command '$PROFILE.AllUsersAllHosts; $PROFILE.CurrentUserAllHosts; Test-Path $PROFILE.CurrentUserAllHosts')",
+      "Bash(uv run python -c ' *)"
     ]
   }
 }

@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from application.config_service import AppConfig, ConfigService
+from shared.env import resolve_config_path
 
 # === MODIFIED START ===
 # 原因：任务执行过程需要生成面向业务人员的可视化执行日志。
@@ -121,7 +122,7 @@ class RunSummary:
 # 原因：任务运行需要读取 ERP 同步的 SKU-供应商对照数据。
 # 影响范围：手动运行入口和 API mock-run。
 def run_once(
-    config_path: str | Path = Path("config") / "config.json",
+    config_path: str | Path = resolve_config_path(),
     supplier_mapping_path: str | Path = Path("outputs") / "sku_supplier_mappings.json",
     exception_order_path: str | Path = Path("outputs") / "exception_orders.json",
     # === MODIFIED START ===
@@ -147,11 +148,19 @@ def run_once(
     # 影响范围：Scheduler 触发的 run_once 窗口计算。
     scheduled_last_run_at: str | None = None,
     # === MODIFIED END ===
+    # === MODIFIED START ===
+    # 原因：重推功能需要按历史任务的时间窗口重新执行，跳过默认窗口计算。
+    # 影响范围：run_once 窗口计算逻辑。
+    window_override: tuple[datetime, datetime] | None = None,
+    # === MODIFIED END ===
+    supplier_urlopen: Callable[..., object] | None = None,
 ) -> RunSummary:
     """Runs one configured task with configured rules."""
 
     config = ConfigService().load(config_path)
-    supplier_client = CloudWarehouseClient(local_path=supplier_mapping_path)
+    supplier_client = CloudWarehouseClient(
+        local_path=supplier_mapping_path, urlopen=supplier_urlopen,
+    )
     # === MODIFIED START ===
     # 原因：批次号日期、任务创建时间和拉单窗口结束时间需要使用同一个 now。
     # 影响范围：run_once 生成的 TaskContext。
@@ -172,6 +181,12 @@ def run_once(
             window_start = datetime.fromisoformat(scheduled_last_run_at)
         else:
             window_start = window_end - timedelta(days=1)
+    # === MODIFIED START ===
+    # 原因：重推功能按历史任务的时间窗口执行，覆盖默认窗口计算。
+    # 影响范围：run_once 窗口计算逻辑。
+    if window_override is not None:
+        window_start, window_end = window_override
+    # === MODIFIED END ===
     task_context = TaskService(
         trace_id_generator=task_trace_id_generator,
         clock=task_clock,
@@ -396,7 +411,7 @@ def build_pipeline_from_config(
         # 原因：祺信文件直推模式需要为每个文件动态构造签名下载地址。
         # 影响范围：Pipeline._deliver_batches、MessagePayload.file_url。
         download_base_url=config.download.base_url or None,
-        download_secret_key=(env or os.environ).get(config.download.secret_key_env),
+        download_secret_key=(os.environ if env is None else env).get(config.download.secret_key_env),
         # === MODIFIED START ===
         # 原因：文件生成后自动上传到公网文件服务器。
         # 影响范围：Pipeline 推送阶段。
@@ -427,7 +442,7 @@ def build_kingdee_transport_from_config(
             tracking_id=f"LOCAL-KINGDEE-{request.trace_id}"
         )
     if config.kingdee.mode == "http":
-        source_env = env or os.environ
+        source_env = os.environ if env is None else env
         token = source_env.get(config.kingdee.token_env)
         return KingdeeHttpTransport(
             api_url=config.kingdee.api_url,
@@ -456,7 +471,7 @@ def build_message_sender_from_config(
         def sender(payload):
             return f"LOCAL-MSG-{payload.group_name}"
     elif config.qixin.mode == "qixin":
-        source_env = env or os.environ
+        source_env = os.environ if env is None else env
         secret_key = source_env.get(config.qixin.secret_key_env) or config.qixin.secret_key_env
         client = QixinClient(
             api_base_url=config.qixin.api_base_url,
@@ -602,7 +617,7 @@ def build_jikeyun_client_from_config(
 ) -> JikeyunClient:
     """Builds a JackYun client from safe config and environment credentials."""
 
-    source_env = env or os.environ
+    source_env = os.environ if env is None else env
     credentials = JikeyunCredentials(
         app_key=_required_env(source_env, config.jikeyun.app_key_env),
         app_secret=_required_env(source_env, config.jikeyun.app_secret_env),
@@ -1036,60 +1051,48 @@ def _mock_raw_orders(config: AppConfig) -> list[dict[str, object]]:
     ignored_warehouse = next(iter(excluded_warehouses), "WH-IGNORE")
 
     return [
-        # 测试正常推送流程——sku="测试sku" 匹配 sku_group_map 中的 weworktest 群
-        # _raw_order(
-        #     order_no="JY202605189067",
-        #     sku_code="测试sku",
-        #     warehouse_code="WH-LOCAL",
-        #     province="广东省",
-        #     city="深圳市",
-        # ),
-        # 测试 sop 群推送流程——sku="测试sku-sop" 匹配 sku_group_map 中的 sop测试1 群
         _raw_order(
-            order_no="JY202605189069",
-            sku_code="测试sku-sop",
+            order_no="SO-LOCAL-PASS",
+            sku_code=pass_sku,
             warehouse_code="WH-LOCAL",
             province="广东省",
             city="深圳市",
         ),
-        # 测试异常流程——未配置群的 SKU 被 GroupRule 拦截
-        # _raw_order(
-        #     order_no="JY202605189068",
-        #     sku_code=unmapped_sku,
-        #     warehouse_code="WH-LOCAL",
-        #     province="广东省",
-        #     city="深圳市",
-        # ),
-        # === MODIFIED START ===
-        # 原因：测试 xlsx 兜底——delivery_order_no 命中 xlsx 真实订单编号，API 无收件人信息。
-        # 影响范围：本地 mock-run 示例数据。
-        # _raw_order(
-        #     order_no="JY202605189067",
-        #     sku_code="防晒服AMGB2377/白色/2XL",
-        #     warehouse_code="WH-LOCAL",
-        #     province="广东省",
-        #     city="深圳市",
-        #     delivery_order_no="JY2026051213434",
-        #     receiver_name="",
-        #     address="",
-        #     phone="",
-        # ),
-        # === MODIFIED END ===
-        # === MODIFIED START ===
-        # 原因：测试极值兜底——API 和 xlsx 都没有收件人信息，最终显示"未提供"。
-        # 影响范围：本地 mock-run 示例数据。
-        # _raw_order(
-        #     order_no="SO-LOCAL-NO-INFO",
-        #     sku_code=pass_sku,
-        #     warehouse_code="WH-LOCAL",
-        #     province="广东省",
-        #     city="深圳市",
-        #     delivery_order_no="NOT-IN-XLSX",
-        #     receiver_name="",
-        #     address="",
-        #     phone="",
-        # ),
-        # === MODIFIED END ===
+        _raw_order(
+            order_no="SO-LOCAL-PASS-2",
+            sku_code=pass_sku,
+            warehouse_code="WH-LOCAL",
+            province="广东省",
+            city="深圳市",
+        ),
+        _raw_order(
+            order_no="SO-LOCAL-PASS-3",
+            sku_code=pass_sku,
+            warehouse_code="WH-LOCAL",
+            province="广东省",
+            city="深圳市",
+        ),
+        _raw_order(
+            order_no="SO-LOCAL-PASS-4",
+            sku_code=pass_sku,
+            warehouse_code="WH-LOCAL",
+            province="广东省",
+            city="深圳市",
+        ),
+        _raw_order(
+            order_no="SO-LOCAL-IGNORE",
+            sku_code=pass_sku,
+            warehouse_code=ignored_warehouse,
+            province="广东省",
+            city="深圳市",
+        ),
+        _raw_order(
+            order_no="SO-LOCAL-ERROR",
+            sku_code=unmapped_sku,
+            warehouse_code="WH-LOCAL",
+            province="广东省",
+            city="深圳市",
+        ),
     ]
 
 

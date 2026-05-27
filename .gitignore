@@ -5,3 +5,5 @@ tmp/
 outputs/
 __pycache__/
 *.pyc
+.env
+config/config.prod.json

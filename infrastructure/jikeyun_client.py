@@ -121,7 +121,7 @@ class JikeyunHttpTransport:
                 payload = _decode_response(raw_body)
                 _raise_for_api_error(payload)
                 return _page_result_from_payload(payload, page_size=request.page_size)
-            except urllib.error.URLError as exc:
+            except (urllib.error.URLError, ValueError) as exc:
                 last_exc = exc
                 if attempt < self.max_retries:
                     sleep(self.retry_delay_seconds * attempt)
@@ -266,13 +266,13 @@ class JikeyunClient:
         # 原因：可选执行 RPA 导出，随后从配置的 XLSX 路径补齐订单地址信息。
         # 影响范围：fetch_orders 吉客云订单映射前置数据准备。
         self._run_rpa_export(trace_id, start_time, end_time)
-        xlsx_lookup = load_order_address_lookup(self.xlsx_path)
+        xlsx_lookup = load_order_address_lookup(self.xlsx_path) if self.rpa_exporter is not None else None
         self.log_info(
             "jikeyun_xlsx_lookup_loaded",
             {
                 "trace_id": trace_id,
                 "xlsx_path": str(self.xlsx_path),
-                "record_count": len(xlsx_lookup),
+                "record_count": len(xlsx_lookup) if xlsx_lookup is not None else 0,
             },
         )
         # === MODIFIED END ===
@@ -350,6 +350,7 @@ class JikeyunClient:
                     "reason": str(exc)[:200],
                 },
             )
+            raise
 
     @staticmethod
     def _noop_log_info(event: str, payload: dict[str, object]) -> None:

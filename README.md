@@ -63,12 +63,15 @@ uv sync
 
 ### 环境变量
 
-| 变量名 | 说明 | 来源 |
+在项目根目录创建 `.env` 文件（参考 `.env.example`）：
+
+| 变量名 | 说明 | 默认值 |
 |---|---|---|
-| `JIKEYUN_APPKEY` | 吉客云开放平台 AppKey | 吉客云开放平台 |
-| `JIKEYUN_APP_SECRET` | 吉客云开放平台 AppSecret | 吉客云开放平台 |
-| `DOWNLOAD_SECRET_KEY` | 文件下载链接签名密钥 | 自行设定，与 :243 服务器一致 |
-| `KINGDEE_TOKEN` | 金蝶 API Token | 金蝶系统（未启用可忽略） |
+| `APP_ENV` | 环境标识（dev/prod） | `dev` |
+| `JIKEYUN_APPKEY` | 吉客云开放平台 AppKey | 无 |
+| `JIKEYUN_APP_SECRET` | 吉客云开放平台 AppSecret | 无 |
+| `DOWNLOAD_SECRET_KEY` | 文件下载链接签名密钥 | 无 |
+| `ADMIN_PASSWORD` | 管理后台密码 | `changeme` |
 
 **设置方式：** 在项目根目录创建 `.env` 文件或系统环境变量。
 
@@ -79,16 +82,16 @@ uv sync
 ```bash
 cd C:\Users\666\projects\AI-DDTS
 
-# 推荐方式
+# 开发环境（默认，mock 模式，调度关闭）
 uv run uvicorn interfaces.app:create_app --host 0.0.0.0 --port 8000 --factory
 
-# 或直接 python
-python -m uvicorn interfaces.app:create_app --host 0.0.0.0 --port 8000 --factory
+# 生产环境
+$env:APP_ENV="prod"; uv run uvicorn interfaces.app:create_app --host 0.0.0.0 --port 8000 --factory
 ```
 
 **必须加 `--factory`**，因为 `interfaces/app.py` 通过 `create_app()` 函数返回 FastAPI 实例，没有全局 app 变量。
 
-启动后访问 `http://localhost:8000` 进入管理后台。
+启动后访问 `http://localhost:8000` 进入管理后台。页面左下角会显示当前环境标识（DEV / PROD）。
 
 ---
 
@@ -260,13 +263,15 @@ AI-DDTS/
 │       ├── region_rule.py           # 区域限发 → ERROR
 │       ├── group_rule.py            # 未配置群 → ERROR
 │       ├── customer_type_rule.py    # 个人客户过滤（-MULTI 后缀）
-│       └── order_prefix_rule.py     # 订单前缀白名单
+│       ├── order_prefix_rule.py     # 订单前缀白名单
+│       └── supplier_rule.py         # SKU-供应商映射（PASS，仅记录映射关系）
 ├── infrastructure/                  # 基础设施层 — 外部 API 适配
-│   ├── jikeyun_client.py            # 吉客云 OpenAPI 客户端（分页、签名）
+│   ├── jikeyun_client.py            # 吉客云 OpenAPI 客户端（分页、签名、重试）
 │   ├── qixin_client.py              # 祺信 API 客户端（文本推送/文件直推）
 │   ├── file_upload_client.py        # 文件上传至公网服务器
 │   ├── message_adapter.py           # 消息发送重试适配器
 │   ├── cloud_warehouse_client.py    # 云仓 API（供应商同步）
+│   ├── product_caller_sync_client.py # 配置同步客户端
 │   ├── kingdee_service.py           # 金蝶采购单提交
 │   ├── db_to_xlsx.py                # RPA：PyAutoGUI 桌面导出自动化
 │   ├── xlsx_region_parser.py        # 区域限发 XLSX 解析
@@ -334,7 +339,18 @@ AI-DDTS/
 
 测试时改为 `"mock"`，使用内置测试订单验证流程。
 
-### 5.4 推送模式
+### 5.4 RPA 配置
+
+```json
+"rpa": {
+  "enabled": true,
+  "xlsx_path": "input\\销售单查询.xlsx"
+}
+```
+
+RPA 通过 PyAutoGUI 从吉客云桌面端自动导出收件人地址/电话，作为 API 拉单的补充数据源。`enabled: true` 时自动读取 XLSX 补充地址信息。
+
+### 5.5 推送模式
 
 ```json
 "qixin": {
@@ -342,7 +358,7 @@ AI-DDTS/
 }
 ```
 
-### 5.5 SKU-群映射
+### 5.6 SKU-群映射
 
 `rules.sku_group_map` 是核心配置，决定每个 SKU 推送到哪个企业微信群：
 
@@ -358,11 +374,11 @@ AI-DDTS/
 
 **重要：** SKU 名称必须与吉客云 API 返回的 `goodsName` / `skuName` **完全一致**（包括标点、空格、特殊字符）。不匹配的 SKU 会被 GroupRule 拦截，报"未配置推送群"。
 
-可通过 Web 后台或直接编辑 config.json 维护。也可以通过 API 上传 XLSX 批量导入（`POST /upload/sku-groups`）。
+可通过 Web 后台或直接编辑 config.json 维护。也可以通过 API 上传 XLSX 批量导入（`POST /config/sku-groups/upload-xlsx`）。
 
 **排查 SKU 匹配问题：** 查看 `outputs/exception_orders.json`，筛选 `reason` 包含"未配置"的记录，提取其中的 `sku_code` 字段，就是缺失的 SKU。
 
-### 5.6 其他规则
+### 5.7 其他规则
 
 | 配置项 | 说明 |
 |---|---|
@@ -431,21 +447,32 @@ POST /scheduler/tick          # 手动触发一次 tick
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | `/health` | 健康检查 |
-| GET | `/login` | 管理员登录页 |
-| GET/POST | `/config` | 配置查看/更新 |
-| POST | `/tasks/run` | 手动触发任务 |
-| POST | `/tasks/mock-run` | mock 模式触发任务 |
-| GET | `/tasks/latest` | 最新任务摘要 |
-| GET | `/scheduler/status` | 调度器状态 |
-| POST | `/scheduler/tick` | 手动触发调度 tick |
-| GET | `/scheduler/loop/status` | 后台循环状态 |
+| GET/POST | `/login` | 管理员登录页 |
+| GET | `/logout` | 退出登录 |
+| GET | `/config` | 查看配置 |
+| PUT | `/config` | 更新配置 |
+| PUT | `/config/rules` | 更新规则配置 |
+| POST | `/config/regions/upload-xlsx` | 上传区域限发 XLSX |
+| POST | `/config/sku-groups/upload-xlsx` | 上传 SKU 群组 XLSX |
+| POST | `/config/sku-groups/sync-caller-configs` | 同步配置到祺信 |
+| POST | `/config/excluded-skus/upload-xlsx` | 上传排除 SKU XLSX |
+| GET | `/supplier-mappings` | 供应商映射列表 |
+| PUT | `/supplier-mappings` | 更新供应商映射 |
 | GET | `/exception-orders` | 异常订单列表 |
 | GET | `/exception-orders/download` | 异常订单 CSV 导出 |
 | GET | `/execution-logs` | 执行日志列表 |
-| GET | `/supplier-mappings` | 供应商映射 |
-| POST | `/upload/sku-groups` | 上传 SKU 群组 XLSX |
-| POST | `/upload/regions` | 上传区域限发 XLSX |
-| POST | `/upload/excluded-skus` | 上传排除 SKU XLSX |
+| GET | `/execution-logs/download` | 执行日志 CSV 导出 |
+| GET | `/tasks/run` | 手动触发任务 |
+| POST | `/tasks/mock-run` | mock 模式触发任务 |
+| GET | `/tasks/latest` | 最新任务摘要 |
+| GET | `/tasks/history` | 任务历史记录 |
+| GET | `/tasks/{trace_id}/pushed-orders/download` | 已推送订单 CSV 导出 |
+| GET | `/tasks/{trace_id}/payment` | 查看付款信息 |
+| POST | `/tasks/{trace_id}/payment-receipt` | 上传付款回执 |
+| GET | `/order-files/download` | 下载订单文件 |
+| GET | `/scheduler/status` | 调度器状态 |
+| POST | `/scheduler/tick` | 手动触发调度 tick |
+| GET | `/scheduler/loop/status` | 后台循环状态 |
 
 ---
 
