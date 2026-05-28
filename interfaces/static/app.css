@@ -1595,6 +1595,143 @@ tbody tr:hover {
   min-height: 34px;
   padding: 0 12px;
 }
+
+/* === MODIFIED START === */
+/* 原因：规则配置表格化改造 — 可编辑单元格、分页、搜索栏样式。 */
+/* 影响范围：限发区域、SKU群、供应商对照表格。 */
+
+.rule-config-table {
+  width: 100%;
+}
+
+.rule-config-table table {
+  min-width: 600px;
+}
+
+.rule-config-table td,
+.rule-config-table th {
+  padding: 10px 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.rule-table-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.rule-table-search {
+  flex: 1;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  color: var(--ink-700);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: 0;
+}
+
+.rule-table-search:focus {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.rule-table-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.editable-cell {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.editable-cell:hover {
+  background: #f0f5ff;
+}
+
+.editable-cell.is-editing {
+  padding: 4px 6px;
+  overflow: visible;
+}
+
+.editable-cell.is-editing input {
+  width: 100%;
+  min-width: 80px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+  color: var(--ink-700);
+  background: #fff;
+  border: 1px solid var(--blue-500);
+  border-radius: 6px;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--ink-500);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagination-controls button {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  color: var(--ink-600);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  border-color: var(--blue-500);
+  color: var(--blue-600);
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pagination-controls select {
+  height: 30px;
+  padding: 0 6px;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.rule-config-table button[data-action="remove-row"] {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
 /* === MODIFIED END === */
 
 .model-card,

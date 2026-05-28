@@ -1197,7 +1197,7 @@ def _optional_string(data: dict[str, Any], key: str) -> str | None:
     if value is None:
         return None
     if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{key} must be a non-empty string when provided")
+        return None
     return value.strip()
 
 

@@ -378,20 +378,32 @@
                       <h3>限发区域</h3>
                       <p>按 SKU（商品名称）+ 省市区匹配，命中后整单进入异常。</p>
                     </div>
-                    <!-- === MODIFIED START ===
-                    原因：限发区域需要和排除 SKU 一样支持模块级启用开关。
-                    影响范围：规则配置中心模块表单。
-                    === MODIFIED END === -->
                     <label class="toggle-row">
                       <input id="restrictedRegionsEnabledInput" type="checkbox" />
                       <span class="switch" aria-hidden="true"></span>
                       <strong>模块启用</strong>
                     </label>
                   </div>
-                  <label>
-                    <span>限发区域：商品名称,省,市</span>
-                    <textarea id="regionTextInput" placeholder="每行一条，格式：商品名称,省,市&#10;例如：正大单冻大胸/1000袋以上,河北,保定&#10;产品d,广东,深圳" rows="6"></textarea>
-                  </label>
+                  <div class="rule-table-toolbar">
+                    <input type="search" id="regionSearchInput" class="rule-table-search" placeholder="搜索产品名称 / 省 / 市" />
+                  </div>
+                  <div class="table-wrap rule-config-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>产品名称</th>
+                          <th>省</th>
+                          <th>市</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody id="regionTableBody"></tbody>
+                    </table>
+                  </div>
+                  <div class="pagination-bar" id="regionPagination"></div>
+                  <div class="rule-table-actions">
+                    <button class="ghost-button" type="button" id="addRegionRowButton">新增一行</button>
+                  </div>
                   <details class="region-text-details">
                     <summary>上传 Excel 批量导入</summary>
                     <div class="region-text-import">
@@ -409,20 +421,32 @@
                       <h3>SKU群配置</h3>
                       <p>通过规则的订单会按 SKU（商品名称）的群配置拆分推送文件。</p>
                     </div>
-                    <!-- === MODIFIED START ===
-                    原因：SKU 群配置需要和排除 SKU 一样支持模块级启用开关。
-                    影响范围：规则配置中心模块表单。
-                    === MODIFIED END === -->
                     <label class="toggle-row">
                       <input id="skuGroupMapEnabledInput" type="checkbox" />
                       <span class="switch" aria-hidden="true"></span>
                       <strong>模块启用</strong>
                     </label>
                   </div>
-                  <label>
-                    <span>SKU 群配置：商品名称,群名,群主手机号（手机号可选）</span>
-                    <textarea id="skuGroupMapInput" placeholder="圣琪酵母粉/5g,GROUP-A,13800138000"></textarea>
-                  </label>
+                  <div class="rule-table-toolbar">
+                    <input type="search" id="skuGroupSearchInput" class="rule-table-search" placeholder="搜索产品名称 / 群名 / 手机号" />
+                  </div>
+                  <div class="table-wrap rule-config-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>产品名称</th>
+                          <th>群名</th>
+                          <th>手机号</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody id="skuGroupTableBody"></tbody>
+                    </table>
+                  </div>
+                  <div class="pagination-bar" id="skuGroupPagination"></div>
+                  <div class="rule-table-actions">
+                    <button class="ghost-button" type="button" id="addSkuGroupRowButton">新增一行</button>
+                  </div>
                   <details class="region-text-details">
                     <summary>上传 Excel 批量导入</summary>
                     <div class="region-text-import">
@@ -438,26 +462,33 @@
                   <div class="rule-module-head">
                     <div>
                       <h3>SKU供应商对照</h3>
-                      <!-- === MODIFIED START ===
-                      原因：SKU-供应商对照不再需要供应商编码，后续将由 ERP 商品档案定时同步更新。
-                      影响范围：规则配置中心 SKU 供应商对照说明。
-                      === MODIFIED END === -->
                       <p>用于金蝶采购申请提交，SKU 指商品名称；后续可由 ERP 商品档案定时同步，当前也可手工维护。</p>
                     </div>
-                    <!-- === MODIFIED START ===
-                    原因：产品预设金蝶推送可启停，当前默认不启用。
-                    影响范围：规则配置中心金蝶开关。
-                    === MODIFIED END === -->
                     <label class="toggle-row">
                       <input id="kingdeeEnabledInput" type="checkbox" />
                       <span class="switch" aria-hidden="true"></span>
                       <strong>启用推送金蝶</strong>
                     </label>
                   </div>
-                  <label>
-                    <span>SKU 供应商对照：商品名称,供应商名称</span>
-                    <textarea id="supplierMappingsInput" placeholder="圣琪酵母粉/5g,供应商A"></textarea>
-                  </label>
+                  <div class="rule-table-toolbar">
+                    <input type="search" id="supplierSearchInput" class="rule-table-search" placeholder="搜索产品名称 / 供应商" />
+                  </div>
+                  <div class="table-wrap rule-config-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>产品名称</th>
+                          <th>供应商名称</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody id="supplierTableBody"></tbody>
+                    </table>
+                  </div>
+                  <div class="pagination-bar" id="supplierPagination"></div>
+                  <div class="rule-table-actions">
+                    <button class="ghost-button" type="button" id="addSupplierRowButton">新增一行</button>
+                  </div>
                 </section>
 
                 <section class="rule-panel" data-rule-panel="schedule">
