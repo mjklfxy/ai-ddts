@@ -58,6 +58,14 @@
             <span class="nav-icon">款</span>
             <span>付款回执</span>
           </button>
+          <!-- === MODIFIED START ===
+          原因：新增临时推送独立页面。
+          影响范围：左侧导航。
+          === MODIFIED END === -->
+          <button class="nav-item" data-view="temp-push">
+            <span class="nav-icon">临</span>
+            <span>临时推送</span>
+          </button>
         </nav>
         <div class="sidebar-footer">
           <span class="pulse"></span>
@@ -478,6 +486,7 @@
                     <button class="ghost-button" type="button" id="addScheduleButton">新增定时任务</button>
                   </div>
                 </section>
+
               </div>
             </section>
 
@@ -524,6 +533,80 @@
               <div class="recent-upload" id="recentUploadInfo">暂无上传记录</div>
             </aside>
           </div>
+        </section>
+
+        <!-- === MODIFIED START ===
+        原因：临时推送独立页面，集成SKU配置+执行+历史。
+        影响范围：前端页面结构。
+        === MODIFIED END === -->
+        <section class="view" id="view-temp-push" data-title="临时推送" data-name="临时推送">
+          <!-- 顶部：配置+执行并排 -->
+          <div class="tp-top-row">
+            <!-- SKU 配置 -->
+            <section class="panel tp-panel">
+              <div class="panel-head">
+                <div>
+                  <h2>正选SKU配置</h2>
+                  <p>配置临时推送要筛选的SKU品名白名单</p>
+                </div>
+              </div>
+              <div class="tp-sku-body">
+                <div class="tp-sku-hint">每行一个SKU品名，匹配时保留，未匹配则丢弃</div>
+                <textarea id="specialSkuInput" rows="6" placeholder="SKU-A&#10;SKU-B&#10;SKU-C"></textarea>
+                <div class="tp-sku-actions">
+                  <button class="ghost-button" type="button" id="saveSpecialSkuButton">保存SKU配置</button>
+                  <span class="tp-sku-count" id="specialSkuCount">0 个SKU</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- 执行配置 -->
+            <section class="panel tp-panel">
+              <div class="panel-head">
+                <div>
+                  <h2>执行临时推送</h2>
+                  <p>设定时间窗口，正选SKU后推送到对应群</p>
+                </div>
+              </div>
+              <div class="tp-exec-body">
+                <div class="tp-field">
+                  <label for="tempPushStartInput">开始时间</label>
+                  <input type="datetime-local" id="tempPushStartInput" step="1" />
+                </div>
+                <div class="tp-field">
+                  <label for="tempPushEndSelect">结束时间（选择已有任务）</label>
+                  <select id="tempPushEndSelect">
+                    <option value="">请先刷新任务列表</option>
+                  </select>
+                  <span class="tp-field-hint" id="tempPushEndHint"></span>
+                </div>
+                <button class="primary-button tp-run-btn" type="button" id="tempPushRunButton">执行临时推送</button>
+              </div>
+            </section>
+          </div>
+
+          <!-- 底部：历史记录 -->
+          <section class="panel tp-panel tp-history-panel">
+            <div class="panel-head">
+              <div>
+                <h2>历史记录</h2>
+                <p>已完成的临时推送批次</p>
+              </div>
+            </div>
+            <div class="table-wrap tp-history-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>批次号</th>
+                    <th>关联任务</th>
+                    <th>推送数</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="tempPushHistoryRows"></tbody>
+              </table>
+            </div>
+          </section>
         </section>
       </main>
 

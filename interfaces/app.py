@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+from datetime import datetime
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode
@@ -635,6 +636,56 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
 
         return service.list_recent_summaries(limit)
 
+    # === MODIFIED END ===
+
+    # === MODIFIED START ===
+    # 原因：临时推送需要独立的运行、列表和下载接口。
+    # 影响范围：FastAPI 临时推送接口。
+    @app.post("/temp-push/run", tags=["temp-push"])
+    def run_temp_push(body: dict[str, object]) -> dict[str, object]:
+        """Runs one temporary push with a 2-rule engine."""
+
+        from application.temp_push_runner import run_temp_push as _run
+        window_start_str = body.get("window_start")
+        window_end_trace_id = body.get("window_end_trace_id")
+        if not window_start_str or not window_end_trace_id:
+            raise HTTPException(status_code=400, detail="window_start 和 window_end_trace_id 必填")
+        window_start = datetime.fromisoformat(str(window_start_str))
+        return _run(window_start=window_start, window_end_trace_id=str(window_end_trace_id))
+
+    @app.get("/temp-push/orders", tags=["temp-push"])
+    def list_temp_push_orders() -> dict[str, object]:
+        """Lists all temporary push records grouped by temp_push_id."""
+
+        from application.special_push_order_store import SpecialPushOrderStore
+        base_dir = Path("outputs") / "special_push"
+        if not base_dir.exists():
+            return {"items": []}
+        items = []
+        for child in sorted(base_dir.iterdir(), reverse=True):
+            if child.is_dir():
+                store = SpecialPushOrderStore(temp_push_id=child.name)
+                orders = store.list_all()
+                if orders:
+                    items.append({
+                        "temp_push_id": child.name,
+                        "order_count": len(orders),
+                        "trace_id": orders[0].trace_id if orders else "",
+                    })
+        return {"items": items}
+
+    @app.get("/temp-push/{temp_push_id}/orders/download", tags=["temp-push"])
+    def download_temp_push_orders(temp_push_id: str, trace_id: str) -> FileResponse:
+        """Downloads temporary push order details as CSV."""
+
+        from application.special_push_order_store import SpecialPushOrderStore
+        store = SpecialPushOrderStore(temp_push_id=temp_push_id)
+        file_path = store.export_csv(trace_id)
+        return FileResponse(
+            path=file_path,
+            media_type="text/csv",
+            filename=file_path.name,
+        )
     # === MODIFIED END ===
 
     # === MODIFIED START ===

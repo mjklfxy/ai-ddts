@@ -34,6 +34,11 @@ const viewMeta = {
   logs: { title: "执行日志", name: "执行日志" },
   // === MODIFIED END ===
   receipts: { title: "付款回执管理", name: "付款回执" },
+  // === MODIFIED START ===
+  // 原因：新增临时推送页面。
+  // 影响范围：页面标题与面包屑。
+  "temp-push": { title: "临时推送", name: "临时推送" },
+  // === MODIFIED END ===
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -110,6 +115,18 @@ function bindEvents() {
   document.getElementById("logEndInput").addEventListener("change", refreshExecutionLogs);
   // === MODIFIED END ===
   document.getElementById("downloadLogsButton").addEventListener("click", downloadExecutionLogs);
+  // === MODIFIED END ===
+  // === MODIFIED START ===
+  // 原因：临时推送页面事件绑定。
+  // 影响范围：临时推送交互。
+  const tempPushRunBtn = document.getElementById("tempPushRunButton");
+  if (tempPushRunBtn) tempPushRunBtn.addEventListener("click", executeTempPush);
+  const tempPushEndSelect = document.getElementById("tempPushEndSelect");
+  if (tempPushEndSelect) tempPushEndSelect.addEventListener("change", updateTempPushEndHint);
+  const saveSkuBtn = document.getElementById("saveSpecialSkuButton");
+  if (saveSkuBtn) saveSkuBtn.addEventListener("click", saveSpecialSkuConfig);
+  const skuInput = document.getElementById("specialSkuInput");
+  if (skuInput) skuInput.addEventListener("input", updateSpecialSkuCount);
   // === MODIFIED END ===
   document.querySelectorAll("[data-rule-tab]").forEach((button) => {
     // === MODIFIED START ===
@@ -283,6 +300,15 @@ function datetimeLocalToIso(value) {
   return date.toISOString();
 }
 
+// datetime-local 输入转本地 ISO 字符串，不走 toISOString()（会转 UTC 导致偏移）
+function toLocalIso(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
 function updateLogCustomRangeVisibility() {
   const isCustom = document.getElementById("logPeriodFilter").value === "custom";
   document.querySelectorAll(".log-custom-range").forEach((input) => {
@@ -365,6 +391,12 @@ async function saveRules() {
       sku_group_map_enabled: document.getElementById("skuGroupMapEnabledInput").checked,
       // === MODIFIED END ===
       sku_group_map: parseMap(document.getElementById("skuGroupMapInput").value),
+      // === MODIFIED START ===
+      // 原因：临时推送SKU配置移到独立页面，从新元素读取。
+      // 影响范围：规则配置保存请求。
+      special_skus_enabled: Boolean(document.getElementById("specialSkuEnabled")?.checked),
+      special_skus: (document.getElementById("specialSkuInput")?.value || "").split("\n").map((s) => s.trim()).filter(Boolean),
+      // === MODIFIED END ===
     };
     const supplierItems = parseSuppliers(document.getElementById("supplierMappingsInput").value);
     // === MODIFIED START ===
@@ -548,6 +580,7 @@ function renderAll() {
   renderTaskTable();
   renderExecutionLogs();
   renderReceiptTable();
+  renderTempPushPage();
   renderSelectedReceiptTask();
 }
 
@@ -994,6 +1027,13 @@ function hydrateRuleInputs() {
   document.getElementById("kingdeeEnabledInput").checked = Boolean((state.config.kingdee || {}).enabled);
   // === MODIFIED END ===
   // === MODIFIED START ===
+  // 原因：加载配置时回填临时推送正选SKU配置到临时推送页面。
+  // 影响范围：临时推送页面SKU面板。
+  const spInputEl = document.getElementById("specialSkuInput");
+  if (spInputEl) spInputEl.value = (rules.special_skus || []).join("\n");
+  updateSpecialSkuCount();
+  // === MODIFIED END ===
+  // === MODIFIED START ===
   // 原因：配置中心新增多条定时任务配置，需要从 /config 回填到可编辑表格。
   // 影响范围：规则配置表单回填。
   const schedules = Array.isArray(state.config.schedules) && state.config.schedules.length
@@ -1092,6 +1132,19 @@ function handleActionClick(event) {
   if (target.dataset.action === "detail") {
     openDrawer(task);
   }
+  // === MODIFIED START ===
+  // 原因：临时推送历史记录下载。
+  // 影响范围：临时推送页面下载操作。
+  if (target.dataset.action === "download-temp-push") {
+    const tpId = target.dataset.tempPushId;
+    const trace = target.dataset.trace;
+    if (tpId && trace) {
+      showNotice(`正在下载临时推送订单：${tpId}`);
+      triggerDownload(`/temp-push/${encodeURIComponent(tpId)}/orders/download?trace_id=${encodeURIComponent(trace)}`);
+    }
+    return;
+  }
+  // === MODIFIED END ===
   if (target.dataset.action === "select-receipt") {
     state.selectedReceiptTask = task;
     renderSelectedReceiptTask();
@@ -1153,6 +1206,154 @@ async function repushTask(task) {
 }
 // === MODIFIED END ===
 
+// === MODIFIED START ===
+// 原因：临时推送页面功能函数。
+// 影响范围：临时推送交互。
+function renderTempPushPage() {
+  // 同步SKU配置到页面元素
+  if (state.config) {
+    const rules = state.config.rules || {};
+    const inputEl = document.getElementById("specialSkuInput");
+    if (inputEl) inputEl.value = (rules.special_skus || []).join("\n");
+    updateSpecialSkuCount();
+  }
+  // 填充任务下拉
+  populateTempPushEndSelect();
+  // 加载历史
+  loadTempPushHistory();
+}
+
+function updateSpecialSkuCount() {
+  const input = document.getElementById("specialSkuInput");
+  const countEl = document.getElementById("specialSkuCount");
+  if (!input || !countEl) return;
+  const lines = input.value.split("\n").map((s) => s.trim()).filter(Boolean);
+  countEl.textContent = `${lines.length} 个SKU`;
+}
+
+async function saveSpecialSkuConfig() {
+  const input = document.getElementById("specialSkuInput");
+  const skus = (input?.value || "").split("\n").map((s) => s.trim()).filter(Boolean);
+  setBusy(true);
+  try {
+    await api("/config/rules", {
+      method: "PUT",
+      body: JSON.stringify({
+        special_skus_enabled: skus.length > 0,
+        special_skus: skus,
+      }),
+    });
+    // 更新本地缓存
+    if (state.config?.rules) {
+      state.config.rules.special_skus_enabled = skus.length > 0;
+      state.config.rules.special_skus = skus;
+    }
+    updateSpecialSkuCount();
+    showNotice(`SKU配置已保存（${skus.length} 个）`);
+  } catch (err) {
+    showNotice(`保存失败：${err.message}`, true);
+  } finally {
+    setBusy(false);
+  }
+}
+
+function populateTempPushEndSelect() {
+  const select = document.getElementById("tempPushEndSelect");
+  if (!select) return;
+  const tasks = state.tasks || [];
+  // 从配置中取 enabled schedule 的 run_at，用于显示
+  const schedules = state.config?.schedules || [];
+  const primaryRunAt = schedules.find((s) => s.enabled)?.run_at || null;
+  select.innerHTML = tasks.length
+    ? tasks.map((t) => {
+        // 显示时间：优先用调度器 run_at，回退到 window_end
+        const displayTime = primaryRunAt || (t.window_end ? formatDateTimeShort(t.window_end) : "?");
+        const label = `${shortId(t.trace_id)}  ${t.task_name || ""}  →  ${displayTime}`;
+        return `<option value="${escapeAttr(t.trace_id)}">${escapeHtml(label)}</option>`;
+      }).join("")
+    : '<option value="">暂无任务</option>';
+  updateTempPushEndHint();
+}
+
+function formatDateTimeShort(iso) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const h = String(d.getHours()).padStart(2, "0");
+    const min = String(d.getMinutes()).padStart(2, "0");
+    return `${m}-${day} ${h}:${min}`;
+  } catch (_) {
+    return iso.slice(0, 16);
+  }
+}
+
+function updateTempPushEndHint() {
+  const select = document.getElementById("tempPushEndSelect");
+  const hint = document.getElementById("tempPushEndHint");
+  if (!select || !hint) return;
+  const task = (state.tasks || []).find((t) => t.trace_id === select.value);
+  const schedules = state.config?.schedules || [];
+  const primaryRunAt = schedules.find((s) => s.enabled)?.run_at || null;
+  const displayTime = primaryRunAt || (task ? formatDateTimeShort(task.window_end) : "");
+  hint.textContent = task ? `→ 复用该任务的结束时间: ${displayTime}` : "";
+}
+
+async function executeTempPush() {
+  const startInput = document.getElementById("tempPushStartInput");
+  const endSelect = document.getElementById("tempPushEndSelect");
+  if (!startInput?.value) { showNotice("请填写开始时间", true); return; }
+  if (!endSelect?.value) { showNotice("请选择结束时间任务", true); return; }
+
+  const windowStart = toLocalIso(startInput.value);
+  const windowEndTraceId = endSelect.value;
+
+  setBusy(true);
+  try {
+    const result = await api("/temp-push/run", {
+      method: "POST",
+      body: JSON.stringify({
+        window_start: windowStart,
+        window_end_trace_id: windowEndTraceId,
+      }),
+    });
+    showNotice(`临时推送完成：${result.temp_push_id}，通过 ${result.passed_count || 0} 单`);
+    await loadTempPushHistory();
+  } catch (err) {
+    showNotice(`临时推送失败：${err.message}`, true);
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function loadTempPushHistory() {
+  const tbody = document.getElementById("tempPushHistoryRows");
+  if (!tbody) return;
+  try {
+    const data = await api("/temp-push/orders");
+    const items = data.items || [];
+    if (!items.length) {
+      tbody.innerHTML = '<tr><td class="empty-row" colspan="4">暂无临时推送记录</td></tr>';
+      return;
+    }
+    state.tempPushHistory = items;
+    tbody.innerHTML = items.map((item) => `
+      <tr>
+        <td>${escapeHtml(item.temp_push_id)}</td>
+        <td>${escapeHtml(item.trace_id || "-")}</td>
+        <td>${item.order_count || 0}</td>
+        <td>
+          <button type="button" data-action="download-temp-push" data-temp-push-id="${escapeAttr(item.temp_push_id)}" data-trace="${escapeAttr(item.trace_id || "")}">下载</button>
+        </td>
+      </tr>
+    `).join("");
+  } catch (_) {
+    tbody.innerHTML = '<tr><td class="empty-row" colspan="4">加载失败</td></tr>';
+  }
+}
+// === MODIFIED END ===
+
 function focusRuleEditor(tab) {
   const map = {
     warehouse: "excludedWarehousesInput",
@@ -1172,6 +1373,7 @@ function focusRuleEditor(tab) {
     // 原因：规则配置中心新增定时任务配置面板。
     // 影响范围：定时任务 tab 焦点。
     schedule: "scheduleRows",
+    // === MODIFIED END ===
     // === MODIFIED END ===
   };
   const target = document.getElementById(map[tab]);
