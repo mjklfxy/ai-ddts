@@ -22,6 +22,18 @@ const state = {
   // 影响范围：定时任务配置表格、保存配置。
   schedulesDraft: [],
   // === MODIFIED END ===
+  // === MODIFIED START ===
+  // 原因：规则配置表格化改造，多列配置从 textarea 改为可编辑表格。
+  // 影响范围：限发区域、SKU群、供应商对照表格。
+  regionDraft: [],
+  skuGroupDraft: [],
+  supplierDraft: [],
+  regionPage: 1,
+  skuGroupPage: 1,
+  supplierPage: 1,
+  pageSize: 20,
+  _saveTimers: {},
+  // === MODIFIED END ===
 };
 
 const viewMeta = {
@@ -91,6 +103,16 @@ function bindEvents() {
   document.getElementById("uploadRegionXlsxButton").addEventListener("click", uploadRegionXlsx);
   document.getElementById("uploadSkuGroupXlsxButton").addEventListener("click", uploadSkuGroupXlsx);
   document.getElementById("uploadExcludedSkuXlsxButton").addEventListener("click", uploadExcludedSkuXlsx);
+  // === MODIFIED START ===
+  // 原因：规则配置表格化改造，新增行按钮和搜索框事件绑定。
+  // 影响范围：限发区域、SKU群、供应商对照表格。
+  document.getElementById("addRegionRowButton").addEventListener("click", () => addDraftRow("region"));
+  document.getElementById("addSkuGroupRowButton").addEventListener("click", () => addDraftRow("skuGroup"));
+  document.getElementById("addSupplierRowButton").addEventListener("click", () => addDraftRow("supplier"));
+  document.getElementById("regionSearchInput").addEventListener("input", () => { state.regionPage = 1; renderRegionTable(); });
+  document.getElementById("skuGroupSearchInput").addEventListener("input", () => { state.skuGroupPage = 1; renderSkuGroupTable(); });
+  document.getElementById("supplierSearchInput").addEventListener("input", () => { state.supplierPage = 1; renderSupplierTable(); });
+  // === MODIFIED END ===
   document.getElementById("drawerCloseButton").addEventListener("click", closeDrawer);
   document.getElementById("globalSearch").addEventListener("input", (event) => {
     state.search = event.target.value.trim().toLowerCase();
@@ -372,6 +394,12 @@ async function saveRules() {
   }
   setBusy(true);
   try {
+    // === MODIFIED START ===
+    // 原因：先从服务端拿最新配置，防止 instantSave 后 state.config 过期导致全量覆盖丢失数据。
+    // 影响范围：规则配置保存流程。
+    const latestConfig = await api("/config").catch(() => null);
+    if (latestConfig) state.config = latestConfig;
+    // === MODIFIED END ===
     const rules = {
       // === MODIFIED START ===
       // 原因：排除库房模块新增总开关，保存时同步写入后端配置。
@@ -387,10 +415,12 @@ async function saveRules() {
       // === MODIFIED END ===
       // === MODIFIED START ===
       restricted_regions_enabled: document.getElementById("restrictedRegionsEnabledInput").checked,
-      restricted_regions: collectRegionsFromText(),
+      restricted_regions: state.regionDraft.map((r) => ({ sku_code: r.sku_code, province: r.province, city: r.city, district: r.district || null })),
       sku_group_map_enabled: document.getElementById("skuGroupMapEnabledInput").checked,
       // === MODIFIED END ===
-      sku_group_map: parseMap(document.getElementById("skuGroupMapInput").value),
+      sku_group_map: Object.fromEntries(
+        state.skuGroupDraft.filter((r) => r.sku_code && r.group_name).map((r) => [r.sku_code, { group_name: r.group_name, owner_mobile: r.owner_mobile }])
+      ),
       // === MODIFIED START ===
       // 原因：临时推送SKU配置移到独立页面，从新元素读取。
       // 影响范围：规则配置保存请求。
@@ -398,7 +428,7 @@ async function saveRules() {
       special_skus: (document.getElementById("specialSkuInput")?.value || "").split("\n").map((s) => s.trim()).filter(Boolean),
       // === MODIFIED END ===
     };
-    const supplierItems = parseSuppliers(document.getElementById("supplierMappingsInput").value);
+    const supplierItems = state.supplierDraft.filter((r) => r.sku_code).map((r) => ({ sku_code: r.sku_code, supplier_name: r.supplier_name }));
     // === MODIFIED START ===
     // 原因：保存规则配置时同时保存多条定时任务配置，避免 router/API 写业务拼装逻辑。
     // 影响范围：规则配置保存请求。
@@ -1004,23 +1034,29 @@ function hydrateRuleInputs() {
   document.getElementById("excludedSkusInput").value = (rules.excluded_skus || rules.enabled_skus || []).join("\n");
   // === MODIFIED END ===
   document.getElementById("restrictedRegionsEnabledInput").checked = Boolean(rules.restricted_regions_enabled);
-  renderRegionGroups(rules.restricted_regions || []);
+  state.regionDraft = (rules.restricted_regions || []).map((r) => ({
+    sku_code: r.sku_code || "",
+    province: r.province || "",
+    city: r.city || "",
+    district: r.district || null,
+  }));
+  state.regionPage = 1;
+  renderRegionTable();
   document.getElementById("skuGroupMapEnabledInput").checked = Boolean(rules.sku_group_map_enabled);
   // === MODIFIED END ===
-  document.getElementById("skuGroupMapInput").value = Object.entries(rules.sku_group_map || {})
-    .map(([sku, info]) => {
-      const gn = typeof info === "string" ? info : (info.group_name || "");
-      const om = typeof info === "string" ? "" : (info.owner_mobile || "");
-      return om ? `${sku},${gn},${om}` : `${sku},${gn}`;
-    })
-    .join("\n");
-  document.getElementById("supplierMappingsInput").value = (state.suppliers || [])
-    // === MODIFIED START ===
-    // 原因：SKU-供应商对照不再维护供应商编码，页面只展示商品名称与供应商名称。
-    // 影响范围：规则配置中心供应商对照回填。
-    .map((item) => [item.sku_code, item.supplier_name].join(","))
-    // === MODIFIED END ===
-    .join("\n");
+  state.skuGroupDraft = Object.entries(rules.sku_group_map || {}).map(([sku, info]) => ({
+    sku_code: sku,
+    group_name: typeof info === "string" ? info : (info.group_name || ""),
+    owner_mobile: typeof info === "string" ? "" : (info.owner_mobile || ""),
+  }));
+  state.skuGroupPage = 1;
+  renderSkuGroupTable();
+  state.supplierDraft = (state.suppliers || []).map((item) => ({
+    sku_code: item.sku_code || "",
+    supplier_name: item.supplier_name || "",
+  }));
+  state.supplierPage = 1;
+  renderSupplierTable();
   // === MODIFIED START ===
   // 原因：加载配置时回填金蝶推送启用开关。
   // 影响范围：规则配置中心 SKU 供应商对照面板。
@@ -1054,6 +1090,238 @@ function hydrateRuleInputs() {
   renderScheduleRows();
   // === MODIFIED END ===
 }
+
+// === MODIFIED START ===
+// 原因：规则配置表格化改造 — 通用表格渲染、分页、搜索、即时编辑、即时保存。
+// 影响范围：限发区域、SKU群、供应商对照表格。
+
+const TABLE_CONFIGS = {
+  region: {
+    draftKey: "regionDraft",
+    pageKey: "regionPage",
+    tbodyId: "regionTableBody",
+    paginationId: "regionPagination",
+    searchId: "regionSearchInput",
+    addBtnId: "addRegionRowButton",
+    columns: [
+      { key: "sku_code", label: "产品名称" },
+      { key: "province", label: "省" },
+      { key: "city", label: "市" },
+    ],
+    makeEmptyRow: () => ({ sku_code: "", province: "", city: "", district: null }),
+    toPayload: (draft) => ({
+      restricted_regions: draft.map((r) => ({ sku_code: r.sku_code, province: r.province, city: r.city, district: r.district || null })),
+    }),
+    savePath: "/config/rules",
+  },
+  skuGroup: {
+    draftKey: "skuGroupDraft",
+    pageKey: "skuGroupPage",
+    tbodyId: "skuGroupTableBody",
+    paginationId: "skuGroupPagination",
+    searchId: "skuGroupSearchInput",
+    addBtnId: "addSkuGroupRowButton",
+    columns: [
+      { key: "sku_code", label: "产品名称" },
+      { key: "group_name", label: "群名" },
+      { key: "owner_mobile", label: "手机号" },
+    ],
+    makeEmptyRow: () => ({ sku_code: "", group_name: "", owner_mobile: "" }),
+    toPayload: (draft) => ({
+      sku_group_map: Object.fromEntries(
+        draft.filter((r) => r.sku_code && r.group_name).map((r) => [r.sku_code, { group_name: r.group_name, owner_mobile: r.owner_mobile }])
+      ),
+    }),
+    savePath: "/config/rules",
+  },
+  supplier: {
+    draftKey: "supplierDraft",
+    pageKey: "supplierPage",
+    tbodyId: "supplierTableBody",
+    paginationId: "supplierPagination",
+    searchId: "supplierSearchInput",
+    addBtnId: "addSupplierRowButton",
+    columns: [
+      { key: "sku_code", label: "产品名称" },
+      { key: "supplier_name", label: "供应商名称" },
+    ],
+    makeEmptyRow: () => ({ sku_code: "", supplier_name: "" }),
+    toPayload: (draft) => ({
+      items: draft.filter((r) => r.sku_code).map((r) => ({ sku_code: r.sku_code, supplier_name: r.supplier_name })),
+    }),
+    savePath: "/supplier-mappings",
+  },
+};
+
+function renderDataTable(tableKey) {
+  const cfg = TABLE_CONFIGS[tableKey];
+  const draft = state[cfg.draftKey] || [];
+  const searchEl = document.getElementById(cfg.searchId);
+  const searchText = (searchEl?.value || "").trim().toLowerCase();
+
+  let filtered = draft;
+  if (searchText) {
+    filtered = draft.filter((row) =>
+      cfg.columns.some((col) => String(row[col.key] || "").toLowerCase().includes(searchText))
+    );
+  }
+
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+  const currentPage = Math.min(state[cfg.pageKey] || 1, totalPages);
+  state[cfg.pageKey] = currentPage;
+  const start = (currentPage - 1) * state.pageSize;
+  const pageRows = filtered.slice(start, start + state.pageSize);
+
+  const tbody = document.getElementById(cfg.tbodyId);
+  if (!tbody) return;
+
+  if (pageRows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${cfg.columns.length + 1}" style="text-align:center;color:var(--ink-500);padding:24px;">暂无数据</td></tr>`;
+  } else {
+    tbody.innerHTML = pageRows.map((row, i) => {
+      const globalIndex = draft.indexOf(row);
+      const cells = cfg.columns.map((col) =>
+        `<td class="editable-cell" data-table="${tableKey}" data-row="${globalIndex}" data-field="${col.key}">${escapeHtml(row[col.key] || "")}</td>`
+      ).join("");
+      return `<tr>${cells}<td><button class="ghost-button" data-action="remove-row" data-table="${tableKey}" data-row="${globalIndex}">删除</button></td></tr>`;
+    }).join("");
+  }
+
+  renderPagination(tableKey, cfg, total, totalPages, currentPage);
+  bindTableCellEvents(tableKey, tbody);
+  bindRemoveRowEvents(tbody);
+}
+
+function renderPagination(tableKey, cfg, total, totalPages, currentPage) {
+  const bar = document.getElementById(cfg.paginationId);
+  if (!bar) return;
+  const from = total === 0 ? 0 : (currentPage - 1) * state.pageSize + 1;
+  const to = Math.min(currentPage * state.pageSize, total);
+  bar.innerHTML = `
+    <span>共 ${total} 条 · 第 ${from}-${to} 条</span>
+    <div class="pagination-controls">
+      <button data-page="prev" ${currentPage <= 1 ? "disabled" : ""}>上一页</button>
+      <span>第 ${currentPage} / ${totalPages} 页</span>
+      <button data-page="next" ${currentPage >= totalPages ? "disabled" : ""}>下一页</button>
+      <select data-page="size">
+        <option value="10" ${state.pageSize === 10 ? "selected" : ""}>10条/页</option>
+        <option value="20" ${state.pageSize === 20 ? "selected" : ""}>20条/页</option>
+        <option value="50" ${state.pageSize === 50 ? "selected" : ""}>50条/页</option>
+      </select>
+    </div>
+  `;
+  bar.querySelector("[data-page='prev']")?.addEventListener("click", () => {
+    if (state[cfg.pageKey] > 1) { state[cfg.pageKey]--; renderDataTable(tableKey); }
+  });
+  bar.querySelector("[data-page='next']")?.addEventListener("click", () => {
+    if (state[cfg.pageKey] < totalPages) { state[cfg.pageKey]++; renderDataTable(tableKey); }
+  });
+  bar.querySelector("[data-page='size']")?.addEventListener("change", (e) => {
+    state.pageSize = Number(e.target.value) || 20;
+    state[cfg.pageKey] = 1;
+    renderDataTable(tableKey);
+  });
+}
+
+function bindTableCellEvents(tableKey, tbody) {
+  tbody.querySelectorAll(".editable-cell").forEach((td) => {
+    td.addEventListener("dblclick", () => makeCellEditable(td, tableKey));
+  });
+}
+
+function bindRemoveRowEvents(tbody) {
+  tbody.querySelectorAll("[data-action='remove-row']").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tableKey = btn.dataset.table;
+      const idx = Number(btn.dataset.row);
+      removeDraftRow(tableKey, idx);
+    });
+  });
+}
+
+function makeCellEditable(td, tableKey) {
+  if (td.classList.contains("is-editing")) return;
+  const cfg = TABLE_CONFIGS[tableKey];
+  const rowIdx = Number(td.dataset.row);
+  const field = td.dataset.field;
+  const oldValue = state[cfg.draftKey][rowIdx][field] || "";
+
+  td.classList.add("is-editing");
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = oldValue;
+  td.textContent = "";
+  td.appendChild(input);
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    const newValue = input.value.trim();
+    td.classList.remove("is-editing");
+    if (newValue !== oldValue) {
+      state[cfg.draftKey][rowIdx][field] = newValue;
+      td.textContent = newValue;
+      debouncedInstantSave(tableKey);
+    } else {
+      td.textContent = oldValue;
+    }
+  };
+  input.addEventListener("blur", commit);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+    if (e.key === "Escape") { input.value = oldValue; input.blur(); }
+  });
+}
+
+function debouncedInstantSave(tableKey) {
+  if (state._saveTimers[tableKey]) clearTimeout(state._saveTimers[tableKey]);
+  state._saveTimers[tableKey] = setTimeout(() => instantSave(tableKey), 300);
+}
+
+async function instantSave(tableKey) {
+  const cfg = TABLE_CONFIGS[tableKey];
+  const payload = cfg.toPayload(state[cfg.draftKey]);
+  try {
+    const result = await api(cfg.savePath, { method: "PUT", body: JSON.stringify(payload) });
+    // === MODIFIED START ===
+    // 原因：即时保存后同步 state.config，防止 saveRules 用旧数据全量覆盖。
+    // 影响范围：表格即时编辑保存。
+    if (result && result.rules) {
+      state.config = { ...state.config, ...result };
+    }
+    // === MODIFIED END ===
+    showNotice("已保存");
+  } catch (error) {
+    showNotice(error.message || "保存失败", true);
+  }
+}
+
+function addDraftRow(tableKey) {
+  const cfg = TABLE_CONFIGS[tableKey];
+  state[cfg.draftKey].push(cfg.makeEmptyRow());
+  state[cfg.pageKey] = Math.ceil(state[cfg.draftKey].length / state.pageSize);
+  renderDataTable(tableKey);
+}
+
+function removeDraftRow(tableKey, index) {
+  const cfg = TABLE_CONFIGS[tableKey];
+  state[cfg.draftKey].splice(index, 1);
+  renderDataTable(tableKey);
+  debouncedInstantSave(tableKey);
+}
+
+function renderRegionTable() { renderDataTable("region"); }
+function renderSkuGroupTable() { renderDataTable("skuGroup"); }
+function renderSupplierTable() { renderDataTable("supplier"); }
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// === MODIFIED END ===
 
 async function openDrawer(task) {
   state.selectedTask = task;
@@ -1362,12 +1630,12 @@ function focusRuleEditor(tab) {
     // 影响范围：规则配置 tab 交互。
     sku: "excludedSkusInput",
     // === MODIFIED END ===
-    region: "regionTextInput",
-    group: "skuGroupMapInput",
+    region: "regionSearchInput",
+    group: "skuGroupSearchInput",
     // === MODIFIED START ===
     // 原因：规则配置联动项新增 SKU 供应商对照。
     // 影响范围：供应商对照 tab 焦点。
-    supplier: "supplierMappingsInput",
+    supplier: "supplierSearchInput",
     // === MODIFIED END ===
     // === MODIFIED START ===
     // 原因：规则配置中心新增定时任务配置面板。
@@ -1620,53 +1888,6 @@ function lines(id) {
     .value.split(/\r?\n|;/)
     .map((line) => line.trim())
     .filter(Boolean);
-}
-
-function parseMap(value) {
-  const result = {};
-  value
-    .split(/\r?\n|;/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .forEach((line) => {
-      const parts = splitCsvLine(line);
-      const sku = parts[0];
-      const groupName = parts[1];
-      const ownerMobile = parts[2] || "";
-      if (sku && groupName) {
-        result[sku] = { group_name: groupName, owner_mobile: ownerMobile };
-      }
-    });
-  return result;
-}
-
-function renderRegionGroups(regions) {
-  const textarea = document.getElementById("regionTextInput");
-  const lines = [];
-  for (const r of regions) {
-    if (!r.sku_code || !r.province) continue;
-    const city = r.city || "";
-    lines.push(`${r.sku_code},${r.province}${city ? "," + city : ""}`);
-  }
-  textarea.value = lines.join("\n");
-}
-
-function collectRegionsFromText() {
-  const textarea = document.getElementById("regionTextInput");
-  const text = textarea.value.trim();
-  if (!text) return [];
-  const regions = [];
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  for (const line of lines) {
-    const parts = line.split(/[,，]/).map((part) => part.trim()).filter(Boolean);
-    if (parts.length < 2) continue;
-    const sku = parts[0];
-    const province = parts[1] || "";
-    const city = parts[2] || null;
-    if (!sku || !province) continue;
-    regions.push({ sku_code: sku, province, city, district: null });
-  }
-  return regions;
 }
 
 // === MODIFIED START ===
@@ -1949,21 +2170,6 @@ async function uploadExcludedSkuXlsx() {
   } finally {
     setBusy(false);
   }
-}
-
-function parseSuppliers(value) {
-  return value
-    .split(/\r?\n|;/)
-    .map((line) => splitCsvLine(line))
-    // === MODIFIED START ===
-    // 原因：供应商对照配置改为商品名称 + 供应商名称两列；兼容旧三列输入时忽略中间的供应商编码。
-    // 影响范围：规则配置中心供应商对照保存。
-    .filter((parts) => parts[0] && parts[1])
-    .map((parts) => ({
-      sku_code: parts[0],
-      supplier_name: parts[2] || parts[1],
-    }));
-    // === MODIFIED END ===
 }
 
 function splitCsvLine(line) {
