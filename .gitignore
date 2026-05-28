@@ -3,6 +3,7 @@
 .pytest_cache/
 tmp/
 outputs/
+tools/
 __pycache__/
 *.pyc
 .env

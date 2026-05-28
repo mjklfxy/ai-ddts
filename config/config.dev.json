@@ -7,23 +7,16 @@
     "schedule_id": "default",
     "name": "默认定时任务",
     "enabled": true,
-    "run_at": "17:00",
-    "check_interval_seconds": 60
+    "run_at": "16:15",
+    "check_interval_seconds": 30
   },
   "schedules": [
     {
       "schedule_id": "default",
       "name": "默认定时任务",
       "enabled": true,
-      "run_at": "17:00",
-      "check_interval_seconds": 60
-    },
-    {
-      "schedule_id": "schedule-4",
-      "name": "定时任务4",
-      "enabled": true,
-      "run_at": "07:06",
-      "check_interval_seconds": 5
+      "run_at": "16:15",
+      "check_interval_seconds": 30
     }
   ],
   "source": {
@@ -85,6 +78,7 @@
     "excluded_warehouses": [
       "湖北武汉城市仓",
       "河北石家庄城市仓",
+      "呼市城市仓",
       "陕西西安城市仓",
       "陕西汉中城市仓",
       "河南洛阳城市仓",
@@ -255,37 +249,1091 @@
       "黑虎虾/1001盒以上",
       "黑虎虾/101盒以上",
       "黑虎虾/11盒以上",
-      "黑虎虾/2盒以上"
+      "黑虎虾/2盒以上",
+      "白云山轻盈遮瑕防晒素颜喷雾/100ml/瓶/一件代发(1-10瓶)",
+      "白云山轻盈遮瑕防晒素颜喷雾/100ml/瓶/集采11-99瓶链接",
+      "白云山轻盈遮瑕防晒素颜喷雾/100ml/瓶/集采100瓶以上链接",
+      "白云山青草膏/30g/集采100瓶及以上链接",
+      "白云山青草膏/30g/一件代发10瓶及以下链接",
+      "白云山青草膏/30g/集采11-99瓶链接",
+      "白云山净亮美白祛斑霜/55g/集采100瓶及以上链接",
+      "白云山净亮美白祛斑霜/55g/集采11-99瓶链接",
+      "白云山净亮美白祛斑霜/55g/一件代发10瓶及以下",
+      "白云山止痒润肤乳（清爽型）/200g/一件代发10瓶及以下",
+      "白云山止痒润肤乳（清爽型）/200g/集采11-99瓶",
+      "白云山止痒润肤乳（清爽型）/200g/集采100瓶以上",
+      "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
+      "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
+      "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
+      "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发"
     ],
     "restricted_regions_enabled": true,
     "restricted_regions": [
       {
-        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "sku_code": "正大单冻大胸/1000袋以上",
+        "province": "河北",
+        "city": "保定",
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/安格拉红/2XL (130-160) 斤",
         "province": "新疆",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "sku_code": "雪中飞T恤女/安格拉红/2XL (130-160) 斤",
         "province": "西藏",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "sku_code": "雪中飞T恤女/安格拉红/2XL (130-160) 斤",
         "province": "香港",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "sku_code": "雪中飞T恤女/安格拉红/2XL (130-160) 斤",
         "province": "澳门",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "sku_code": "雪中飞T恤女/安格拉红/2XL (130-160) 斤",
         "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/2XL (130-160) 斤",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/2XL (130-160) 斤",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/2XL (130-160) 斤",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/2XL (130-160) 斤",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/2XL (130-160) 斤",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/XL (100-130) 斤",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/XL (100-130) 斤",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/XL (100-130) 斤",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/XL (100-130) 斤",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/灰蓝色/XL (100-130) 斤",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/安格拉红/XL (100-130) 斤",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/安格拉红/XL (100-130) 斤",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/安格拉红/XL (100-130) 斤",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/安格拉红/XL (100-130) 斤",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞T恤女/安格拉红/XL (100-130) 斤",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/2XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/M",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/M",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/M",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/M",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/M",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/2XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/3XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/L",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/L",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/L",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/L",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/L",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/2XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/M",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/M",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/M",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/M",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/M",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/L",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/L",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/L",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/L",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/L",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/3XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款深灰色/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/L",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/L",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/L",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/L",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/L",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/3XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/M",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/M",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/M",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/M",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/M",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/L",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/L",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/L",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/L",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/L",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款浅灰/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/M",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/M",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/M",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/M",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/男款雾霾蓝/M",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/2XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/3XL",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞情侣防晒衣/女款紫色/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款XL (110-130)",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款XL (110-130)",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款XL (110-130)",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款XL (110-130)",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款XL (110-130)",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款3XL (150-170)",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款3XL (150-170)",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款3XL (150-170)",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款3XL (150-170)",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款3XL (150-170)",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款L (100-125)",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款L (100-125)",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款L (100-125)",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款L (100-125)",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款L (100-125)",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款L (90-110)",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款L (90-110)",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款L (90-110)",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款L (90-110)",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款L (90-110)",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款3XL (175-200)",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款3XL (175-200)",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款3XL (175-200)",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款3XL (175-200)",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款3XL (175-200)",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款2XL (130-150)",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款2XL (130-150)",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款2XL (130-150)",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款2XL (130-150)",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/女款2XL (130-150)",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款XL (125-150)",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款XL (125-150)",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款XL (125-150)",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款XL (125-150)",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款XL (125-150)",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款2XL(150-175)",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款2XL(150-175)",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款2XL(150-175)",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款2XL(150-175)",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞速干裤（男女同款）/男款2XL(150-175)",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞男袜/3双/份",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞男袜/3双/份",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞男袜/3双/份",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞男袜/3双/份",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞男袜/3双/份",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞女袜/3双/份",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞女袜/3双/份",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞女袜/3双/份",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞女袜/3双/份",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "雪中飞女袜/3双/份",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "玉露香梨/4kg/盒",
+        "province": "海南",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "玉露香梨/4kg/盒",
+        "province": "青海",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "玉露香梨/4kg/盒",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "玉露香梨/4kg/盒",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "玉露香梨/4kg/盒",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "玉露香梨/4kg/盒",
+        "province": "四川",
+        "city": "甘孜州",
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "province": "新疆",
         "city": null,
         "district": null
       },
@@ -296,56 +1344,8 @@
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/白色/3XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/3XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/3XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/3XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "防晒服AMGB2377/白色/4XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/4XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/4XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/4XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/4XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -356,56 +1356,8 @@
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/白色/L",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/L",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/L",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/L",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "防晒服AMGB2377/白色/M",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/M",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/M",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/M",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/M",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -416,56 +1368,8 @@
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/白色/XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/白色/XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "防晒服AMGB2377/粉色/2XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/2XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/2XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/2XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/2XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -476,56 +1380,8 @@
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/粉色/3XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/3XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/3XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/3XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "防晒服AMGB2377/粉色/4XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/4XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/4XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/4XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/4XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -536,56 +1392,8 @@
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/粉色/L",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/L",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/L",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/L",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "防晒服AMGB2377/粉色/M",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/M",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/M",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/M",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/M",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -596,56 +1404,8 @@
         "district": null
       },
       {
-        "sku_code": "防晒服AMGB2377/粉色/XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "防晒服AMGB2377/粉色/XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -656,56 +1416,8 @@
         "district": null
       },
       {
-        "sku_code": "夏之氢运动T恤男款6901/白色/3XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/3XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/3XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/3XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -716,56 +1428,8 @@
         "district": null
       },
       {
-        "sku_code": "夏之氢运动T恤男款6901/白色/XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/白色/XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -776,56 +1440,8 @@
         "district": null
       },
       {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/3XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/3XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/3XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/3XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -836,56 +1452,8 @@
         "district": null
       },
       {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤男款6901/灰色/XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -896,56 +1464,8 @@
         "district": null
       },
       {
-        "sku_code": "夏之氢运动T恤女款6601/白色/3XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/3XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/3XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/3XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "夏之氢运动T恤女款6601/白色/L",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/L",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/L",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/L",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/L",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -956,56 +1476,8 @@
         "district": null
       },
       {
-        "sku_code": "夏之氢运动T恤女款6601/白色/XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/白色/XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -1016,56 +1488,8 @@
         "district": null
       },
       {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/3XL",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/3XL",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/3XL",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/3XL",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "夏之氢运动T恤女款6601/紫色/L",
         "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/L",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/L",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/L",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "夏之氢运动T恤女款6601/紫色/L",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -1076,8 +1500,332 @@
         "district": null
       },
       {
+        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/4XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/L",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/M",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/4XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/L",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/M",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/L",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/3XL",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/L",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "夏之氢运动T恤女款6601/紫色/XL",
         "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/4XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/L",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/M",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/4XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/L",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/M",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/L",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/3XL",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/L",
+        "province": "香港",
         "city": null,
         "district": null
       },
@@ -1088,8 +1836,332 @@
         "district": null
       },
       {
+        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/4XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/L",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/M",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/4XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/L",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/M",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/L",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/3XL",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/L",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "夏之氢运动T恤女款6601/紫色/XL",
         "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/4XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/L",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/M",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/白色/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/4XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/L",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/M",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "防晒服AMGB2377/粉色/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/4XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/白色/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/4XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤男款6901/灰色/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/L",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/白色/XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/2XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/3XL",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "夏之氢运动T恤女款6601/紫色/L",
+        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -1106,44 +2178,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/38",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/38",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/38",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋男款/AF965黑色/39",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/39",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/39",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/39",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1154,44 +2190,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/40",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/40",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/40",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋男款/AF965黑色/41",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/41",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/41",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/41",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1202,44 +2202,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/42",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/42",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/42",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋男款/AF965黑色/43",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/43",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/43",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/43",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1250,44 +2214,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/44",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/44",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/44",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋男款/AF965黑色/45",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/45",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/45",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/45",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1298,44 +2226,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/35",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/35",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/35",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋女款/BF965黑色/36",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/36",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/36",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/36",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1346,44 +2238,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/37",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/37",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/37",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋女款/BF965黑色/38",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/38",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/38",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/38",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1394,44 +2250,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/39",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/39",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/39",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋女款/BF965黑色/40",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/40",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/40",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/40",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1442,44 +2262,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/41",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/41",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/41",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋女款/BF965紫色/35",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/35",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/35",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/35",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1490,44 +2274,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/36",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/36",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/36",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋女款/BF965紫色/37",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/37",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/37",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/37",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1538,68 +2286,14 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/38",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/38",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/38",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋女款/BF965紫色/39",
         "province": "香港",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/39",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/39",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/39",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源休闲散步鞋女款/BF965紫色/40",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/40",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/40",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/40",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1610,14 +2304,392 @@
         "district": null
       },
       {
-        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/41",
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/38",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/39",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/40",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/41",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/42",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/43",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/44",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/45",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/35",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/36",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/37",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/38",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/39",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/40",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/41",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/35",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/36",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/37",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/38",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/39",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/40",
         "province": "澳门",
         "city": null,
         "district": null
       },
       {
         "sku_code": "泰和源休闲散步鞋女款/BF965紫色/41",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/38",
         "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/39",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/40",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/41",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/42",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/43",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/44",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/45",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/35",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/36",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/37",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/38",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/39",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/40",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/41",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/35",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/36",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/37",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/38",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/39",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/40",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/41",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/38",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/39",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/40",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/41",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/42",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/43",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/44",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋男款/AF965黑色/45",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/35",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/36",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/37",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/38",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/39",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/40",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965黑色/41",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/35",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/36",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/37",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/38",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/39",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源休闲散步鞋女款/BF965紫色/40",
+        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1634,44 +2706,38 @@
         "district": null
       },
       {
-        "sku_code": "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "仿珍珠项链/吊坠12MM&铜链/套/一件代发",
         "province": "新疆",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "仿珍珠项链/吊坠12MM&铜链/套/一件代发",
+        "sku_code": "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发",
         "province": "西藏",
         "city": null,
         "district": null
       },
       {
         "sku_code": "仿珍珠项链/吊坠12MM&铜链/套/一件代发",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发",
         "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "仿珍珠项链/吊坠12MM&铜链/套/一件代发",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发",
+        "province": "澳门",
         "city": null,
         "district": null
       },
@@ -1682,6 +2748,12 @@
         "district": null
       },
       {
+        "sku_code": "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "仿珍珠项链/吊坠12MM&铜链/套/一件代发",
         "province": "台湾",
         "city": null,
@@ -1694,44 +2766,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/35",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/35",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/35",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源德训鞋BW802女款/黄色/36",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/36",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/36",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/36",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1742,44 +2778,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/37",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/37",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/37",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源德训鞋BW802女款/黄色/38",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/38",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/38",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/38",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1790,44 +2790,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/39",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/39",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/39",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源德训鞋BW802女款/黄色/40",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/40",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/40",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/40",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1838,44 +2802,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/41",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/41",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/黄色/41",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源德训鞋BW802女款/米色/35",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/35",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/35",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/35",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1886,44 +2814,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源德训鞋BW802女款/米色/36",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/36",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/36",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源德训鞋BW802女款/米色/37",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/37",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/37",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/37",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1934,44 +2826,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源德训鞋BW802女款/米色/38",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/38",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/38",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源德训鞋BW802女款/米色/39",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/39",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/39",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/39",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -1982,44 +2838,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源德训鞋BW802女款/米色/40",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/40",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/40",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源德训鞋BW802女款/米色/41",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/41",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/41",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源德训鞋BW802女款/米色/41",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2030,44 +2850,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/38",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/38",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/38",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源沙滩鞋AW812男款/黑色/39",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/39",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/39",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/39",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2078,44 +2862,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/40",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/40",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/40",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源沙滩鞋AW812男款/黑色/41",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/41",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/41",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/41",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2126,44 +2874,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/42",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/42",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/42",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源沙滩鞋AW812男款/黑色/43",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/43",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/43",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/43",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2174,44 +2886,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/44",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/44",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/黑色/44",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源沙滩鞋AW812男款/棕色/38",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/38",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/38",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/38",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2222,44 +2898,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/39",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/39",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/39",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源沙滩鞋AW812男款/棕色/40",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/40",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/40",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/40",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2270,44 +2910,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/41",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/41",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/41",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源沙滩鞋AW812男款/棕色/42",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/42",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/42",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/42",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2318,44 +2922,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/43",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/43",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/43",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源沙滩鞋AW812男款/棕色/44",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/44",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/44",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源沙滩鞋AW812男款/棕色/44",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2366,44 +2934,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/35",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/35",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/35",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源渔夫鞋BW748女款/米色/36",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/36",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/36",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/36",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2414,44 +2946,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/37",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/37",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/37",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源渔夫鞋BW748女款/米色/38",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/38",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/38",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/38",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2462,44 +2958,8 @@
         "district": null
       },
       {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/39",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/39",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/39",
-        "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
         "sku_code": "泰和源渔夫鞋BW748女款/米色/40",
         "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/40",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/40",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/40",
-        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2510,14 +2970,626 @@
         "district": null
       },
       {
-        "sku_code": "泰和源渔夫鞋BW748女款/米色/41",
+        "sku_code": "泰和源德训鞋BW802女款/黄色/35",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/36",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/37",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/38",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/39",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/40",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/41",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/35",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/36",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/37",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/38",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/39",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/40",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/41",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/38",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/39",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/40",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/41",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/42",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/43",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/44",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/38",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/39",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/40",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/41",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/42",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/43",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/44",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/35",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/36",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/37",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/38",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/39",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/40",
         "province": "澳门",
         "city": null,
         "district": null
       },
       {
         "sku_code": "泰和源渔夫鞋BW748女款/米色/41",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/35",
         "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/36",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/37",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/38",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/39",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/40",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/41",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/35",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/36",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/37",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/38",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/39",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/40",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/41",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/38",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/39",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/40",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/41",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/42",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/43",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/44",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/38",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/39",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/40",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/41",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/42",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/43",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/44",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/35",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/36",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/37",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/38",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/39",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/40",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/41",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/35",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/36",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/37",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/38",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/39",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/40",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/黄色/41",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/35",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/36",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/37",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/38",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/39",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/40",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源德训鞋BW802女款/米色/41",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/38",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/39",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/40",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/41",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/42",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/43",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/黑色/44",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/38",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/39",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/40",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/41",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/42",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/43",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源沙滩鞋AW812男款/棕色/44",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/35",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/36",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/37",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/38",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/39",
+        "province": "海外",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "泰和源渔夫鞋BW748女款/米色/40",
+        "province": "海外",
         "city": null,
         "district": null
       },
@@ -2552,19 +3624,115 @@
         "district": null
       },
       {
+        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "陶瓷餐具斗笠碗*2个/套",
         "province": "西藏",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "陶瓷餐具斗笠碗*2个/套",
-        "province": "内蒙",
+        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
+        "province": "西藏",
         "city": null,
         "district": null
       },
       {
         "sku_code": "陶瓷餐具斗笠碗*2个/套",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具斗笠碗*2个/套",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
         "province": "香港",
         "city": null,
         "district": null
@@ -2576,7 +3744,55 @@
         "district": null
       },
       {
+        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "陶瓷餐具斗笠碗*2个/套",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
         "province": "台湾",
         "city": null,
         "district": null
@@ -2589,79 +3805,7 @@
       },
       {
         "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套",
         "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具青花瓷大鱼盘/个",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -2673,79 +3817,7 @@
       },
       {
         "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套",
         "province": "海外",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "陶瓷餐具10双筷子&1个米饭铲/套",
-        "province": "台湾",
         "city": null,
         "district": null
       },
@@ -2756,7 +3828,1519 @@
         "district": null
       },
       {
+        "sku_code": "潮汕牛肉丸/250g/一件代发/4袋起拍/冻品不退不换",
+        "province": "辽宁",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕牛肉丸/250g/60袋起发/冻品不退不换",
+        "province": "辽宁",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕墨鱼丸/250g/一件代发/4袋起拍/冻品不退不换",
+        "province": "辽宁",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕墨鱼丸/250g/60袋起发/冻品不退不换",
+        "province": "辽宁",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕鱼丸/250g/一件代发4袋起拍/冻品不退不换",
+        "province": "辽宁",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕鱼丸/250g/60袋起发/冻品不退不换",
+        "province": "辽宁",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕牛肉丸/250g/60袋起发/加收运费地区集采/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕墨鱼丸/250g/60袋起发/加收运费地区集采/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕鱼丸/250g/60袋起发/加收运费地区集采/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕牛肉丸/250g/60袋起发/加收运费地区集采/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕墨鱼丸/250g/60袋起发/加收运费地区集采/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "潮汕鱼丸/250g/60袋起发/加收运费地区集采/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸(仅限石家庄市场)/100袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/1000袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/100袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/10袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）(仅限石家庄市场)/100袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中(30-40)/1000袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/100袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/10袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根（仅限石家庄市场）/100袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/1000袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/100袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/10袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/1000袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋-1000袋",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/10袋以上",
+        "province": "内蒙古",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸(仅限石家庄市场)/100袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/1000袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/100袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/10袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）(仅限石家庄市场)/100袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中(30-40)/1000袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/100袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/10袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根（仅限石家庄市场）/100袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/1000袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/100袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/10袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/1000袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋-1000袋",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/10袋以上",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸(仅限石家庄市场)/100袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/1000袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/100袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/10袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）(仅限石家庄市场)/100袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中(30-40)/1000袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/100袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/10袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根（仅限石家庄市场）/100袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/1000袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/100袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/10袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/1000袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋-1000袋",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/10袋以上",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸(仅限石家庄市场)/100袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/1000袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/100袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/10袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）(仅限石家庄市场)/100袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中(30-40)/1000袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/100袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/10袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根（仅限石家庄市场）/100袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/1000袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/100袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/10袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/1000袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋-1000袋",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/10袋以上",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸(仅限石家庄市场)/100袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/1000袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/100袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻大胸/10袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）(仅限石家庄市场)/100袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中(30-40)/1000袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/100袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻鸡翅中（30-40）/10袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根（仅限石家庄市场）/100袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/1000袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/100袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大鸡翅根/10袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/1000袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/100袋-1000袋",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "正大单冻琵琶腿(120-140g)/10袋以上",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g/袋/600箱起拍/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞去鳃/去内脏)/1050g/袋/600箱起拍/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g/袋/600箱起拍/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞/去鳃/去内脏)/1050g*9袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*12袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g*24袋/箱/600箱及以上同一地址的价格/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼（去鳞/去鳃/去内脏）/1050g",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏)/400g",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*4袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*18袋/份冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*24袋/份/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*48袋/份/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*2袋/份/一件代发/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*2袋/份/一件代发/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*4袋/份/一件代发/冻品不退不换",
+        "province": "新疆",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g/袋/600箱起拍/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞去鳃/去内脏)/1050g/袋/600箱起拍/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g/袋/600箱起拍/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞/去鳃/去内脏)/1050g*9袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*12袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g*24袋/箱/600箱及以上同一地址的价格/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼（去鳞/去鳃/去内脏）/1050g",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏)/400g",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*4袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*18袋/份冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*24袋/份/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*48袋/份/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*2袋/份/一件代发/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*2袋/份/一件代发/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*4袋/份/一件代发/冻品不退不换",
+        "province": "西藏",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g/袋/600箱起拍/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞去鳃/去内脏)/1050g/袋/600箱起拍/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g/袋/600箱起拍/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞/去鳃/去内脏)/1050g*9袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*12袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g*24袋/箱/600箱及以上同一地址的价格/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼（去鳞/去鳃/去内脏）/1050g",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏)/400g",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*4袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*18袋/份冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*24袋/份/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*48袋/份/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*2袋/份/一件代发/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*2袋/份/一件代发/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*4袋/份/一件代发/冻品不退不换",
+        "province": "青海",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g/袋/600箱起拍/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞去鳃/去内脏)/1050g/袋/600箱起拍/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g/袋/600箱起拍/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞/去鳃/去内脏)/1050g*9袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*12袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g*24袋/箱/600箱及以上同一地址的价格/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼（去鳞/去鳃/去内脏）/1050g",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏)/400g",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*4袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*18袋/份冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*24袋/份/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*48袋/份/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*2袋/份/一件代发/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*2袋/份/一件代发/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*4袋/份/一件代发/冻品不退不换",
+        "province": "云南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g/袋/600箱起拍/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞去鳃/去内脏)/1050g/袋/600箱起拍/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g/袋/600箱起拍/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞/去鳃/去内脏)/1050g*9袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*12袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g*24袋/箱/600箱及以上同一地址的价格/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼（去鳞/去鳃/去内脏）/1050g",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏)/400g",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*4袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*18袋/份冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*24袋/份/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*48袋/份/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*2袋/份/一件代发/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*2袋/份/一件代发/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*4袋/份/一件代发/冻品不退不换",
+        "province": "海南",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g/袋/600箱起拍/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞去鳃/去内脏)/1050g/袋/600箱起拍/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g/袋/600箱起拍/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞/去鳃/去内脏)/1050g*9袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*12袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g*24袋/箱/600箱及以上同一地址的价格/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼（去鳞/去鳃/去内脏）/1050g",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏)/400g",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*4袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*18袋/份冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*24袋/份/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*48袋/份/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*2袋/份/一件代发/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*2袋/份/一件代发/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*4袋/份/一件代发/冻品不退不换",
+        "province": "香港",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g/袋/600箱起拍/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞去鳃/去内脏)/1050g/袋/600箱起拍/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g/袋/600箱起拍/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞/去鳃/去内脏)/1050g*9袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*12袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g*24袋/箱/600箱及以上同一地址的价格/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼（去鳞/去鳃/去内脏）/1050g",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏)/400g",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*4袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*18袋/份冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*24袋/份/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*48袋/份/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*2袋/份/一件代发/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*2袋/份/一件代发/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*4袋/份/一件代发/冻品不退不换",
+        "province": "澳门",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g/袋/600箱起拍/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞去鳃/去内脏)/1050g/袋/600箱起拍/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g/袋/600箱起拍/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼(去鳞/去鳃/去内脏)/1050g*9袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*12袋/箱/600箱及以上同一地址价格/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼(去鳞/去鳃/去内脏)/400g*24袋/箱/600箱及以上同一地址的价格/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼（去鳞/去鳃/去内脏）/1050g",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*2袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏)/400g",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "*4袋/份/12份以上及同一地址的价格/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*18袋/份冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*24袋/份/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*48袋/份/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得舟山带鱼/1000g*2袋/份/一件代发/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得白蕉海鲈鱼/1050g*2袋/份/一件代发/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "鲜到鲜得三去舟山小黄鱼（去鳞/去鳃/去内脏）/400g*4袋/份/一件代发/冻品不退不换",
+        "province": "台湾",
+        "city": "沈阳市",
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3/1份",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*2+哈尔滨红肠（瘦肉型）90g*2+肘花肉300g*2/1份",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3+猪头肉500g*1/1份",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3/1份",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*2+哈尔滨红肠（瘦肉型）90g*2+肘花肉300g*2/1份",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3+猪头肉500g*1/1份",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3/1份",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*2+哈尔滨红肠（瘦肉型）90g*2+肘花肉300g*2/1份",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3+猪头肉500g*1/1份",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3/1份",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*2+哈尔滨红肠（瘦肉型）90g*2+肘花肉300g*2/1份",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3+猪头肉500g*1/1份",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3/1份",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*2+哈尔滨红肠（瘦肉型）90g*2+肘花肉300g*2/1份",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "哈尔滨红肠（肥丁型）90g*3+哈尔滨红肠（瘦肉型）90g*3+猪头肉500g*1/1份",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "帕达诺驱蚊液/220ml*1瓶+50ml*2瓶/份/一件代发",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
         "province": "新疆",
         "city": null,
         "district": null
@@ -2768,13 +5352,31 @@
         "district": null
       },
       {
+        "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "帕达诺驱蚊液/220ml*1瓶+50ml*2瓶/份/一件代发",
         "province": "香港",
         "city": null,
         "district": null
       },
       {
+        "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "帕达诺驱蚊液/220ml*1瓶+50ml*2瓶/份/一件代发",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
         "province": "澳门",
         "city": null,
         "district": null
@@ -2787,60 +5389,126 @@
       },
       {
         "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
+        "province": "台湾",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
         "province": "新疆",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
         "province": "西藏",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
-        "province": "香港",
+        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
+        "province": "西藏",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
-        "province": "澳门",
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
+        "province": "西藏",
         "city": null,
         "district": null
       },
       {
-        "sku_code": "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上",
+        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
         "province": "西藏",
         "city": null,
         "district": null
@@ -2853,103 +5521,13 @@
       },
       {
         "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发",
         "province": "海南",
         "city": null,
         "district": null
       },
       {
         "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上",
         "province": "海南",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
-        "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发",
-        "province": "西藏",
         "city": null,
         "district": null
       },
@@ -2966,7 +5544,43 @@
         "district": null
       },
       {
+        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺超迷你手帕纸/12包/条",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
+        "province": "新疆",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "若禺5层抽取式面巾纸/280张/包",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺超迷你手帕纸/12包/条",
+        "province": "西藏",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
         "province": "西藏",
         "city": null,
         "district": null
@@ -2978,13 +5592,67 @@
         "district": null
       },
       {
-        "sku_code": "若禺5层抽取式面巾纸/280张/包",
-        "province": "内蒙",
+        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
+        "province": "青海",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺超迷你手帕纸/12包/条",
+        "province": "青海",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
+        "province": "青海",
         "city": null,
         "district": null
       },
       {
         "sku_code": "若禺5层抽取式面巾纸/280张/包",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺超迷你手帕纸/12包/条",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
+        "province": "内蒙古",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺5层抽取式面巾纸/280张/包",
+        "province": "海南",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
+        "province": "海南",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺超迷你手帕纸/12包/条",
+        "province": "海南",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
         "province": "海南",
         "city": null,
         "district": null
@@ -2996,7 +5664,43 @@
         "district": null
       },
       {
+        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺超迷你手帕纸/12包/条",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
+        "province": "香港",
+        "city": null,
+        "district": null
+      },
+      {
         "sku_code": "若禺5层抽取式面巾纸/280张/包",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺超迷你手帕纸/12包/条",
+        "province": "澳门",
+        "city": null,
+        "district": null
+      },
+      {
+        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
         "province": "澳门",
         "city": null,
         "district": null
@@ -3009,91 +5713,7 @@
       },
       {
         "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
-        "province": "青海",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
-        "province": "海南",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺双层挂式厨房抽纸巾/400张/提",
         "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺超迷你手帕纸/12包/条",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺超迷你手帕纸/12包/条",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺超迷你手帕纸/12包/条",
-        "province": "青海",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺超迷你手帕纸/12包/条",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺超迷你手帕纸/12包/条",
-        "province": "海南",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺超迷你手帕纸/12包/条",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺超迷你手帕纸/12包/条",
-        "province": "澳门",
         "city": null,
         "district": null
       },
@@ -3105,115 +5725,153 @@
       },
       {
         "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
-        "province": "青海",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
-        "province": "海南",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
-        "province": "香港",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
-        "province": "澳门",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "若禺氧气森林卫生纸14卷/800g/提",
         "province": "台湾",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒百香果中式精酿啤酒/1L/罐",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒百香果中式精酿啤酒/1L/罐",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒百香果中式精酿啤酒/1L/罐",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒百香果中式精酿啤酒/1L/罐",
-        "province": "海南",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒百香果中式精酿啤酒/1L/罐",
-        "province": "青海",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒精酿白啤/1L/罐",
-        "province": "新疆",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒精酿白啤/1L/罐",
-        "province": "西藏",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒精酿白啤/1L/罐",
-        "province": "内蒙",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒精酿白啤/1L/罐",
-        "province": "海南",
-        "city": null,
-        "district": null
-      },
-      {
-        "sku_code": "呀麦迪招牌老啤酒精酿白啤/1L/罐",
-        "province": "青海",
         "city": null,
         "district": null
       }
     ],
     "sku_group_map_enabled": true,
     "sku_group_map": {
+      "泰和源休闲散步鞋男款/AF965黑色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/42": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/43": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/44": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/45": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/35": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/36": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/37": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/35": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/36": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/37": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "仿珍珠项链/吊坠12MM&铜链/套/一件代发": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "无抗鸡蛋42斤中号/42斤/箱": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "天合人康山药小麻花/（原味）108g": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "怀山药脆条/怀山药脆条": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "山药小麻花（海苔味）/108g/袋": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
       "防晒服AMGB2377/白色/2XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
@@ -3350,126 +6008,6 @@
         "user_id": ""
       },
       "夏之氢运动T恤女款6601/紫色/XL": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋男款/AF965黑色/38": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋男款/AF965黑色/39": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋男款/AF965黑色/40": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋男款/AF965黑色/41": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋男款/AF965黑色/42": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋男款/AF965黑色/43": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋男款/AF965黑色/44": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋男款/AF965黑色/45": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965黑色/35": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965黑色/36": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965黑色/37": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965黑色/38": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965黑色/39": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965黑色/40": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965黑色/41": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965紫色/35": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965紫色/36": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965紫色/37": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965紫色/38": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965紫色/39": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965紫色/40": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "泰和源休闲散步鞋女款/BF965紫色/41": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发": {
-        "group_name": "12121",
-        "owner_mobile": "15176152071",
-        "user_id": ""
-      },
-      "仿珍珠项链/吊坠12MM&铜链/套/一件代发": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
@@ -3729,12 +6267,82 @@
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "呀麦迪招牌老啤酒百香果中式精酿啤酒/1L/罐": {
+      "山东玉菇甜瓜/净重不低于4.5斤": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "呀麦迪招牌老啤酒精酿白啤/1L/罐": {
+      "贝贝南瓜(国产)/净重不低于4.5斤": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "蚕丝丝光罩宽肩带内衣/水晶粉/2XL(140-165)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "蚕丝丝光罩宽肩带内衣/水晶粉/XL(115-140)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "蚕丝丝光罩宽肩带内衣/月光白/2XL(140-165)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "蚕丝丝光罩宽肩带内衣/水晶粉/L(90-115)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "蚕丝丝光罩宽肩带内衣/月光白/L(90-115)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "蚕丝丝光罩宽肩带内衣/月光白/XL(115-140)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "男士抗菌棉质内裤(4条装)/颜色随机XL(110-130)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "男士抗菌棉质内裤(4条装)/颜色随机2XL(130-150)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "男士抗菌棉质内裤(4条装)/颜色随机3XL(150-175)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "男士抗菌棉质内裤(4条装)/颜色随机L(90-110)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "云感棉朵蚕丝内裤(高腰4条装)/颜色随机 M (85-105)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "云感棉朵蚕丝内裤(高腰4条装)/颜色随机 XL(125-145)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "云感棉朵蚕丝内裤(高腰4条装)/颜色随机  L(105-125)": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "云感棉朵蚕丝内裤(高腰4条装)/颜色随机 2XL(145-160)": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""

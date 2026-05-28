@@ -522,7 +522,34 @@ POST /scheduler/tick          # 手动触发一次 tick
 
 ---
 
-## 13. 常见问题
+## 13. Dev 测试工具
+
+`tools/` 目录存放本地辅助脚本，不纳入版本控制。
+
+### 订单 Excel 拆分工具
+
+dev 环境所有订单推到同一个测试群（12121），推送后用此脚本按生产群名拆分 Excel，方便与生产推送结果对比。
+
+**目录结构：**
+```
+tools/dev-split/
+├── split.py          # 拆分脚本
+└── results/          # 拆分结果输出
+```
+
+**用法：**
+```bash
+# 1. 把推过去的 xlsx 文件放到 tools/dev-split/ 目录下
+# 2. 运行拆分
+python tools/dev-split/split.py 12121_20260528xxxxx.xlsx
+# 3. 结果在 tools/dev-split/results/ 下，每个生产群一个文件
+```
+
+未匹配的行（SKU 不在生产配置中）会单独输出到 `results/_未匹配.xlsx`。
+
+---
+
+## 14. 常见问题
 
 ### Q: 推送失败，userid 解析有问题
 优先检查 userid 是否正确。手机号 → userid 依赖远程 API，可能不稳定。手动触发 tick 后查看执行日志定位具体失败阶段。
