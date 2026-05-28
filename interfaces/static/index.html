@@ -91,6 +91,11 @@
               <span>RPA</span>
             </label>
             <!-- === MODIFIED END === -->
+            <span class="last-run-badge" id="lastRunBadge" title="点击强行修改上次运行时间">
+              <span class="status-dot" id="lastRunDot"></span>
+              <span class="last-run-label">上次运行</span>
+              <span class="last-run-time" id="lastRunTime">--</span>
+            </span>
             <button class="ghost-button" type="button" id="refreshButton">刷新</button>
           </div>
         </header>
@@ -98,7 +103,6 @@
         <section class="notice is-hidden" id="notice" role="status"></section>
 
         <section class="view is-active" id="view-dashboard" data-title="厂直订单推送工作台" data-name="总览">
-          <div id="schedulerStatusBar" class="scheduler-status-bar"></div>
           <div class="metric-grid" id="dashboardMetrics"></div>
           <div class="content-grid">
             <section class="panel panel-wide">
@@ -527,6 +531,25 @@
         <button class="drawer-close" type="button" id="drawerCloseButton">×</button>
         <div id="drawerContent"></div>
       </aside>
+    </div>
+    <!-- 上次运行时间编辑弹窗 -->
+    <div class="modal-overlay is-hidden" id="lastRunModal">
+      <div class="modal-box">
+        <h3>强行修改上次运行时间</h3>
+        <p class="modal-hint">修改后调度器将按新时间判断是否需要重新执行</p>
+        <div class="modal-field">
+          <label for="lastRunDateInput">日期</label>
+          <input type="date" id="lastRunDateInput" />
+        </div>
+        <div class="modal-field">
+          <label for="lastRunTimeInput">时间</label>
+          <input type="time" id="lastRunTimeInput" step="1" />
+        </div>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" id="lastRunCancelBtn">取消</button>
+          <button class="primary-button" type="button" id="lastRunSaveBtn">保存</button>
+        </div>
+      </div>
     </div>
     <script src="/static/app.js?v=20260511-cn-buttons" defer></script>
     <script>

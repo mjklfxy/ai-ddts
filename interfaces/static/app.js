@@ -54,13 +54,19 @@ function bindEvents() {
     document.body.classList.toggle("menu-open");
   });
   document.getElementById("refreshButton").addEventListener("click", loadApp);
+  document.getElementById("lastRunBadge").addEventListener("click", openLastRunModal);
+  document.getElementById("lastRunCancelBtn").addEventListener("click", closeLastRunModal);
+  document.getElementById("lastRunSaveBtn").addEventListener("click", saveLastRunTime);
+  document.getElementById("lastRunModal").addEventListener("click", (e) => {
+    if (e.target.id === "lastRunModal") closeLastRunModal();
+  });
   // === MODIFIED START ===
   // 原因：RPA 桌面导出需要前端可控开关，实时切换 rpa.enabled。
   // 影响范围：顶部操作栏 RPA toggle。
   document.getElementById("rpaToggle").addEventListener("change", toggleRpa);
   // === MODIFIED END ===
   // === MODIFIED START ===
-  // 原因：页面顶部删除“立即执行”入口，任务执行改由调度/后端流程触发。
+  // 原因：页面顶部删除"立即执行"入口，任务执行改由调度/后端流程触发。
   // 影响范围：前端初始化事件绑定。
   const runTaskButton = document.getElementById("runTaskButton");
   if (runTaskButton) runTaskButton.addEventListener("click", runTask);
@@ -448,11 +454,13 @@ async function uploadReceipt() {
 }
 
 function renderSchedulerStatus() {
-  const bar = document.getElementById("schedulerStatusBar");
-  if (!bar) return;
+  const dot = document.getElementById("lastRunDot");
+  const timeEl = document.getElementById("lastRunTime");
+  if (!dot || !timeEl) return;
   const s = state.scheduler;
   if (!s || !s.items || !s.items.length) {
-    bar.innerHTML = '<span class="status-dot"></span><span>定时任务：暂无配置</span>';
+    dot.className = "status-dot";
+    timeEl.textContent = "暂无配置";
     return;
   }
   const enabled = s.items.filter((i) => i.enabled);
@@ -464,17 +472,72 @@ function renderSchedulerStatus() {
     return a > b ? item : best;
   }, null);
   const isActive = enabled.some((i) => i.due) || s.due_count > 0;
-  const dotClass = isActive || latest ? "active" : "";
-  const runTime = latest
+  dot.className = "status-dot" + (isActive || latest ? " active" : "");
+  timeEl.textContent = latest
     ? `${latest.last_run_date} ${latest.last_run_at || ""}`.trim()
     : "尚未运行";
-  const scheduleNames = enabled.map((i) => i.name || i.schedule_id).join("、");
-  bar.innerHTML = `
-    <span class="status-dot ${dotClass}"></span>
-    <span class="status-label">上次运行</span>
-    <span>${escapeHtml(runTime)}</span>
-    <span style="margin-left:auto;color:var(--muted);font-size:12px;">${escapeHtml(scheduleNames)}</span>
-  `;
+}
+
+function openLastRunModal() {
+  const s = state.scheduler;
+  if (!s || !s.items || !s.items.length) return;
+  const enabled = s.items.filter((i) => i.enabled);
+  const latest = enabled.reduce((best, item) => {
+    if (!item.last_run_date) return best;
+    if (!best) return item;
+    const a = item.last_run_date + "T" + (item.last_run_at || "");
+    const b = best.last_run_date + "T" + (best.last_run_at || "");
+    return a > b ? item : best;
+  }, null);
+  const dateInput = document.getElementById("lastRunDateInput");
+  const timeInput = document.getElementById("lastRunTimeInput");
+  if (latest) {
+    dateInput.value = latest.last_run_date || "";
+    timeInput.value = latest.last_run_at || "";
+  } else {
+    const now = new Date();
+    dateInput.value = now.toISOString().slice(0, 10);
+    timeInput.value = now.toTimeString().slice(0, 8);
+  }
+  document.getElementById("lastRunModal").classList.remove("is-hidden");
+}
+
+function closeLastRunModal() {
+  document.getElementById("lastRunModal").classList.add("is-hidden");
+}
+
+async function saveLastRunTime() {
+  const s = state.scheduler;
+  if (!s || !s.items) return;
+  const enabled = s.items.filter((i) => i.enabled);
+  if (!enabled.length) return;
+  const latest = enabled.reduce((best, item) => {
+    if (!item.last_run_date) return best;
+    if (!best) return item;
+    const a = item.last_run_date + "T" + (item.last_run_at || "");
+    const b = best.last_run_date + "T" + (best.last_run_at || "");
+    return a > b ? item : best;
+  }, null);
+  const scheduleId = latest ? latest.schedule_id : enabled[0].schedule_id;
+  const dateVal = document.getElementById("lastRunDateInput").value;
+  const timeVal = document.getElementById("lastRunTimeInput").value;
+  if (!dateVal) { showNotice("请选择日期", true); return; }
+  setBusy(true);
+  try {
+    const params = new URLSearchParams({
+      schedule_id: scheduleId,
+      last_run_date: dateVal,
+      last_run_at: timeVal || "00:00:00",
+    });
+    await api(`/scheduler/state?${params}`, { method: "PUT" });
+    closeLastRunModal();
+    showNotice("上次运行时间已更新");
+    await loadApp();
+  } catch (e) {
+    showNotice(e.message || "更新失败", true);
+  } finally {
+    setBusy(false);
+  }
 }
 
 function renderAll() {
@@ -1740,12 +1803,14 @@ function escapeAttr(value) {
 
 function setBusy(isBusy) {
   // === MODIFIED START ===
-  // 原因：页面顶部删除“立即执行”入口，忙碌态更新需兼容按钮不存在。
+  // 原因：页面顶部删除"立即执行"入口，忙碌态更新需兼容按钮不存在。
   // 影响范围：前端全局忙碌态。
   const runTaskButton = document.getElementById("runTaskButton");
   if (runTaskButton) runTaskButton.disabled = isBusy;
   // === MODIFIED END ===
   document.getElementById("refreshButton").disabled = isBusy;
+  const lastRunBadge = document.getElementById("lastRunBadge");
+  if (lastRunBadge) lastRunBadge.style.pointerEvents = isBusy ? "none" : "";
   document.getElementById("saveRulesButton").disabled = isBusy;
   // === MODIFIED START ===
   // 原因：规则配置页新增同步按钮，需要纳入全局忙碌态防止重复提交。
