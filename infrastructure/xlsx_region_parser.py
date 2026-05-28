@@ -272,9 +272,14 @@ def _load_via_openpyxl(path: Path) -> list[dict[str, str | None]]:
                         suggestion="请在合并区域的第一个单元格填写 SKU",
                     )
 
-            # 省和市都为空 → 跳过
+            # 省和市都为空 → 报错（合并区域内无省的行自动跳过，不会走到这里）
             if not province and not city_raw:
-                continue
+                raise ImportRuleError(
+                    row=row_idx,
+                    column="B",
+                    reason="省和市均为空，无法生成限发规则",
+                    suggestion="请填写省，或同时填写省和市",
+                )
 
             # 省为空但市有值 → 报错
             if not province and city_raw:

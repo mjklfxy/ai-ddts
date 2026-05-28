@@ -19,18 +19,11 @@
       "check_interval_seconds": 60
     },
     {
-      "schedule_id": "schedule-2",
-      "name": "定时任务2",
-      "enabled": false,
-      "run_at": "19:30",
-      "check_interval_seconds": 60
-    },
-    {
-      "schedule_id": "schedule-3sdaf",
-      "name": "定时任务3awdasd",
+      "schedule_id": "schedule-4",
+      "name": "定时任务4",
       "enabled": true,
-      "run_at": "19:30",
-      "check_interval_seconds": 60
+      "run_at": "07:06",
+      "check_interval_seconds": 5
     }
   ],
   "source": {
@@ -3221,132 +3214,527 @@
     ],
     "sku_group_map_enabled": true,
     "sku_group_map": {
-      "蜂王浆冻干粉/天合人康恒亮牌蜂王浆冻干粉": {
+      "防晒服AMGB2377/白色/2XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "天合人康牦牛骨胶原蛋白肽-自营（海南华肽）/蛋白肽": {
+      "防晒服AMGB2377/白色/3XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "新阿克南极磷虾油/新阿克南极磷虾油（添加纳豆激酶和植物甾醇）": {
+      "防晒服AMGB2377/白色/4XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "山东玉菇甜瓜/净重不低于4.5斤": {
+      "防晒服AMGB2377/白色/L": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "天合人康山药小麻花/（原味）108g": {
+      "防晒服AMGB2377/白色/M": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "怀山药脆条/怀山药脆条": {
+      "防晒服AMGB2377/白色/XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "龙巍厨下富氢水机配套滤芯/1套": {
+      "防晒服AMGB2377/粉色/2XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "蜂胶/天合人康恒亮牌蜂胶软胶囊": {
+      "防晒服AMGB2377/粉色/3XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "洋槐蜜/恒亮蜂业洋槐蜜": {
+      "防晒服AMGB2377/粉色/4XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "天合人康黄精党参益生菌发酵植物饮/30ml*12瓶/盒": {
+      "防晒服AMGB2377/粉色/L": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "牙膏/恒亮蜂胶牙膏100g": {
+      "防晒服AMGB2377/粉色/M": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "医用橡皮膏/恒亮蜂业蜂毒牌-医用橡皮膏（蜂毒贴）": {
+      "防晒服AMGB2377/粉色/XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "天合人康&凝百年牌L-硒-甲基硒代半胱氨酸片/96盒/箱": {
+      "夏之氢运动T恤男款6901/白色/2XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "双马生物曲中金红曲银杏叶丹参胶囊2瓶盒装/2瓶/盒": {
+      "夏之氢运动T恤男款6901/白色/3XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "龙巍厨下富氢水机/NLW-R8-X1": {
+      "夏之氢运动T恤男款6901/白色/4XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "龙巍富氢水机(三代纳米气泡款)/NLW-RO2302-75H/灰色": {
+      "夏之氢运动T恤男款6901/白色/XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "佳帮手鞋刷N01/1个": {
+      "夏之氢运动T恤男款6901/灰色/2XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "天合人康纸抽/三连包": {
+      "夏之氢运动T恤男款6901/灰色/3XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "龙巍富氢水机三代配套滤芯/（聚丙烯炭棒复合滤芯+反渗透膜活性炭棒复合滤芯）/套": {
+      "夏之氢运动T恤男款6901/灰色/4XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "潮汕牛肉丸250g*2袋+墨鱼丸250g*1袋+鱼丸250g*1袋/4袋/份/冻品不退不换": {
+      "夏之氢运动T恤男款6901/灰色/XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "山药小麻花（海苔味）/108g/袋": {
+      "夏之氢运动T恤女款6601/白色/2XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "天合人康82%甘油二酯油/500ml": {
+      "夏之氢运动T恤女款6601/白色/3XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "天合人康有机全脂羊奶粉-自营/400克/盒": {
+      "夏之氢运动T恤女款6601/白色/L": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "龙魏氢水机-滤芯": {
+      "夏之氢运动T恤女款6601/白色/XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "天合人康蓝莓叶黄素酯凝胶糖果/云仓发货": {
+      "夏之氢运动T恤女款6601/紫色/2XL": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""
       },
-      "HISEWAY钙维生素E蛋白粉（康恩萃）/12罐/箱": {
+      "夏之氢运动T恤女款6601/紫色/3XL": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "夏之氢运动T恤女款6601/紫色/L": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "夏之氢运动T恤女款6601/紫色/XL": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/42": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/43": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/44": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋男款/AF965黑色/45": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/35": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/36": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/37": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965黑色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/35": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/36": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/37": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源休闲散步鞋女款/BF965紫色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "仿珍珠套件/项链10MM&手链10MM&耳钉12MM/套/一件代发": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "仿珍珠项链/吊坠12MM&铜链/套/一件代发": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/黄色/35": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/黄色/36": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/黄色/37": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/黄色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/黄色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/黄色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/黄色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/米色/35": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/米色/36": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/米色/37": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/米色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/米色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/米色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源德训鞋BW802女款/米色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/黑色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/黑色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/黑色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/黑色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/黑色/42": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/黑色/43": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/黑色/44": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/棕色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/棕色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/棕色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/棕色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/棕色/42": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/棕色/43": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源沙滩鞋AW812男款/棕色/44": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源渔夫鞋BW748女款/米色/35": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源渔夫鞋BW748女款/米色/36": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源渔夫鞋BW748女款/米色/37": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源渔夫鞋BW748女款/米色/38": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源渔夫鞋BW748女款/米色/39": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源渔夫鞋BW748女款/米色/40": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "泰和源渔夫鞋BW748女款/米色/41": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "万合恒康白桦树原汁/330ml": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "陶瓷餐具斗笠碗*2个/套": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "陶瓷餐具13件套/4碗&3盘&1汤碗&1大汤勺&4小勺/套": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "陶瓷餐具青花瓷大鱼盘/个": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "陶瓷餐具18件套/6碗&4盘&1汤碗&1大汤勺&6小勺/套": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "陶瓷餐具10双筷子&1个米饭铲/套": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "帕达诺驱蚊液/220ml*1瓶+50ml*2瓶/份/一件代发": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "帕达诺叮叮舒缓走珠冰露/20ml*2支/份/一件代发": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/集采100个以上": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "佳帮手棉被压缩包-大号/杏粉色/52*42*60cm/一件代发": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/集采100个以上": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "佳帮手棉被压缩包-中号/杏粉色/52*30*42cm/一件代发": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "若禺5层抽取式面巾纸/280张/包": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "若禺双层挂式厨房抽纸巾/400张/提": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "若禺超迷你手帕纸/12包/条": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "若禺氧气森林卫生纸14卷/800g/提": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "呀麦迪招牌老啤酒百香果中式精酿啤酒/1L/罐": {
+        "group_name": "12121",
+        "owner_mobile": "15176152071",
+        "user_id": ""
+      },
+      "呀麦迪招牌老啤酒精酿白啤/1L/罐": {
         "group_name": "12121",
         "owner_mobile": "15176152071",
         "user_id": ""

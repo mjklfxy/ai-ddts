@@ -258,7 +258,9 @@ def _replace_text(text: str, trace_id: str, delay: float = 1) -> None:
         },
     )
     pg.hotkey("ctrl", "a")
-    time.sleep(0.3)
+    time.sleep(0.15)
+    pg.press("delete")
+    time.sleep(0.15)
     _type(text, trace_id, delay)
 
 
@@ -280,26 +282,38 @@ def _confirm_overwrite_if_present(
     trace_id: str,
     timeout_seconds: float = 5,
 ) -> bool:
-    """Confirms the Windows overwrite dialog only when it is actually present."""
+    """Confirms the Windows overwrite dialog only when it is actually present.
 
-    deadline = time.time() + timeout_seconds
-    while time.time() <= deadline:
-        windows = gw.getWindowsWithTitle("确认另存为")
-        if windows:
-            dialog = windows[0]
-            dialog.activate()
-            time.sleep(0.2)
-            _click(dialog, dialog.left + 357, dialog.top + 170, trace_id, delay=0.2)
-            log_info(
-                "overwrite_confirmed",
-                {
-                    "trace_id": trace_id,
-                    "title": dialog.title,
-                    "screen": (dialog.left + 357, dialog.top + 170),
-                },
-            )
-            return True
-        time.sleep(0.3)
+    Silently returns False if the dialog is not found, disappears mid-click,
+    or the window handle becomes invalid — none of these are fatal.
+    """
+
+    try:
+        deadline = time.time() + timeout_seconds
+        while time.time() <= deadline:
+            windows = gw.getWindowsWithTitle("确认另存为")
+            if windows:
+                dialog = windows[0]
+                try:
+                    dialog.activate()
+                    time.sleep(0.2)
+                    click_x = dialog.left + 357
+                    click_y = dialog.top + 170
+                    _click(dialog, click_x, click_y, trace_id, delay=0.2)
+                    log_info(
+                        "overwrite_confirmed",
+                        {"trace_id": trace_id, "screen": (click_x, click_y)},
+                    )
+                    return True
+                except Exception:
+                    log_info(
+                        "overwrite_dialog_gone",
+                        {"trace_id": trace_id},
+                    )
+                    return False
+            time.sleep(0.3)
+    except Exception:
+        pass
     log_info(
         "overwrite_not_present",
         {"trace_id": trace_id, "timeout_seconds": timeout_seconds},
@@ -399,7 +413,7 @@ def _export_steps(
             ("hover_plain_merge_export", "hover", (1384, 363), 2),
             ("click_export_all_pages", "move_click", (1743, 461), 2),
             ("wait_save_as_dialog", "wait_window", "另存为", 120),
-            ("focus_save_as_filename", "click", (1042, 802), 1),
+            ("focus_save_as_filename", "click", (1042, 802), 2),
             ("replace_save_as_path", "replace_text", target_path, 1),
             ("click_save_as_button", "click", (1321, 804), 3),
             ("confirm_overwrite_if_present", "confirm_overwrite", "", 5),

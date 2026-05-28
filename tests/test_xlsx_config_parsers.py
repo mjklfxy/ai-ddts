@@ -232,14 +232,16 @@ class RegionParserIllegalTests(TestCase):
         self.assertIn("省为空但市/区有值", ctx.exception.reason)
 
     def test_province_empty_raises(self) -> None:
-        """省为空（市也为空），行被跳过，不算错。"""
+        """省为空（市也为空），应报错。"""
         path = _make_region_xlsx([
             ["产品名称", "省", "市"],
             ["SKU-A", None, None],
         ])
-        # 省为空且市为空 → 跳过，解析结果为空 → 由 api_service 层报"无记录"
-        parsed = load_restricted_regions_from_xlsx(path)
-        self.assertEqual(parsed, [])
+        with self.assertRaises(ImportRuleError) as ctx:
+            load_restricted_regions_from_xlsx(path)
+        self.assertEqual(ctx.exception.row, 2)
+        self.assertEqual(ctx.exception.column, "B")
+        self.assertIn("省和市均为空", ctx.exception.reason)
 
     def test_header_missing_raises(self) -> None:
         """表头缺失，必须报错。"""

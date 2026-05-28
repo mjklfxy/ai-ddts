@@ -115,6 +115,18 @@ function bindEvents() {
   document.body.addEventListener("click", handleActionClick);
 }
 
+let _schedulerPollTimer = null;
+function startSchedulerPolling() {
+  if (_schedulerPollTimer) clearInterval(_schedulerPollTimer);
+  _schedulerPollTimer = setInterval(async () => {
+    try {
+      const scheduler = await api("/scheduler/status");
+      state.scheduler = scheduler;
+      renderSchedulerStatus();
+    } catch (_) { /* silent */ }
+  }, 30_000);
+}
+
 async function loadApp() {
   setBusy(true);
   try {
@@ -155,6 +167,7 @@ async function loadApp() {
     setRuleTab(state.ruleTab, false);
     // === MODIFIED END ===
     renderAll();
+    startSchedulerPolling();
     showNotice("数据已刷新");
   } catch (error) {
     showNotice(error.message || "数据加载失败", true);
@@ -434,7 +447,38 @@ async function uploadReceipt() {
   }
 }
 
+function renderSchedulerStatus() {
+  const bar = document.getElementById("schedulerStatusBar");
+  if (!bar) return;
+  const s = state.scheduler;
+  if (!s || !s.items || !s.items.length) {
+    bar.innerHTML = '<span class="status-dot"></span><span>定时任务：暂无配置</span>';
+    return;
+  }
+  const enabled = s.items.filter((i) => i.enabled);
+  const latest = enabled.reduce((best, item) => {
+    if (!item.last_run_date) return best;
+    if (!best) return item;
+    const a = item.last_run_date + "T" + (item.last_run_at || "");
+    const b = best.last_run_date + "T" + (best.last_run_at || "");
+    return a > b ? item : best;
+  }, null);
+  const isActive = enabled.some((i) => i.due) || s.due_count > 0;
+  const dotClass = isActive || latest ? "active" : "";
+  const runTime = latest
+    ? `${latest.last_run_date} ${latest.last_run_at || ""}`.trim()
+    : "尚未运行";
+  const scheduleNames = enabled.map((i) => i.name || i.schedule_id).join("、");
+  bar.innerHTML = `
+    <span class="status-dot ${dotClass}"></span>
+    <span class="status-label">上次运行</span>
+    <span>${escapeHtml(runTime)}</span>
+    <span style="margin-left:auto;color:var(--muted);font-size:12px;">${escapeHtml(scheduleNames)}</span>
+  `;
+}
+
 function renderAll() {
+  renderSchedulerStatus();
   renderMetrics();
   renderDashboardTasks();
   renderRuleOverview();
