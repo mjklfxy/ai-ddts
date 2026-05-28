@@ -496,6 +496,100 @@ h2 {
   margin-top: 20px;
 }
 
+/* 临时推送页面 */
+.tp-top-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+@media (max-width: 860px) {
+  .tp-top-row {
+    grid-template-columns: 1fr;
+  }
+}
+.tp-panel {
+  margin-bottom: 0;
+}
+.tp-sku-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tp-sku-hint {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.tp-sku-body textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+.tp-sku-body textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+.tp-sku-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tp-sku-count {
+  font-size: 12px;
+  color: var(--muted);
+}
+.tp-exec-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.tp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tp-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-500);
+}
+.tp-field input,
+.tp-field select {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+.tp-field input:focus,
+.tp-field select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+.tp-field-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+.tp-run-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.tp-history-wrap {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

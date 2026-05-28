@@ -42,6 +42,12 @@ RULE_UPDATE_KEYS = {
     "order_prefix_filter_enabled",
     "allowed_order_prefixes",
     # === MODIFIED END ===
+    # === MODIFIED START ===
+    # 原因：临时推送 SKU 正选列表需要支持配置 API 局部更新。
+    # 影响范围：规则配置局部更新白名单。
+    "special_skus_enabled",
+    "special_skus",
+    # === MODIFIED END ===
 }
 # === MODIFIED END ===
 
@@ -205,6 +211,12 @@ class RuleConfig:
     personal_order_suffix: str
     order_prefix_filter_enabled: bool
     allowed_order_prefixes: tuple[str, ...]
+    # === MODIFIED END ===
+    # === MODIFIED START ===
+    # 原因：临时推送需要正选 SKU 白名单配置。
+    # 影响范围：RuleConfig、配置解析、临时推送规则引擎。
+    special_skus_enabled: bool
+    special_skus: tuple[str, ...]
     # === MODIFIED END ===
 
 
@@ -679,6 +691,17 @@ class ConfigService:
             allowed_order_prefixes=tuple(
                 _string_list(rules, "allowed_order_prefixes")
             ),
+            # === MODIFIED END ===
+            # === MODIFIED START ===
+            # 原因：解析临时推送正选 SKU 配置。
+            # 影响范围：RuleConfig 构造。
+            special_skus_enabled=_optional_bool(
+                rules,
+                "special_skus_enabled",
+                False,
+                "rules.special_skus_enabled",
+            ),
+            special_skus=tuple(_string_list(rules, "special_skus")),
             # === MODIFIED END ===
         )
         message_config = MessageConfig(
@@ -1345,6 +1368,12 @@ def to_dict(config: AppConfig) -> dict[str, object]:
             "personal_order_suffix": config.rules.personal_order_suffix,
             "order_prefix_filter_enabled": config.rules.order_prefix_filter_enabled,
             "allowed_order_prefixes": list(config.rules.allowed_order_prefixes),
+            # === MODIFIED END ===
+            # === MODIFIED START ===
+            # 原因：配置 API 需要返回临时推送正选 SKU 配置。
+            # 影响范围：config 响应和配置落盘。
+            "special_skus_enabled": config.rules.special_skus_enabled,
+            "special_skus": list(config.rules.special_skus),
             # === MODIFIED END ===
         },
         "message": {

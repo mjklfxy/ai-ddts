@@ -13,6 +13,11 @@ class ExecutionLogStage(Enum):
     MESSAGE = "推送群"
     KINGDEE = "金蝶"
     RECEIPT = "回执"
+    # === MODIFIED START ===
+    # 原因：临时推送需要独立的执行日志阶段。
+    # 影响范围：执行日志页面展示。
+    TEMP_PUSH = "临时推送"
+    # === MODIFIED END ===
 
 
 class ExecutionLogResult(Enum):
