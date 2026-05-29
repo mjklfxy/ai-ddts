@@ -72,17 +72,28 @@ def describe_export_file(target_path: Path | str) -> tuple[str, dict[str, object
 
 
 def _find_window(substring: str, trace_id: str) -> gw.Win32Window | None:
-    """Finds the first desktop window whose title contains the target text."""
+    """Finds the desktop window whose title best matches the target text."""
 
+    # === MODIFIED START ===
+    # 原因：getWindowsWithTitle 是子串匹配，VSCode 标题含"吉客云"会排在前面。
+    #   优先选标题精确匹配的窗口，其次选标题最短的（最可能是目标客户端）。
+    # 影响范围：RPA 窗口查找。
     windows = gw.getWindowsWithTitle(substring)
     if not windows:
         log_info("window_not_found", {"trace_id": trace_id, "substring": substring})
         return None
-    log_info(
-        "window_found",
-        {"trace_id": trace_id, "substring": substring, "title": windows[0].title},
-    )
-    return windows[0]
+
+    # 精确匹配优先
+    for w in windows:
+        if w.title.strip() == substring:
+            log_info("window_found", {"trace_id": trace_id, "substring": substring, "title": w.title})
+            return w
+
+    # 否则选标题最短的（排除 IDE/浏览器等长标题窗口）
+    best = min(windows, key=lambda w: len(w.title))
+    log_info("window_found", {"trace_id": trace_id, "substring": substring, "title": best.title})
+    return best
+    # === MODIFIED END ===
 
 
 def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
