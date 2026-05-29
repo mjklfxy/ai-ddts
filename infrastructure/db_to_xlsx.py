@@ -16,6 +16,18 @@ from shared.logging.logger import log_error, log_info
 user32 = ctypes.windll.user32
 user32.SetProcessDPIAware()
 kernel32 = ctypes.windll.kernel32
+# === MODIFIED START ===
+# 原因：恢复重构前的窗口激活完整常量集。
+# 影响范围：RPA 窗口前台控制。
+SW_RESTORE = 9
+SW_MAXIMIZE = 3
+HWND_TOPMOST = -1
+HWND_NOTOPMOST = -2
+SWP_NOSIZE = 0x0001
+SWP_NOMOVE = 0x0002
+SWP_SHOWWINDOW = 0x0040
+FORCE_FOREGROUND_FLAGS = SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW
+# === MODIFIED END ===
 SPI_GETFOREGROUNDLOCKTIMEOUT = 0x2000
 SPI_SETFOREGROUNDLOCKTIMEOUT = 0x2001
 SPIF_SENDCHANGE = 0x0002
@@ -76,57 +88,125 @@ def _find_window(substring: str, trace_id: str) -> gw.Win32Window | None:
 def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
     """Activates the target window before sending simulated input."""
 
-    hwnd = getattr(win, "_hWnd", None) or getattr(win, "hWnd", None)
-    if not (isinstance(hwnd, int) and hwnd > 0):
-        hwnd = None
-    log_info("window_activate", {"trace_id": trace_id, "title": win.title, "hwnd": hwnd})
-
+    # === MODIFIED START ===
+    # 原因：恢复重构前的多层窗口激活逻辑，包括 win.activate() 兜底和重试。
+    # 影响范围：RPA 吉客云窗口激活、后续坐标点击可靠性。
+    hwnd = _window_handle(win)
+    log_info(
+        "window_activate",
+        {
+            "trace_id": trace_id,
+            "title": win.title,
+            "left": win.left,
+            "top": win.top,
+            "width": win.width,
+            "height": win.height,
+            "minimized": win.isMinimized,
+            "hwnd": hwnd,
+        },
+    )
     if win.isMinimized:
         win.restore()
+        time.sleep(0.3)
 
     if hwnd is not None:
-        _force_foreground(hwnd)
-    if not win.isMaximized:
-        win.maximize()
+        _force_window_foreground(hwnd, trace_id)
+    _maximize_window(win, hwnd, trace_id)
+    try:
+        win.activate()
+    except Exception as e:
+        log_error("window_activate_fallback_failed", {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)})
 
-    time.sleep(0.3)
-    ok = hwnd is not None and user32.GetForegroundWindow() == hwnd
-    if not ok:
-        log_error("window_activate_failed", {"trace_id": trace_id, "hwnd": hwnd})
-    return ok
+    time.sleep(0.5)
+    if hwnd is not None and not _is_foreground_window(hwnd):
+        log_error(
+            "window_foreground_verify_failed",
+            {"trace_id": trace_id, "hwnd": hwnd, "foreground_hwnd": _foreground_window_handle(), "title": win.title},
+        )
+        _steal_foreground(hwnd, trace_id)
+        time.sleep(0.3)
+        if not _is_foreground_window(hwnd):
+            log_error("window_foreground_retry_failed", {"trace_id": trace_id, "hwnd": hwnd, "foreground_hwnd": _foreground_window_handle()})
+            return False
+
+    try:
+        cur = pg.position()
+        log_info("mouse_position", {"trace_id": trace_id, "position": cur})
+    except Exception as e:
+        log_error("pyautogui_error", {"trace_id": trace_id, "error": str(e)})
+        return False
+
+    if hwnd is not None:
+        log_info(
+            "window_foreground_verified",
+            {"trace_id": trace_id, "hwnd": hwnd, "title": win.title,
+             "maximized": _is_window_maximized(win), "left": win.left,
+             "top": win.top, "width": win.width, "height": win.height},
+        )
+    return True
+    # === MODIFIED END ===
 
 
-def _force_foreground(hwnd: int) -> None:
-    """Forces a window to foreground via AttachThreadInput + Alt key simulation."""
+def _window_handle(win: gw.Win32Window) -> int | None:
+    """Returns the native Windows handle exposed by pygetwindow."""
 
-    target_tid = user32.GetWindowThreadProcessId(hwnd, None)
-    current_tid = kernel32.GetCurrentThreadId()
+    hwnd = getattr(win, "_hWnd", None) or getattr(win, "hWnd", None)
+    if isinstance(hwnd, int) and hwnd > 0:
+        return hwnd
+    return None
 
-    timeout = ctypes.c_uint(0)
-    user32.SystemParametersInfoW(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, ctypes.byref(timeout), 0)
-    user32.SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, 0, SPIF_SENDCHANGE)
 
-    attached = target_tid != current_tid and bool(
-        user32.AttachThreadInput(current_tid, target_tid, True)
-    )
+def _force_window_foreground(hwnd: int, trace_id: str) -> None:
+    """Restores, foregrounds, and briefly topmost-pins a target window."""
 
-    user32.SetForegroundWindow(hwnd)
-    user32.BringWindowToTop(hwnd)
+    try:
+        user32.ShowWindow(hwnd, SW_RESTORE)
+        user32.BringWindowToTop(hwnd)
+        _steal_foreground(hwnd, trace_id)
+        user32.SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, FORCE_FOREGROUND_FLAGS)
+        user32.SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, FORCE_FOREGROUND_FLAGS)
+        log_info("window_force_foreground", {"trace_id": trace_id, "hwnd": hwnd})
+    except Exception as e:
+        log_error("window_force_foreground_failed", {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)})
 
-    if user32.GetForegroundWindow() != hwnd:
-        user32.SendInput(2, ctypes.byref(_ALT_INPUTS), ctypes.sizeof(_INPUT))
 
-    if attached:
-        user32.AttachThreadInput(current_tid, target_tid, False)
-    user32.SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, timeout.value, 0, SPIF_SENDCHANGE)
+def _steal_foreground(hwnd: int, trace_id: str) -> None:
+    """Aggressively forces a window to foreground using AttachThreadInput + input simulation."""
+
+    try:
+        target_tid = user32.GetWindowThreadProcessId(hwnd, None)
+        current_tid = kernel32.GetCurrentThreadId()
+
+        timeout = ctypes.c_uint(0)
+        user32.SystemParametersInfoW(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, ctypes.byref(timeout), 0)
+        user32.SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, 0, SPIF_SENDCHANGE)
+
+        attached = False
+        if target_tid != current_tid:
+            attached = bool(user32.AttachThreadInput(current_tid, target_tid, True))
+
+        user32.SetForegroundWindow(hwnd)
+        user32.BringWindowToTop(hwnd)
+
+        if user32.GetForegroundWindow() != hwnd:
+            _simulate_alt_key()
+            user32.SetForegroundWindow(hwnd)
+
+        if attached:
+            user32.AttachThreadInput(current_tid, target_tid, False)
+
+        user32.SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, timeout.value, 0, SPIF_SENDCHANGE)
+        log_info("steal_foreground_done", {"trace_id": trace_id, "hwnd": hwnd})
+    except Exception as e:
+        log_error("steal_foreground_failed", {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)})
 
 
 class _KEYBDINPUT(ctypes.Structure):
     _fields_ = [
-        ("wVk", ctypes.c_ushort),
-        ("wScan", ctypes.c_ushort),
-        ("dwFlags", ctypes.c_ulong),
-        ("time", ctypes.c_ulong),
+        ("wVk", ctypes.wintypes.WORD),
+        ("wScan", ctypes.wintypes.WORD),
+        ("dwFlags", ctypes.wintypes.DWORD),
+        ("time", ctypes.wintypes.DWORD),
         ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
     ]
 
@@ -137,20 +217,71 @@ class _INPUT_UNION(ctypes.Union):
 
 class _INPUT(ctypes.Structure):
     _fields_ = [
-        ("type", ctypes.c_ulong),
+        ("type", ctypes.wintypes.DWORD),
         ("union", _INPUT_UNION),
     ]
 
 
-def _make_alt_input(flags: int) -> _INPUT:
-    inp = _INPUT()
-    inp.type = INPUT_KEYBOARD
-    inp.union.ki.wVk = 0x12  # VK_MENU (Alt)
-    inp.union.ki.dwFlags = flags
-    return inp
+def _simulate_alt_key() -> None:
+    """Simulates Alt key press+release to satisfy Windows foreground lock."""
+
+    VK_MENU = 0x12
+
+    def _make_input(vk: int, flags: int) -> _INPUT:
+        inp = _INPUT()
+        inp.type = INPUT_KEYBOARD
+        inp.union.ki.wVk = vk
+        inp.union.ki.dwFlags = flags
+        return inp
+
+    arr = (_INPUT * 2)(_make_input(VK_MENU, 0), _make_input(VK_MENU, KEYEVENTF_KEYUP))
+    user32.SendInput(2, ctypes.byref(arr), ctypes.sizeof(_INPUT))
 
 
-_ALT_INPUTS = (_INPUT * 2)(_make_alt_input(0), _make_alt_input(KEYEVENTF_KEYUP))
+def _maximize_window(win: gw.Win32Window, hwnd: int | None, trace_id: str) -> None:
+    """Maximizes the target window before fixed-coordinate automation."""
+
+    try:
+        if not _is_window_maximized(win):
+            win.maximize()
+            time.sleep(0.3)
+        log_info(
+            "window_maximized",
+            {"trace_id": trace_id, "hwnd": hwnd, "title": win.title,
+             "left": win.left, "top": win.top, "width": win.width,
+             "height": win.height, "maximized": _is_window_maximized(win)},
+        )
+    except Exception as e:
+        log_error("window_maximize_failed", {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)})
+        if hwnd is not None:
+            try:
+                user32.ShowWindow(hwnd, SW_MAXIMIZE)
+                time.sleep(0.3)
+                log_info("window_maximized_win32", {"trace_id": trace_id, "hwnd": hwnd})
+            except Exception as win32_error:
+                log_error("window_maximize_win32_failed", {"trace_id": trace_id, "hwnd": hwnd, "error": str(win32_error)})
+
+
+def _is_window_maximized(win: gw.Win32Window) -> bool:
+    return bool(getattr(win, "isMaximized", False))
+
+
+def _foreground_window_handle() -> int | None:
+    """Returns the current foreground window handle when available."""
+
+    try:
+        hwnd = user32.GetForegroundWindow()
+    except Exception:
+        return None
+    if isinstance(hwnd, int) and hwnd > 0:
+        return hwnd
+    return None
+
+
+def _is_foreground_window(hwnd: int) -> bool:
+    """Returns whether the expected window is currently foreground."""
+
+    return _foreground_window_handle() == hwnd
 # === MODIFIED END ===
 
 
