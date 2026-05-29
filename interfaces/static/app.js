@@ -1571,6 +1571,7 @@ function updateTempPushEndHint() {
 async function executeTempPush() {
   const startInput = document.getElementById("tempPushStartInput");
   const endSelect = document.getElementById("tempPushEndSelect");
+  const runBtn = document.getElementById("tempPushRunButton");
   if (!startInput?.value) { showNotice("请填写开始时间", true); return; }
   if (!endSelect?.value) { showNotice("请选择结束时间任务", true); return; }
 
@@ -1597,6 +1598,7 @@ async function executeTempPush() {
   const windowEndRunAt = endSelect.value;
 
   setBusy(true);
+  if (runBtn) runBtn.disabled = true;
   try {
     const result = await api("/temp-push/run", {
       method: "POST",
@@ -1612,6 +1614,7 @@ async function executeTempPush() {
     showNotice(`临时推送失败：${err.message}`, true);
   } finally {
     setBusy(false);
+    if (runBtn) runBtn.disabled = false;
   }
 }
 
