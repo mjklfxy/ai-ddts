@@ -553,6 +553,11 @@ def _export_steps(
         ("focus_order_status_input", "click", (277, 584), 1),
         ("open_order_status_filter", "click", (188, 588), 1),
         ("type_order_status_keyword", "type", "待发货", 1),
+        # === MODIFIED START ===
+        # 原因：筛选下拉框输入关键词后需要关闭弹出层才能勾选复选框。
+        # 影响范围：RPA 订单状态筛选流程。
+        ("close_keyword_popup", "click", (220, 585), 0.5),
+        # === MODIFIED END ===
         ("check_status_pending_submit", "click", (173, 656), 1),
         ("check_status_submitting", "click", (173, 690), 1),
         ("check_status_submitted", "click", (173, 723), 1),
