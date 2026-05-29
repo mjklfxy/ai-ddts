@@ -668,15 +668,58 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
             return {"items": []}
         items = []
         for child in sorted(base_dir.iterdir(), reverse=True):
-            if child.is_dir():
-                store = SpecialPushOrderStore(temp_push_id=child.name)
-                orders = store.list_all()
+            if not child.is_dir():
+                continue
+            store = SpecialPushOrderStore(temp_push_id=child.name)
+            orders = store.list_all()
+
+            # 从执行日志提取摘要信息
+            push_status = ""
+            passed_count = 0
+            ignored_count = 0
+            error_count = 0
+            window_start = ""
+            window_end = ""
+            failure_reason = ""
+            log_path = child / "execution_logs.json"
+            if log_path.exists():
+                try:
+                    import json as _json
+                    logs = _json.loads(log_path.read_text(encoding="utf-8"))
+                    for log in logs:
+                        details = log.get("details", {})
+                        if log.get("stage") == "TEMP_PUSH" and not window_start:
+                            window_start = details.get("window_start", "")
+                            window_end = details.get("window_end", "")
+                        if log.get("stage") == "RULE":
+                            passed_count = details.get("passed_count", 0)
+                            ignored_count = details.get("ignored_count", 0)
+                            error_count = details.get("error_count", 0)
+                        if log.get("stage") == "MESSAGE":
+                            push_status = log.get("summary", "")
+                        if log.get("result") == "FAILED":
+                            failure_reason = log.get("summary", "")
+                except Exception:
+                    pass
+
+            if not push_status:
                 if orders:
-                    items.append({
-                        "temp_push_id": child.name,
-                        "order_count": len(orders),
-                        "trace_id": orders[0].trace_id if orders else "",
-                    })
+                    push_status = "已推送"
+                else:
+                    push_status = "无订单"
+
+            items.append({
+                "temp_push_id": child.name,
+                "trace_id": orders[0].trace_id if orders else "",
+                "order_count": len(orders),
+                "push_status": push_status,
+                "passed_count": passed_count,
+                "ignored_count": ignored_count,
+                "error_count": error_count,
+                "window_start": window_start,
+                "window_end": window_end,
+                "failure_reason": failure_reason,
+            })
         return {"items": items}
 
     @app.get("/temp-push/{temp_push_id}/orders/download", tags=["temp-push"])

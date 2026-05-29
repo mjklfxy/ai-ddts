@@ -1058,6 +1058,22 @@ tbody tr:hover {
   background: #f1f5f9;
 }
 
+.failure-hint {
+  display: inline-block;
+  margin-left: 4px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 50%;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: help;
+  vertical-align: middle;
+}
+
 .row-actions {
   display: inline-flex;
   gap: 10px;

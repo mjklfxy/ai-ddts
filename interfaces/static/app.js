@@ -1625,22 +1625,31 @@ async function loadTempPushHistory() {
     const data = await api("/temp-push/orders");
     const items = data.items || [];
     if (!items.length) {
-      tbody.innerHTML = '<tr><td class="empty-row" colspan="4">暂无临时推送记录</td></tr>';
+      tbody.innerHTML = '<tr><td class="empty-row" colspan="6">暂无临时推送记录</td></tr>';
       return;
     }
     state.tempPushHistory = items;
-    tbody.innerHTML = items.map((item) => `
+    tbody.innerHTML = items.map((item) => {
+      const timeWindow = item.window_start && item.window_end
+        ? `${formatDate(item.window_start)} ~ ${formatDate(item.window_end)}`
+        : "-";
+      const failureTip = item.failure_reason
+        ? ` title="${escapeAttr(item.failure_reason)}"`
+        : "";
+      return `
       <tr>
         <td>${escapeHtml(item.temp_push_id)}</td>
-        <td>${escapeHtml(item.trace_id || "-")}</td>
+        <td>${statusBadge(item.push_status)}${item.failure_reason ? `<span class="failure-hint"${failureTip}>!</span>` : ""}</td>
+        <td>通过 ${item.passed_count || 0} / 异常 ${item.error_count || 0} / 忽略 ${item.ignored_count || 0}</td>
         <td>${item.order_count || 0}</td>
+        <td>${timeWindow}</td>
         <td>
-          <button type="button" data-action="download-temp-push" data-temp-push-id="${escapeAttr(item.temp_push_id)}" data-trace="${escapeAttr(item.trace_id || "")}">下载</button>
+          <button type="button" data-action="download-temp-push" data-temp-push-id="${escapeAttr(item.temp_push_id)}" data-trace="${escapeAttr(item.trace_id || "")}">下载明细</button>
         </td>
-      </tr>
-    `).join("");
+      </tr>`;
+    }).join("");
   } catch (_) {
-    tbody.innerHTML = '<tr><td class="empty-row" colspan="4">加载失败</td></tr>';
+    tbody.innerHTML = '<tr><td class="empty-row" colspan="6">加载失败</td></tr>';
   }
 }
 // === MODIFIED END ===
