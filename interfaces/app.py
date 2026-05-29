@@ -688,16 +688,27 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
                     logs = _json.loads(log_path.read_text(encoding="utf-8"))
                     for log in logs:
                         details = log.get("details", {})
-                        if log.get("stage") == "TEMP_PUSH" and not window_start:
-                            window_start = details.get("window_start", "")
-                            window_end = details.get("window_end", "")
-                        if log.get("stage") == "RULE":
-                            passed_count = details.get("passed_count", 0)
-                            ignored_count = details.get("ignored_count", 0)
-                            error_count = details.get("error_count", 0)
-                        if log.get("stage") == "MESSAGE":
-                            push_status = log.get("summary", "")
-                        if log.get("result") == "FAILED":
+                        stage = log.get("stage", "")
+                        # 临时推送开始 — 提取时间窗口
+                        if "临时推送" in stage and not window_start:
+                            impact = log.get("impact", "")
+                            # impact 格式: "时间窗口：xxx 至 xxx"
+                            if "至" in impact:
+                                parts = impact.split("至")
+                                if len(parts) == 2:
+                                    window_start = parts[0].replace("时间窗口：", "").strip()
+                                    window_end = parts[1].strip()
+                            window_end = window_end or details.get("window_end", "")
+                        # 规则判断 — 提取计数
+                        if "规则" in stage:
+                            passed_count = details.get("passed_count", details.get("passed", 0))
+                            ignored_count = details.get("ignored_count", details.get("ignored", 0))
+                            error_count = details.get("error_count", details.get("error", 0))
+                        # 推送群 — 提取推送状态
+                        if "推送" in stage and "规则" not in stage:
+                            push_status = details.get("push_status", "") or log.get("summary", "")
+                        # 失败记录
+                        if log.get("result") == "失败" or log.get("result") == "FAILED":
                             failure_reason = log.get("summary", "")
                 except Exception:
                     pass
