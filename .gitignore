@@ -7,6 +7,8 @@ tools/
 __pycache__/
 *.pyc
 .env
-config/config.prod.json
+config/config.dev.json
+config/config_prod.json
 .claude/
+.agents/
 input/
