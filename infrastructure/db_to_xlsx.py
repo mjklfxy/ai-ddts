@@ -150,7 +150,7 @@ def _make_alt_input(flags: int) -> _INPUT:
     return inp
 
 
-_ALT_INPUTS = (_make_alt_input(0), _make_alt_input(KEYEVENTF_KEYUP))
+_ALT_INPUTS = (_INPUT * 2)(_make_alt_input(0), _make_alt_input(KEYEVENTF_KEYUP))
 # === MODIFIED END ===
 
 

@@ -17,6 +17,13 @@
       "enabled": true,
       "run_at": "16:15",
       "check_interval_seconds": 30
+    },
+    {
+      "schedule_id": "schedule-2",
+      "name": "定时任务2",
+      "enabled": true,
+      "run_at": "20:00",
+      "check_interval_seconds": 60
     }
   ],
   "source": {
