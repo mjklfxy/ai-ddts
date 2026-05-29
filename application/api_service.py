@@ -76,7 +76,7 @@ class ApiService:
     # 影响范围：任务运行和查询接口。
     def __init__(
         self,
-        config_path: str | Path = resolve_config_path(),
+        config_path: str | Path | None = None,
         task_store_path: str | Path = Path("outputs") / "task_runs.json",
         # === MODIFIED START ===
         # 原因：API 需要维护 ERP 同步来的 SKU-供应商对照数据。
@@ -120,7 +120,7 @@ class ApiService:
         supplier_urlopen: Callable[..., Any] | None = None,
         # === MODIFIED END ===
     ) -> None:
-        self.config_path = Path(config_path)
+        self.config_path = Path(config_path) if config_path is not None else resolve_config_path()
         self.task_run_store = TaskRunStore(task_store_path)
         # === MODIFIED START ===
         # 原因：任务运行和供应商映射接口共用同一个本地映射存储。

@@ -41,12 +41,14 @@ from shared.logging.logger import log_error, log_info
 def run_temp_push(
     window_start: datetime,
     window_end_trace_id: str,
-    config_path: str | Path = resolve_config_path(),
+    config_path: str | Path | None = None,
     supplier_mapping_path: str | Path = Path("outputs") / "sku_supplier_mappings.json",
     clock: Callable[[], datetime] | None = None,
 ) -> dict[str, object]:
     """Runs one temporary push with a 2-rule engine (SpecialSku + GroupRule)."""
 
+    if config_path is None:
+        config_path = resolve_config_path()
     config = ConfigService().load(config_path)
     now = (clock or datetime.now)()
 

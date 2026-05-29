@@ -122,7 +122,7 @@ class RunSummary:
 # 原因：任务运行需要读取 ERP 同步的 SKU-供应商对照数据。
 # 影响范围：手动运行入口和 API mock-run。
 def run_once(
-    config_path: str | Path = resolve_config_path(),
+    config_path: str | Path | None = None,
     supplier_mapping_path: str | Path = Path("outputs") / "sku_supplier_mappings.json",
     exception_order_path: str | Path = Path("outputs") / "exception_orders.json",
     # === MODIFIED START ===
@@ -157,6 +157,8 @@ def run_once(
 ) -> RunSummary:
     """Runs one configured task with configured rules."""
 
+    if config_path is None:
+        config_path = resolve_config_path()
     config = ConfigService().load(config_path)
     supplier_client = CloudWarehouseClient(
         local_path=supplier_mapping_path, urlopen=supplier_urlopen,

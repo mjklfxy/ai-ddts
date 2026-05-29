@@ -20,7 +20,7 @@ from pydantic import BaseModel
 from application.api_service import ApiService
 from application.config_service import ConfigService
 from infrastructure.xlsx_region_parser import ImportRuleError
-from shared.env import get_env, load_dotenv
+from shared.env import get_env, load_dotenv, resolve_config_path
 
 # === MODIFIED START ===
 # 原因：推送/上传订单文件统一改为 Excel，下载接口需要返回 Excel MIME。
@@ -157,7 +157,8 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
     """Creates the FastAPI app and delegates work to application services."""
 
     load_dotenv()
-    service = api_service or ApiService()
+    resolved_config_path = resolve_config_path()
+    service = api_service or ApiService(config_path=resolved_config_path)
 
     # Load once at startup for the download endpoint.
     _app_config = ConfigService().load(service.config_path)
