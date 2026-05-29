@@ -23,7 +23,6 @@ from application.pipeline import (
     PipelineOrderEvaluation,
 )
 from application.special_push_order_store import SpecialPushOrderStore
-from application.task_run_store import TaskRunStore
 from domain.enums.execution_log import ExecutionLogResult, ExecutionLogStage
 from domain.enums.rule import RuleDecision
 from domain.enums.status import KingdeeStatus, PushStatus
@@ -40,7 +39,11 @@ from shared.logging.logger import log_error, log_info
 
 def run_temp_push(
     window_start: datetime,
-    window_end_trace_id: str,
+    # === MODIFIED START ===
+    # 原因：结束时间改为从定时任务 run_at 计算，不再依赖任务运行历史 trace_id。
+    # 影响范围：临时推送执行逻辑、函数签名。
+    window_end_run_at: str,
+    # === MODIFIED END ===
     config_path: str | Path | None = None,
     supplier_mapping_path: str | Path = Path("outputs") / "sku_supplier_mappings.json",
     clock: Callable[[], datetime] | None = None,
@@ -52,12 +55,11 @@ def run_temp_push(
     config = ConfigService().load(config_path)
     now = (clock or datetime.now)()
 
-    # 1. Read window_end from existing task
-    task_run_store = TaskRunStore()
-    end_summary = task_run_store.get_by_trace_id(window_end_trace_id)
-    if end_summary is None or not end_summary.window_end:
-        raise ValueError(f"任务 {window_end_trace_id} 不存在或缺少时间窗口信息")
-    window_end = datetime.fromisoformat(end_summary.window_end)
+    # === MODIFIED START ===
+    # 原因：从 run_at 计算 window_end，复用 manual_runner 的逻辑。
+    # 影响范围：临时推送时间窗口计算。
+    window_end = _scheduled_window_end(now, window_end_run_at)
+    # === MODIFIED END ===
 
     # 2. Generate temp_push_id
     temp_push_id = f"TP-{now:%Y%m%d%H%M%S}"
@@ -79,7 +81,7 @@ def run_temp_push(
     _append_log(log_store, task_context, ExecutionLogStage.TEMP_PUSH, ExecutionLogResult.SUCCESS,
                 "临时推送开始",
                 impact=f"时间窗口：{window_start.isoformat()} 至 {window_end.isoformat()}",
-                details={"temp_push_id": temp_push_id, "window_end_trace_id": window_end_trace_id})
+                details={"temp_push_id": temp_push_id, "window_end_run_at": window_end_run_at})
 
     # 5. Fetch orders
     try:
@@ -330,3 +332,10 @@ def _push_summary(status: PushStatus) -> str:
     if status is PushStatus.FAILED:
         return "临时推送失败"
     return "没有需要推送的订单"
+
+
+def _scheduled_window_end(now: datetime, run_at: str) -> datetime:
+    """Returns today's scheduled end time for one fixed daily schedule."""
+
+    scheduled_time = datetime.strptime(run_at, "%H:%M").time()
+    return datetime.combine(now.date(), scheduled_time)

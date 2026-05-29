@@ -648,11 +648,15 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
 
         from application.temp_push_runner import run_temp_push as _run
         window_start_str = body.get("window_start")
-        window_end_trace_id = body.get("window_end_trace_id")
-        if not window_start_str or not window_end_trace_id:
-            raise HTTPException(status_code=400, detail="window_start 和 window_end_trace_id 必填")
+        # === MODIFIED START ===
+        # 原因：结束时间改为从定时任务 run_at 计算，不再依赖任务运行历史 trace_id。
+        # 影响范围：临时推送执行接口。
+        window_end_run_at = body.get("window_end_run_at")
+        if not window_start_str or not window_end_run_at:
+            raise HTTPException(status_code=400, detail="window_start 和 window_end_run_at 必填")
         window_start = datetime.fromisoformat(str(window_start_str))
-        return _run(window_start=window_start, window_end_trace_id=str(window_end_trace_id))
+        return _run(window_start=window_start, window_end_run_at=str(window_end_run_at))
+        # === MODIFIED END ===
 
     @app.get("/temp-push/orders", tags=["temp-push"])
     def list_temp_push_orders() -> dict[str, object]:

@@ -1528,18 +1528,17 @@ async function saveSpecialSkuConfig() {
 function populateTempPushEndSelect() {
   const select = document.getElementById("tempPushEndSelect");
   if (!select) return;
-  const tasks = state.tasks || [];
-  // 从配置中取 enabled schedule 的 run_at，用于显示
-  const schedules = state.config?.schedules || [];
-  const primaryRunAt = schedules.find((s) => s.enabled)?.run_at || null;
-  select.innerHTML = tasks.length
-    ? tasks.map((t) => {
-        // 显示时间：优先用调度器 run_at，回退到 window_end
-        const displayTime = primaryRunAt || (t.window_end ? formatDateTimeShort(t.window_end) : "?");
-        const label = `${shortId(t.trace_id)}  ${t.task_name || ""}  →  ${displayTime}`;
-        return `<option value="${escapeAttr(t.trace_id)}">${escapeHtml(label)}</option>`;
+  // === MODIFIED START ===
+  // 原因：临时推送下拉改为读取配置中的定时任务，而非任务运行历史。
+  // 影响范围：临时推送页面结束时间下拉。
+  const schedules = (state.config?.schedules || []).filter((s) => s.enabled);
+  select.innerHTML = schedules.length
+    ? schedules.map((s) => {
+        const label = `${s.name || s.schedule_id} → ${s.run_at}`;
+        return `<option value="${escapeAttr(s.run_at)}">${escapeHtml(label)}</option>`;
       }).join("")
-    : '<option value="">暂无任务</option>';
+    : '<option value="">暂无定时任务</option>';
+  // === MODIFIED END ===
   updateTempPushEndHint();
 }
 
@@ -1561,11 +1560,12 @@ function updateTempPushEndHint() {
   const select = document.getElementById("tempPushEndSelect");
   const hint = document.getElementById("tempPushEndHint");
   if (!select || !hint) return;
-  const task = (state.tasks || []).find((t) => t.trace_id === select.value);
-  const schedules = state.config?.schedules || [];
-  const primaryRunAt = schedules.find((s) => s.enabled)?.run_at || null;
-  const displayTime = primaryRunAt || (task ? formatDateTimeShort(task.window_end) : "");
-  hint.textContent = task ? `→ 复用该任务的结束时间: ${displayTime}` : "";
+  // === MODIFIED START ===
+  // 原因：hint 改为显示选中定时任务的 run_at 结束时间。
+  // 影响范围：临时推送页面提示文本。
+  const runAt = select.value;
+  hint.textContent = runAt ? `→ 结束时间: 今天 ${runAt}` : "";
+  // === MODIFIED END ===
 }
 
 async function executeTempPush() {
@@ -1575,7 +1575,26 @@ async function executeTempPush() {
   if (!endSelect?.value) { showNotice("请选择结束时间任务", true); return; }
 
   const windowStart = toLocalIso(startInput.value);
-  const windowEndTraceId = endSelect.value;
+  // === MODIFIED START ===
+  // 原因：结束时间改为从定时任务 run_at 计算，不再依赖任务运行历史 trace_id。
+  // 影响范围：临时推送执行请求。
+
+  // 时间合法性校验
+  const startDate = new Date(startInput.value);
+  if (isNaN(startDate.getTime())) { showNotice("开始时间格式无效", true); return; }
+  const now = new Date();
+  if (startDate > now) { showNotice("开始时间不能晚于当前时间", true); return; }
+
+  // 结束时间 = 今天 run_at
+  const [h, m] = endSelect.value.split(":").map(Number);
+  const endDate = new Date(now);
+  endDate.setHours(h, m, 0, 0);
+  // 如果今天的 run_at 已过，用明天的
+  if (endDate <= now) { endDate.setDate(endDate.getDate() + 1); }
+
+  if (startDate >= endDate) { showNotice("开始时间不能晚于结束时间", true); return; }
+
+  const windowEndRunAt = endSelect.value;
 
   setBusy(true);
   try {
@@ -1583,9 +1602,10 @@ async function executeTempPush() {
       method: "POST",
       body: JSON.stringify({
         window_start: windowStart,
-        window_end_trace_id: windowEndTraceId,
+        window_end_run_at: windowEndRunAt,
       }),
     });
+    // === MODIFIED END ===
     showNotice(`临时推送完成：${result.temp_push_id}，通过 ${result.passed_count || 0} 单`);
     await loadTempPushHistory();
   } catch (err) {
