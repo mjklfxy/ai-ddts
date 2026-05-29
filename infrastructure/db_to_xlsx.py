@@ -105,29 +105,49 @@ def _activate_window(win: gw.Win32Window, trace_id: str) -> bool:
             "hwnd": hwnd,
         },
     )
+
+    # DEBUG: 每步记录前台窗口状态
+    log_info("dbg_step", {"trace_id": trace_id, "step": "start", "hwnd": hwnd, "fg": _foreground_window_handle()})
+
     if win.isMinimized:
         win.restore()
         time.sleep(0.3)
+        log_info("dbg_step", {"trace_id": trace_id, "step": "after_restore", "fg": _foreground_window_handle()})
 
     if hwnd is not None:
         _force_window_foreground(hwnd, trace_id)
+        log_info("dbg_step", {"trace_id": trace_id, "step": "after_force_fg", "fg": _foreground_window_handle(), "match": _is_foreground_window(hwnd)})
+
     _maximize_window(win, hwnd, trace_id)
+    log_info("dbg_step", {"trace_id": trace_id, "step": "after_maximize", "fg": _foreground_window_handle()})
+
     try:
         win.activate()
+        log_info("dbg_step", {"trace_id": trace_id, "step": "after_activate", "fg": _foreground_window_handle()})
     except Exception as e:
         log_error("window_activate_fallback_failed", {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)})
+        log_info("dbg_step", {"trace_id": trace_id, "step": "activate_exception", "fg": _foreground_window_handle(), "err": str(e)})
 
     time.sleep(0.5)
+    fg_now = _foreground_window_handle()
+    log_info("dbg_step", {"trace_id": trace_id, "step": "verify1", "hwnd": hwnd, "fg": fg_now, "match": _is_foreground_window(hwnd)})
+
+    # === MODIFIED START ===
+    # 原因：后台线程 uvicorn 无法通过 SetForegroundWindow 抢前台（Windows 安全限制），
+    #   但 pyautogui 的 click/moveTo 是全局的，不依赖前台状态。
+    #   放宽验证：前台不匹配时打 warning 继续，不再 return False。
+    # 影响范围：RPA 窗口激活容错。
     if hwnd is not None and not _is_foreground_window(hwnd):
         log_error(
-            "window_foreground_verify_failed",
-            {"trace_id": trace_id, "hwnd": hwnd, "foreground_hwnd": _foreground_window_handle(), "title": win.title},
+            "window_foreground_not_active",
+            {"trace_id": trace_id, "hwnd": hwnd, "foreground_hwnd": fg_now, "title": win.title,
+             "note": "后台线程无法抢前台，继续执行RPA"},
         )
         _steal_foreground(hwnd, trace_id)
         time.sleep(0.3)
-        if not _is_foreground_window(hwnd):
-            log_error("window_foreground_retry_failed", {"trace_id": trace_id, "hwnd": hwnd, "foreground_hwnd": _foreground_window_handle()})
-            return False
+        fg_retry = _foreground_window_handle()
+        log_info("dbg_step", {"trace_id": trace_id, "step": "after_steal", "fg": fg_retry, "match": _is_foreground_window(hwnd)})
+    # === MODIFIED END ===
 
     try:
         cur = pg.position()
@@ -171,8 +191,12 @@ def _force_window_foreground(hwnd: int, trace_id: str) -> None:
 
 
 def _steal_foreground(hwnd: int, trace_id: str) -> None:
-    """Aggressively forces a window to foreground using AttachThreadInput + input simulation."""
+    """Aggressively forces a window to foreground using AttachThreadInput + keybd_event."""
 
+    # === MODIFIED START ===
+    # 原因：SendInput 从后台线程注入的输入不被 Windows 认定为当前线程的用户输入，
+    #   导致 SetForegroundWindow 仍被拦截。改用 keybd_event 投递到线程消息队列。
+    # 影响范围：后台线程窗口激活。
     try:
         target_tid = user32.GetWindowThreadProcessId(hwnd, None)
         current_tid = kernel32.GetCurrentThreadId()
@@ -185,12 +209,17 @@ def _steal_foreground(hwnd: int, trace_id: str) -> None:
         if target_tid != current_tid:
             attached = bool(user32.AttachThreadInput(current_tid, target_tid, True))
 
+        # 先模拟 Alt 按下/释放，让 Windows 认为当前线程有用户输入
+        _keybd_alt_press_release()
+
         user32.SetForegroundWindow(hwnd)
         user32.BringWindowToTop(hwnd)
 
         if user32.GetForegroundWindow() != hwnd:
-            _simulate_alt_key()
+            # 再试一次
+            _keybd_alt_press_release()
             user32.SetForegroundWindow(hwnd)
+            user32.BringWindowToTop(hwnd)
 
         if attached:
             user32.AttachThreadInput(current_tid, target_tid, False)
@@ -199,6 +228,16 @@ def _steal_foreground(hwnd: int, trace_id: str) -> None:
         log_info("steal_foreground_done", {"trace_id": trace_id, "hwnd": hwnd})
     except Exception as e:
         log_error("steal_foreground_failed", {"trace_id": trace_id, "hwnd": hwnd, "error": str(e)})
+    # === MODIFIED END ===
+
+
+def _keybd_alt_press_release() -> None:
+    """Simulates Alt key press+release via keybd_event (thread message queue based)."""
+
+    VK_MENU = 0x12
+    KEYEVENTF_KEYUP_FLAG = 0x0002
+    user32.keybd_event(VK_MENU, 0, 0, 0)
+    user32.keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP_FLAG, 0)
 
 
 class _KEYBDINPUT(ctypes.Structure):
