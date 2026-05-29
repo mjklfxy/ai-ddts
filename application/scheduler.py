@@ -297,6 +297,25 @@ class DailyFixedTimeScheduler:
                 schedule_name=schedule_config.name,
             )
 
+        # === MODIFIED START ===
+        # 原因：超过 run_at 一定时间后不再触发，避免迟到的任务意外执行。
+        # 影响范围：Scheduler tick 超时判断。
+        run_h, run_m = (int(x) for x in schedule_config.run_at.split(":"))
+        now_minutes = now.hour * 60 + now.minute
+        run_minutes = run_h * 60 + run_m
+        if now_minutes - run_minutes > schedule_config.stale_threshold_minutes:
+            return SchedulerTickResult(
+                status=SchedulerStatus.NOT_DUE,
+                reason="stale_threshold_exceeded",
+                should_run=False,
+                now=now.isoformat(),
+                run_at=schedule_config.run_at,
+                last_run_date=run_state.last_run_date,
+                schedule_id=schedule_config.schedule_id,
+                schedule_name=schedule_config.name,
+            )
+        # === MODIFIED END ===
+
         summary = self.task_runner(schedule_config)
         self.task_recorder(schedule_config, summary)
         self.state_store.mark_run(

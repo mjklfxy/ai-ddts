@@ -80,6 +80,11 @@ class ScheduleConfig:
     # 影响范围：Scheduler loop 配置。
     check_interval_seconds: int = 60
     # === MODIFIED END ===
+    # === MODIFIED START ===
+    # 原因：超过 run_at 一定时间后不再触发，避免迟到的任务意外执行。
+    # 影响范围：ScheduleConfig、Scheduler tick 判断。
+    stale_threshold_minutes: int = 5
+    # === MODIFIED END ===
 # === MODIFIED END ===
 
 
@@ -910,6 +915,12 @@ def _schedule_config(
             "check_interval_seconds",
             60,
             f"{field_name}.check_interval_seconds",
+        ),
+        stale_threshold_minutes=_optional_positive_int(
+            data,
+            "stale_threshold_minutes",
+            5,
+            f"{field_name}.stale_threshold_minutes",
         ),
     )
 # === MODIFIED END ===
