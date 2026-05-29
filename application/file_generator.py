@@ -25,6 +25,7 @@ ORDER_FILE_HEADERS: tuple[str, ...] = (
     "电话",
     "物流公司",
     "物流单号",
+    "渠道分类",
 )
 
 ORDER_ERROR_HEADERS: tuple[str, ...] = ORDER_FILE_HEADERS + ("异常原因",)
@@ -136,7 +137,7 @@ class ExcelFileGenerator:
     @staticmethod
     def _to_row(
         order_line: OrderLineForSplit,
-    ) -> tuple[str, str, str, int, str, str, str, str, str]:
+    ) -> tuple[str, str, str, int, str, str, str, str, str, str]:
         return (
             order_line.order_no,
             order_line.delivery_order_no,
@@ -147,6 +148,7 @@ class ExcelFileGenerator:
             order_line.phone,
             order_line.logistics_company,
             order_line.logistics_no,
+            order_line.channel_classification,
         )
 
 

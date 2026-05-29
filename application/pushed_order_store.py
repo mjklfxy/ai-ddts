@@ -31,6 +31,7 @@ PUSHED_ORDER_CSV_HEADERS = (
     "电话",
     "物流公司",
     "物流单号",
+    "渠道分类",
     "推送文件",
     "消息追踪号",
 )
@@ -58,6 +59,7 @@ class StoredPushedOrder:
     phone: str
     logistics_company: str
     logistics_no: str
+    channel_classification: str
     file_path: str
     message_tracking_id: str
 
@@ -175,6 +177,7 @@ def pushed_order_to_dict(record: StoredPushedOrder) -> dict[str, object]:
         "phone": record.phone,
         "logistics_company": record.logistics_company,
         "logistics_no": record.logistics_no,
+        "channel_classification": record.channel_classification,
         "file_path": record.file_path,
         "message_tracking_id": record.message_tracking_id,
     }
@@ -205,6 +208,7 @@ def _stored_from_delivery(
         phone=order_line.phone,
         logistics_company=order_line.logistics_company,
         logistics_no=order_line.logistics_no,
+        channel_classification=order_line.channel_classification,
         file_path=str(delivery.generated_file.file_path),
         message_tracking_id=delivery.message_result.tracking_id,
     )
@@ -231,6 +235,7 @@ def _stored_from_dict(data: dict[str, Any]) -> StoredPushedOrder:
         logistics_company=_optional_string(data, "logistics_company"),
         logistics_no=_optional_string(data, "logistics_no"),
         file_path=_optional_string(data, "file_path"),
+        channel_classification=_optional_string(data, "channel_classification"),
         message_tracking_id=_optional_string(data, "message_tracking_id"),
     )
 
@@ -254,6 +259,7 @@ def _csv_row(record: StoredPushedOrder) -> list[object]:
         record.phone,
         record.logistics_company,
         record.logistics_no,
+        record.channel_classification,
         record.file_path,
         record.message_tracking_id,
     ]

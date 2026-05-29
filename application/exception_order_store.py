@@ -37,6 +37,7 @@ EXCEPTION_ORDER_CSV_HEADERS = (
     "推送群名称",
     "群主手机号",
     # === MODIFIED END ===
+    "渠道分类",
     "货品摘要",
     "数量",
     "收件人",
@@ -82,7 +83,8 @@ class StoredExceptionOrder:
     # === MODIFIED END ===
     reason: str
     rule_name: str
-    process_status: ExceptionProcessStatus
+    channel_classification: str = ""
+    process_status: ExceptionProcessStatus = ExceptionProcessStatus.PENDING
 
 
 class ExceptionOrderStore:
@@ -233,6 +235,7 @@ def stored_exception_to_dict(record: StoredExceptionOrder) -> dict[str, object]:
         "group_name": record.group_name,
         "owner_mobile": record.owner_mobile,
         "supplier_name": record.supplier_name,
+        "channel_classification": record.channel_classification,
         # === MODIFIED END ===
         "reason": record.reason,
         "rule_name": record.rule_name,
@@ -278,6 +281,7 @@ def _stored_from_exception(
         group_name=exception_order.group_name,
         owner_mobile=exception_order.owner_mobile,
         supplier_name=exception_order.supplier_name,
+        channel_classification=exception_order.channel_classification,
         # === MODIFIED END ===
         reason=exception_order.reason,
         rule_name=exception_order.rule_name,
@@ -312,6 +316,7 @@ def _stored_from_dict(data: dict[str, Any]) -> StoredExceptionOrder:
         group_name=_optional_string(data, "group_name"),
         owner_mobile=_optional_string(data, "owner_mobile"),
         supplier_name=_optional_string(data, "supplier_name"),
+        channel_classification=_optional_string(data, "channel_classification"),
         # === MODIFIED END ===
         reason=_required_string(data, "reason"),
         rule_name=_required_string(data, "rule_name"),
@@ -331,6 +336,7 @@ def _csv_row(record: StoredExceptionOrder) -> list[object]:
         record.supplier_name,
         record.group_name,
         record.owner_mobile,
+        record.channel_classification,
         record.goods_summary,
         record.quantity,
         record.receiver_name,

@@ -33,6 +33,7 @@ class OrderLineForSplit:
     owner_mobile: str = ""
     supplier_name: str = ""
     # === MODIFIED END ===
+    channel_classification: str = ""
 
 
 @dataclass(frozen=True, slots=True)

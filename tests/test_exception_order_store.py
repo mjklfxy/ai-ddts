@@ -65,7 +65,7 @@ class ExceptionOrderStoreTests(TestCase):
         self.assertEqual(rows[1][5], "华东仓")
         self.assertEqual(rows[1][6], "SKU-001")
         self.assertEqual(rows[1][7], "供应商A")
-        self.assertEqual(rows[1][17], "未配置推送群")
+        self.assertEqual(rows[1][18], "未配置推送群")
 
     # === MODIFIED START ===
     # 原因：任务清单异常订单下载需要支持按任务批次筛选。

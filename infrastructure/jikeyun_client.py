@@ -14,7 +14,7 @@ from typing import Any
 
 from application.order_splitter import OrderLineForSplit
 from application.pipeline import PipelineOrder
-from application.xlsx_reader import OrderAddressInfo, load_order_address_lookup
+from application.xlsx_reader import OrderAddressInfo, refresh_order_address_cache
 from domain.rules.base import RuleContext
 
 
@@ -266,7 +266,15 @@ class JikeyunClient:
         # 原因：可选执行 RPA 导出，随后从配置的 XLSX 路径补齐订单地址信息。
         # 影响范围：fetch_orders 吉客云订单映射前置数据准备。
         self._run_rpa_export(trace_id, start_time, end_time)
-        xlsx_lookup = load_order_address_lookup(self.xlsx_path) if self.rpa_exporter is not None else None
+        # === MODIFIED START ===
+        # 原因：RPA 导出后强制重建 input Excel 旁的 JSON 映射，后续仍通过 JSON 缓存回填收件信息。
+        # 影响范围：吉客云订单映射前的 XLSX/JSON 回填数据准备。
+        xlsx_lookup = (
+            refresh_order_address_cache(self.xlsx_path)
+            if self.rpa_exporter is not None
+            else None
+        )
+        # === MODIFIED END ===
         self.log_info(
             "jikeyun_xlsx_lookup_loaded",
             {
@@ -452,6 +460,8 @@ class JikeyunClient:
             _optional_string_any(raw_order, WAREHOUSE_NAME_ALIASES) or ""
         )
         # === MODIFIED END ===
+        owner_name = _optional_string_any(raw_order, OWNER_NAME_ALIASES) or ""
+        channel_classification = "直营要货" if owner_name == "自营" else ""
         for line_source in line_sources:
             merged_source = {**raw_order, **line_source}
             # === MODIFIED START ===
@@ -564,6 +574,7 @@ class JikeyunClient:
                     owner_mobile="",
                     supplier_name="",
                     # === MODIFIED END ===
+                    channel_classification=channel_classification,
                 )
             )
 
@@ -749,6 +760,7 @@ LINE_LIST_ALIASES = (
     "details",
     "items",
 )
+OWNER_NAME_ALIASES = ("ownerName", "owner_name", "货主")
 
 
 def _request_to_form(request: JikeyunPageRequest) -> dict[str, str]:

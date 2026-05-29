@@ -36,6 +36,7 @@ class ExceptionOrderSource:
     group_name: str = ""
     owner_mobile: str = ""
     supplier_name: str = ""
+    channel_classification: str = ""
     # === MODIFIED END ===
 
 
@@ -71,6 +72,7 @@ class ExceptionOrder:
     group_name: str = ""
     owner_mobile: str = ""
     supplier_name: str = ""
+    channel_classification: str = ""
     # === MODIFIED END ===
     process_status: ExceptionProcessStatus = ExceptionProcessStatus.PENDING
 
@@ -114,6 +116,7 @@ class ExceptionOrder:
             group_name=source.group_name,
             owner_mobile=source.owner_mobile,
             supplier_name=source.supplier_name,
+            channel_classification=source.channel_classification,
             # === MODIFIED END ===
             reason=rule_result.reason,
             rule_name=rule_result.rule_name,

@@ -130,6 +130,72 @@ class JikeyunClientTests(TestCase):
         )
         self.assertEqual([order.rule_context.order_no for order in orders], ["SO-RPA"])
 
+    def test_fetch_orders_refreshes_xlsx_cache_after_rpa_export(self) -> None:
+        from tempfile import TemporaryDirectory
+
+        from openpyxl import Workbook
+        from application.xlsx_reader import load_order_address_lookup
+
+        with TemporaryDirectory() as temp_dir:
+            xlsx_path = Path(temp_dir) / "orders.xlsx"
+            wb = Workbook()
+            ws = wb.active
+            ws.append(["标记", "订单编号"] + [""] * 15 + ["收货人", "手机", "收货地址"])
+            ws.append(["", "JY-CACHE-REFRESH"] + [""] * 15 + ["Old Receiver", "13900000001", "Old Address"])
+            wb.save(xlsx_path)
+            wb.close()
+            load_order_address_lookup(xlsx_path)
+
+            wb = Workbook()
+            ws = wb.active
+            ws.append(["标记", "订单编号"] + [""] * 15 + ["收货人", "手机", "收货地址"])
+            ws.append(["", "JY-CACHE-REFRESH"] + [""] * 15 + ["New Receiver", "13900000002", "New Address"])
+            wb.save(xlsx_path)
+            wb.close()
+            cache_path = xlsx_path.with_suffix(xlsx_path.suffix + ".cache.json")
+            cache_mtime = xlsx_path.stat().st_mtime + 60
+            cache_path.touch()
+            cache_path_stat = cache_path.stat()
+            import os
+
+            os.utime(cache_path, (cache_path_stat.st_atime, cache_mtime))
+
+            def exporter(
+                trace_id: str,
+                export_path: Path,
+                start_time: datetime,
+                end_time: datetime,
+            ) -> None:
+                _ = (trace_id, export_path, start_time, end_time)
+
+            client = make_client(
+                transport=lambda request: JikeyunPageResult(
+                    items=(
+                        {
+                            "orderNo": "S-CACHE-REFRESH",
+                            "erporderNo": "JY-CACHE-REFRESH",
+                            "goodsDetail": [{"goodsName": "Goods XLSX", "sellCount": 1}],
+                            "receiverName": "",
+                            "address": "",
+                            "phone": "",
+                        },
+                    ),
+                    has_next=False,
+                ),
+                rpa_exporter=exporter,
+                xlsx_path=xlsx_path,
+            )
+
+            orders = client.fetch_orders(
+                trace_id="TRACE-XLSX-NO-RPA",
+                start_time=datetime(2026, 4, 30, 8, 0, 0),
+                end_time=datetime(2026, 4, 30, 12, 0, 0),
+            )
+
+        self.assertEqual(orders[0].order_lines[0].receiver_name, "New Receiver")
+        self.assertEqual(orders[0].order_lines[0].address, "New Address")
+        self.assertEqual(orders[0].order_lines[0].phone, "13900000002")
+
     def test_fetch_orders_propagates_rpa_exporter_failure(self) -> None:
         errors: list[tuple[str, dict[str, object]]] = []
 

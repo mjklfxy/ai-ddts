@@ -685,6 +685,7 @@ class Pipeline:
             group_name=order_line.group_name,
             owner_mobile=order_line.owner_mobile,
             supplier_name=order_line.supplier_name,
+            channel_classification=order_line.channel_classification,
             # === MODIFIED END ===
         )
 
