@@ -550,14 +550,11 @@ def _export_steps(
     target_path = str(_export_target_path(xlsx_path))
     # 订单状态是 Flutter 多选复选框下拉：先点击输入区域，再点箭头展开列表，逐个勾选复选框，点确认。
     steps: list[tuple[str, str, tuple[int, int] | str, float]] = [
+        ("move_to_close_button", "hover", (220, 585), 1),
+        ("click_close_button", "click", (220, 585), 0.5),
         ("focus_order_status_input", "click", (277, 584), 1),
         ("open_order_status_filter", "click", (188, 588), 1),
         ("type_order_status_keyword", "type", "待发货", 1),
-        # === MODIFIED START ===
-        # 原因：筛选下拉框输入关键词后需要关闭弹出层才能勾选复选框。
-        # 影响范围：RPA 订单状态筛选流程。
-        ("close_keyword_popup", "click", (220, 585), 0.5),
-        # === MODIFIED END ===
         ("check_status_pending_submit", "click", (173, 656), 1),
         ("check_status_submitting", "click", (173, 690), 1),
         ("check_status_submitted", "click", (173, 723), 1),

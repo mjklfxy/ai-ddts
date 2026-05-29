@@ -103,6 +103,7 @@ class BackgroundSchedulerLoop:
                     {
                         "trace_id": "scheduler",
                         "error_type": exc.__class__.__name__,
+                        "error": str(exc)[:200],
                     },
                 )
             await asyncio.sleep(self._safe_interval_seconds())
