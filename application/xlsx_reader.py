@@ -40,6 +40,25 @@ def load_order_address_lookup(xlsx_path: Path | str) -> dict[str, OrderAddressIn
     return lookup
 
 
+# === MODIFIED START ===
+# 原因：RPA 每次导出后都需要重建 JSON 映射，不能因为 cache mtime 较新就复用旧内容。
+# 影响范围：吉客云收件人/地址/电话的 input Excel 回填缓存。
+def refresh_order_address_cache(xlsx_path: Path | str) -> dict[str, OrderAddressInfo]:
+    """Rebuilds the JSON cache from xlsx and returns the JSON-backed lookup."""
+
+    path = Path(xlsx_path)
+    if not path.exists():
+        return {}
+
+    cache_path = path.with_suffix(path.suffix + ".cache.json")
+    lookup = _read_xlsx(path)
+    _save_cache(cache_path, lookup)
+    return _load_cache(cache_path)
+
+
+# === MODIFIED END ===
+
+
 def _read_xlsx(path: Path) -> dict[str, OrderAddressInfo]:
     import warnings
 

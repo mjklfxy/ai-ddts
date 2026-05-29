@@ -12,6 +12,7 @@ from infrastructure.db_to_xlsx import (
     _confirm_overwrite_if_present,
     _export_steps,
     _hover,
+    _type,
     _wait_for_window,
     describe_export_file,
 )
@@ -132,12 +133,57 @@ class DbToXlsxTests(TestCase):
 
         self.assertEqual(calls, [("moveTo", (1371, 220, 0.3))])
 
+    def test_type_waits_before_clearing_clipboard_after_paste(self) -> None:
+        calls: list[tuple[str, object]] = []
+        original_pg = db_to_xlsx.pg
+        original_pyperclip = db_to_xlsx.pyperclip
+        original_sleep = db_to_xlsx.time.sleep
+        original_log_info = db_to_xlsx.log_info
+
+        class FakePyAutoGui:
+            """Captures paste hotkey calls issued by the RPA type helper."""
+
+            def hotkey(self, *keys):
+                calls.append(("hotkey", keys))
+
+        class FakePyperclip:
+            """Captures clipboard writes issued by the RPA type helper."""
+
+            def copy(self, text):
+                calls.append(("copy", text))
+
+        try:
+            db_to_xlsx.pg = FakePyAutoGui()
+            db_to_xlsx.pyperclip = FakePyperclip()
+            db_to_xlsx.time.sleep = lambda delay: calls.append(("sleep", delay))
+            db_to_xlsx.log_info = lambda event, payload: None
+
+            _type("C:\\input\\销售单查询.xlsx", "TRACE-TYPE", delay=1)
+        finally:
+            db_to_xlsx.pg = original_pg
+            db_to_xlsx.pyperclip = original_pyperclip
+            db_to_xlsx.time.sleep = original_sleep
+            db_to_xlsx.log_info = original_log_info
+
+        self.assertEqual(
+            calls,
+            [
+                ("copy", "C:\\input\\销售单查询.xlsx"),
+                ("hotkey", ("ctrl", "v")),
+                ("sleep", 0.3),
+                ("copy", ""),
+                ("sleep", 1),
+            ],
+        )
+
     def test_export_steps_use_order_status_and_merge_current_page_without_time_filtering(self) -> None:
         target_path = Path("input") / "销售单查询.xlsx"
 
         steps = _export_steps(target_path)
         step_names = [step[0] for step in steps]
 
+        self.assertEqual(step_names[0], "reset_left_filters_click_1")
+        self.assertEqual(step_names[1], "reset_left_filters_click_2")
         self.assertIn("focus_order_status_input", step_names)
         self.assertIn("open_order_status_filter", step_names)
         self.assertIn("type_order_status_keyword", step_names)
@@ -170,6 +216,10 @@ class DbToXlsxTests(TestCase):
         self.assertNotIn("replace_order_time_end", step_names)
 
         step_by_name = {step[0]: step for step in steps}
+        self.assertEqual(step_by_name["reset_left_filters_click_1"][2], (241, 936))
+        self.assertEqual(step_by_name["reset_left_filters_click_2"][2], (241, 936))
+        self.assertEqual(step_by_name["move_to_close_button"][2], (284, 587))
+        self.assertEqual(step_by_name["click_close_button"][2], (284, 587))
         self.assertEqual(step_by_name["focus_order_status_input"][2], (277, 584))
         self.assertEqual(step_by_name["open_order_status_filter"][2], (188, 588))
         self.assertEqual(step_by_name["type_order_status_keyword"][2], "待发货")
@@ -178,8 +228,8 @@ class DbToXlsxTests(TestCase):
         self.assertEqual(step_by_name["check_status_submitted"][2], (173, 723))
         self.assertEqual(step_by_name["confirm_order_status_filter"][2], (194, 866))
         self.assertEqual(step_by_name["pre_filter_click_1"][2], (522, 215))
-        self.assertEqual(step_by_name["pre_filter_click_2"][2], (447, 247))
-        self.assertEqual(step_by_name["pre_filter_click_3"][2], (447, 247))
+        self.assertEqual(step_by_name["pre_filter_click_2"][2], (457, 251))
+        self.assertEqual(step_by_name["pre_filter_click_3"][2], (457, 251))
         self.assertEqual(step_by_name["pre_filter_click_4"][2], (501, 360))
         self.assertEqual(step_by_name["pre_filter_click_5"][2], (688, 394))
         self.assertEqual(step_by_name["apply_left_filters"][2], (68, 933))
@@ -212,28 +262,48 @@ class DbToXlsxTests(TestCase):
         self.assertEqual(step_by_name["click_statistics_time_type_item"][2], (142, 550))
         self.assertNotIn("replace_statistics_time_type", step_by_name)
         self.assertNotIn("confirm_statistics_time_type", step_by_name)
-        self.assertEqual(step_by_name["focus_order_time_start"][2], (82, 482))
+        self.assertEqual(step_by_name["focus_order_time_start"][2], (120, 482))
+        self.assertEqual(step_by_name["refocus_order_time_start"][2], (120, 482))
+        self.assertEqual(step_by_name["refocus_order_time_start"][3], 1)
         self.assertEqual(
             step_by_name["replace_order_time_start"][2],
             "2026-05-21 09:30:00",
         )
         self.assertEqual(step_by_name["confirm_order_time_start"][1], "press")
         self.assertEqual(step_by_name["confirm_order_time_start"][2], "enter")
-        self.assertEqual(step_by_name["confirm_order_time_start"][3], 2)
-        self.assertEqual(step_by_name["focus_order_time_end"][2], (82, 520))
+        self.assertEqual(step_by_name["confirm_order_time_start"][3], 1)
+        self.assertEqual(step_by_name["focus_order_time_end"][2], (120, 520))
+        self.assertEqual(step_by_name["refocus_order_time_end"][2], (120, 520))
+        self.assertEqual(step_by_name["refocus_order_time_end"][3], 1)
         self.assertEqual(
             step_by_name["replace_order_time_end"][2],
             "2026-05-22 09:30:00",
         )
         self.assertEqual(step_by_name["confirm_order_time_end"][1], "press")
         self.assertEqual(step_by_name["confirm_order_time_end"][2], "enter")
-        self.assertEqual(step_by_name["confirm_order_time_end"][3], 2)
+        self.assertEqual(step_by_name["confirm_order_time_end"][3], 1)
         self.assertEqual(step_by_name["apply_left_filters"][2], (68, 933))
         self.assertEqual(step_by_name["apply_left_filters"][3], 9)
         step_names = [step[0] for step in steps]
         self.assertLess(
+            step_names.index("focus_order_time_start"),
+            step_names.index("refocus_order_time_start"),
+        )
+        self.assertLess(
+            step_names.index("refocus_order_time_start"),
+            step_names.index("replace_order_time_start"),
+        )
+        self.assertLess(
             step_names.index("confirm_order_time_start"),
             step_names.index("focus_order_time_end"),
+        )
+        self.assertLess(
+            step_names.index("focus_order_time_end"),
+            step_names.index("refocus_order_time_end"),
+        )
+        self.assertLess(
+            step_names.index("refocus_order_time_end"),
+            step_names.index("replace_order_time_end"),
         )
         self.assertLess(
             step_names.index("confirm_order_time_end"),

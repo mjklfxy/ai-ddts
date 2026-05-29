@@ -420,6 +420,11 @@ def _type(text: str, trace_id: str, delay: float = 1) -> None:
     )
     pyperclip.copy(text)
     pg.hotkey("ctrl", "v")
+    # === MODIFIED START ===
+    # 原因：Windows/桌面控件处理 Ctrl+V 可能晚于热键返回，立即清空剪贴板会偶发导致另存为文件名未粘贴。
+    # 影响范围：RPA 所有剪贴板输入，尤其是另存为文件名路径输入。
+    time.sleep(0.3)
+    # === MODIFIED END ===
     pyperclip.copy("")
     time.sleep(delay)
 
@@ -550,8 +555,10 @@ def _export_steps(
     target_path = str(_export_target_path(xlsx_path))
     # 订单状态是 Flutter 多选复选框下拉：先点击输入区域，再点箭头展开列表，逐个勾选复选框，点确认。
     steps: list[tuple[str, str, tuple[int, int] | str, float]] = [
-        ("move_to_close_button", "hover", (220, 585), 1),
-        ("click_close_button", "click", (220, 585), 0.5),
+        ("reset_left_filters_click_1", "click", (241, 936), 1),
+        ("reset_left_filters_click_2", "click", (241, 936), 1),
+        ("move_to_close_button", "hover", (284, 587), 1),
+        ("click_close_button", "click", (284, 587), 0.5),
         ("focus_order_status_input", "click", (277, 584), 1),
         ("open_order_status_filter", "click", (188, 588), 1),
         ("type_order_status_keyword", "type", "待发货", 1),
@@ -566,29 +573,31 @@ def _export_steps(
             [
                 ("open_statistics_time_type", "click", (173, 411), 1),
                 ("click_statistics_time_type_item", "click", (142, 550), 1),
-                ("focus_order_time_start", "click", (82, 482), 1),
+                ("focus_order_time_start", "click", (120, 482), 1),
+                ("refocus_order_time_start", "click", (120, 482), 1),
                 (
                     "replace_order_time_start",
                     "replace_text",
                     _format_ui_datetime(start_time),
                     1,
                 ),
-                ("confirm_order_time_start", "press", "enter", 2),
-                ("focus_order_time_end", "click", (82, 520), 1),
+                ("confirm_order_time_start", "press", "enter", 1),
+                ("focus_order_time_end", "click", (120, 520), 1),
+                ("refocus_order_time_end", "click", (120, 520), 1),
                 (
                     "replace_order_time_end",
                     "replace_text",
                     _format_ui_datetime(end_time),
                     1,
                 ),
-                ("confirm_order_time_end", "press", "enter", 2),
+                ("confirm_order_time_end", "press", "enter", 1),
             ]
         )
     steps.extend(
         [
             ("pre_filter_click_1", "click", (522, 215), 1),
-            ("pre_filter_click_2", "click", (447, 247), 1),
-            ("pre_filter_click_3", "click", (447, 247), 1),
+            ("pre_filter_click_2", "click", (457, 251), 1),
+            ("pre_filter_click_3", "click", (457, 251), 1),
             ("pre_filter_click_4", "click", (501, 360), 1),
             ("pre_filter_click_5", "click", (688, 394), 3),
             ("apply_left_filters", "click", (68, 933), 9),
