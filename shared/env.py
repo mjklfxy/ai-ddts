@@ -22,6 +22,17 @@ def resolve_config_path() -> Path:
     return p if p.exists() else Path("config") / "config.json"
 
 
+def is_channel_classification_enabled() -> bool:
+    """Returns whether the channel_classification column is enabled.
+
+    Controlled by env var AI_DDTS_CHANNEL_CLASSIFICATION_ENABLED.
+    Defaults to True when unset.
+    """
+    return os.getenv("AI_DDTS_CHANNEL_CLASSIFICATION_ENABLED", "1").strip().lower() in (
+        "1", "true", "yes",
+    )
+
+
 def load_dotenv(path: Path = Path(".env")) -> None:
     """Loads .env file into os.environ without adding a dependency.
 

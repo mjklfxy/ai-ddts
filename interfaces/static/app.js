@@ -301,25 +301,24 @@ function currentLogRange() {
   if (period === "all") return {};
   if (period === "custom") {
     return {
-      startAt: datetimeLocalToIso(document.getElementById("logStartInput").value),
-      endAt: datetimeLocalToIso(document.getElementById("logEndInput").value),
+      startAt: toLocalIso(document.getElementById("logStartInput").value),
+      endAt: toLocalIso(document.getElementById("logEndInput").value),
     };
   }
   if (period === "today") {
     const start = new Date(now);
     start.setHours(0, 0, 0, 0);
-    return { startAt: start.toISOString(), endAt: now.toISOString() };
+    return { startAt: dateToLocalIso(start), endAt: dateToLocalIso(now) };
   }
   const hours = period === "24h" ? 24 : period === "30d" ? 24 * 30 : 24 * 7;
   const start = new Date(now.getTime() - hours * 60 * 60 * 1000);
-  return { startAt: start.toISOString(), endAt: now.toISOString() };
+  return { startAt: dateToLocalIso(start), endAt: dateToLocalIso(now) };
 }
 
-function datetimeLocalToIso(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString();
+// Date 对象转本地 ISO 字符串，不走 toISOString()（会转 UTC 导致偏移）
+function dateToLocalIso(d) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 // datetime-local 输入转本地 ISO 字符串，不走 toISOString()（会转 UTC 导致偏移）
@@ -424,7 +423,6 @@ async function saveRules() {
       // === MODIFIED START ===
       // 原因：临时推送SKU配置移到独立页面，从新元素读取。
       // 影响范围：规则配置保存请求。
-      special_skus_enabled: Boolean(document.getElementById("specialSkuEnabled")?.checked),
       special_skus: (document.getElementById("specialSkuInput")?.value || "").split("\n").map((s) => s.trim()).filter(Boolean),
       // === MODIFIED END ===
     };
@@ -1375,6 +1373,34 @@ function handleActionClick(event) {
     return;
   }
   // === MODIFIED END ===
+  // === MODIFIED START ===
+  // 原因：临时推送下载按钮没有 data-trace，在 task 查找之后会被 !task return 拦截。
+  // 影响范围：临时推送历史表格下载按钮。
+  if (target.dataset.action === "download-temp-push") {
+    const tpId = target.dataset.tempPushId;
+    if (tpId) {
+      showNotice(`正在下载正常推送订单：${tpId}`);
+      triggerDownload(`/temp-push/${encodeURIComponent(tpId)}/orders/download`);
+    }
+    return;
+  }
+  if (target.dataset.action === "download-temp-push-exceptions") {
+    const tpId = target.dataset.tempPushId;
+    if (tpId) {
+      showNotice(`正在下载异常订单：${tpId}`);
+      triggerDownload(`/temp-push/${encodeURIComponent(tpId)}/exception-orders/download`);
+    }
+    return;
+  }
+  if (target.dataset.action === "download-temp-push-logs") {
+    const tpId = target.dataset.tempPushId;
+    if (tpId) {
+      showNotice(`正在下载执行日志：${tpId}`);
+      triggerDownload(`/temp-push/${encodeURIComponent(tpId)}/execution-logs/download`);
+    }
+    return;
+  }
+  // === MODIFIED END ===
   const task = state.tasks.find((item) => item.trace_id === target.dataset.trace);
   if (!task) return;
   // === MODIFIED START ===
@@ -1400,19 +1426,6 @@ function handleActionClick(event) {
   if (target.dataset.action === "detail") {
     openDrawer(task);
   }
-  // === MODIFIED START ===
-  // 原因：临时推送历史记录下载。
-  // 影响范围：临时推送页面下载操作。
-  if (target.dataset.action === "download-temp-push") {
-    const tpId = target.dataset.tempPushId;
-    const trace = target.dataset.trace;
-    if (tpId && trace) {
-      showNotice(`正在下载临时推送订单：${tpId}`);
-      triggerDownload(`/temp-push/${encodeURIComponent(tpId)}/orders/download?trace_id=${encodeURIComponent(trace)}`);
-    }
-    return;
-  }
-  // === MODIFIED END ===
   if (target.dataset.action === "select-receipt") {
     state.selectedReceiptTask = task;
     renderSelectedReceiptTask();
@@ -1507,13 +1520,11 @@ async function saveSpecialSkuConfig() {
     await api("/config/rules", {
       method: "PUT",
       body: JSON.stringify({
-        special_skus_enabled: skus.length > 0,
         special_skus: skus,
       }),
     });
     // 更新本地缓存
     if (state.config?.rules) {
-      state.config.rules.special_skus_enabled = skus.length > 0;
       state.config.rules.special_skus = skus;
     }
     updateSpecialSkuCount();
@@ -1636,16 +1647,38 @@ async function loadTempPushHistory() {
       const failureTip = item.failure_reason
         ? ` title="${escapeAttr(item.failure_reason)}"`
         : "";
+      // === MODIFIED START ===
+      // 原因：按钮命名与定时任务对齐（"正常推送"），增加"执行日志"下载，优化禁用态。
+      //       用 order_count 判断是否存在可下载的订单明细，避免日志汇总异常时按钮误置灰。
+      // 影响范围：临时推送历史表格操作列。
+      const hasOrders = Number(item.order_count || 0) > 0;
+      const hasErrors = Number(item.error_count || 0) > 0;
+      const normalBtn = hasOrders
+        ? `<button type="button" data-action="download-temp-push" data-temp-push-id="${escapeAttr(item.temp_push_id)}">正常推送</button>`
+        : `<span class="action-disabled" title="当前批次没有正常推送订单">正常推送</span>`;
+      const exceptionBtn = hasErrors
+        ? `<button type="button" data-action="download-temp-push-exceptions" data-temp-push-id="${escapeAttr(item.temp_push_id)}">异常订单</button>`
+        : `<span class="action-disabled" title="当前批次没有异常订单">异常订单</span>`;
+      // === MODIFIED END ===
       return `
       <tr>
         <td>${escapeHtml(item.temp_push_id)}</td>
-        <td>${statusBadge(item.push_status)}${item.failure_reason ? `<span class="failure-hint"${failureTip}>!</span>` : ""}</td>
+        <!-- === MODIFIED START ===
+        原因：临时推送历史参考任务清单，统一展示创建时间、订单统计、推送状态和行操作。
+        影响范围：临时推送历史表格行。
+        === MODIFIED END === -->
+        <td>${formatDate(item.created_at)}</td>
         <td>通过 ${item.passed_count || 0} / 异常 ${item.error_count || 0} / 忽略 ${item.ignored_count || 0}</td>
-        <td>${item.order_count || 0}</td>
+        <td>${statusBadge(item.push_status)}${item.failure_reason ? `<span class="failure-hint"${failureTip}>!</span>` : ""}</td>
         <td>${timeWindow}</td>
         <td>
-          <button type="button" data-action="download-temp-push" data-temp-push-id="${escapeAttr(item.temp_push_id)}" data-trace="${escapeAttr(item.trace_id || "")}">下载明细</button>
+          <div class="row-actions">
+            ${normalBtn}
+            ${exceptionBtn}
+            <button type="button" data-action="download-temp-push-logs" data-temp-push-id="${escapeAttr(item.temp_push_id)}">执行日志</button>
+          </div>
         </td>
+        <!-- === MODIFIED END === -->
       </tr>`;
     }).join("");
   } catch (_) {

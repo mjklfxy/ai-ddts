@@ -10,6 +10,8 @@ from application.exception_order_store import ExceptionOrderStore
 from application.execution_log_store import ExecutionLogRecord, ExecutionLogStore
 from application.file_generator import ExcelFileGenerator
 from application.manual_runner import (
+    _build_cached_user_resolver,
+    _build_upload_fn,
     build_message_sender_from_config,
     build_order_source_client,
     fetch_orders_from_config,
@@ -30,9 +32,11 @@ from domain.exception_order import ExceptionOrder, ExceptionOrderSource
 from domain.rule_engine import RuleEngine
 from domain.rules.base import RuleContext, RuleResult
 from domain.rules.group_rule import GroupRule
+from domain.rules.region_rule import RegionRule
 from domain.rules.special_sku_rule import SpecialSkuRule
 from infrastructure.cloud_warehouse_client import CloudWarehouseClient
 from infrastructure.message_adapter import MessagePayload
+from infrastructure.qixin_client import build_download_url
 from shared.env import resolve_config_path
 from shared.logging.logger import log_error, log_info
 
@@ -48,7 +52,7 @@ def run_temp_push(
     supplier_mapping_path: str | Path = Path("outputs") / "sku_supplier_mappings.json",
     clock: Callable[[], datetime] | None = None,
 ) -> dict[str, object]:
-    """Runs one temporary push with a 2-rule engine (SpecialSku + GroupRule)."""
+    """Runs one temporary push with a 3-rule engine (SpecialSku + Region + Group)."""
 
     if config_path is None:
         config_path = resolve_config_path()
@@ -81,7 +85,8 @@ def run_temp_push(
     _append_log(log_store, task_context, ExecutionLogStage.TEMP_PUSH, ExecutionLogResult.SUCCESS,
                 "临时推送开始",
                 impact=f"时间窗口：{window_start.isoformat()} 至 {window_end.isoformat()}",
-                details={"temp_push_id": temp_push_id, "window_end_run_at": window_end_run_at})
+                details={"temp_push_id": temp_push_id, "window_end_run_at": window_end_run_at,
+                         "window_start": window_start.isoformat(), "window_end": window_end.isoformat()})
 
     # 5. Fetch orders
     try:
@@ -97,11 +102,14 @@ def run_temp_push(
                 "已完成订单抓取", impact=f"本次抓取订单 {len(orders)} 单",
                 details={"order_count": len(orders)})
 
-    # 6. Build 2-rule engine
+    # 6. Build 3-rule engine (SpecialSku → Region → Group)
     rule_engine = RuleEngine(rules=[
         SpecialSkuRule(
             special_skus=set(config.rules.special_skus),
-            enabled=config.rules.special_skus_enabled,
+        ),
+        RegionRule(
+            restricted_regions=config.rules.restricted_regions,
+            enabled=config.rules.restricted_regions_enabled,
         ),
         GroupRule(
             sku_group_map=config.rules.sku_group_map,
@@ -127,10 +135,12 @@ def run_temp_push(
         # === MODIFIED START ===
         # 原因：异常订单需要按厂家生成 error Excel 文件，供业务人员查看和处理。
         # 影响范围：outputs/special_push/{id}/error/ 目录。
+        # 注意：ExcelFileGenerator.generate_error() 内部会自动拼 /error/ 子目录，
+        #       所以这里传 base_dir 而非 base_dir / "error"，避免双层嵌套。
         from application.manual_runner import _generate_error_files
         _generate_error_files(
             exception_orders=exception_orders,
-            output_dir=base_dir / "error",
+            output_dir=base_dir,
             clock=lambda: now,
         )
         # === MODIFIED END ===
@@ -149,13 +159,26 @@ def run_temp_push(
             clock=lambda: now,
         )
         message_sender = build_message_sender_from_config(config)
+        user_resolver = _build_cached_user_resolver(config)
 
         deliveries, batch_failures = _deliver_batches(
             task_context=task_context,
             batches=batches,
             file_generator=file_generator,
             message_sender=message_sender,
-            file_prefix="special_",
+            # === MODIFIED START ===
+            # 原因：临时推送文件名加 temp_push_id 前缀，与定时任务产出的文件区分。
+            # 影响范围：临时推送正常订单 Excel 文件名。
+            file_prefix=f"{temp_push_id}_",
+            # === MODIFIED END ===
+            # === MODIFIED START ===
+            # 原因：临时推送在文件直推模式下也必须先得到公网 file_url，否则 QixinSender 会拒绝发送。
+            # 影响范围：临时推送推送群阶段。
+            upload_file=_build_upload_fn(config),
+            download_base_url=config.download.base_url or None,
+            download_secret_key=os.environ.get(config.download.secret_key_env),
+            # === MODIFIED END ===
+            user_resolver=user_resolver,
             log_info=log_info,
             log_error=log_error,
         )
@@ -250,6 +273,18 @@ def _deliver_batches(
     file_generator: ExcelFileGenerator,
     message_sender,
     file_prefix: str = "",
+    # === MODIFIED START ===
+    # 原因：临时推送需要与正式 pipeline 一样把生成文件上传/签名为公网 URL，供文件直推使用。
+    # 影响范围：临时推送 _deliver_batches 与 MessagePayload.file_url。
+    upload_file: Callable[[Path], str] | None = None,
+    download_base_url: str | None = None,
+    download_secret_key: str | None = None,
+    # === MODIFIED END ===
+    # === MODIFIED START ===
+    # 原因：user_id 解析对齐主流程，使用带缓存的 resolver 替代内联硬编码。
+    # 影响范围：临时推送 _deliver_batches user_id 解析。
+    user_resolver: Callable[[str], str] | None = None,
+    # === MODIFIED END ===
     log_info=None,
     log_error=None,
 ):
@@ -261,18 +296,37 @@ def _deliver_batches(
         generated_file = None
         try:
             generated_file = file_generator.generate(batch, file_prefix=file_prefix)
+            # === MODIFIED START ===
+            # 原因：push_mode=file 时祺信接口要求 file_url，临时推送原先只传本地 file_path 导致推送失败。
+            # 影响范围：临时推送文件上传/下载 URL 构造与消息发送。
+            file_url = None
+            if upload_file is not None:
+                file_url = upload_file(generated_file.file_path)
+                if log_info is not None:
+                    log_info("temp_push_file_uploaded", {
+                        "trace_id": task_context.trace_id,
+                        "group_name": batch.group_name,
+                        "file_name": generated_file.file_path.name,
+                        "has_file_url": bool(file_url),
+                    })
+            elif download_base_url and download_secret_key:
+                file_url = build_download_url(
+                    base_url=download_base_url,
+                    filename=generated_file.file_path.name,
+                    secret_key=download_secret_key,
+                )
+            # === MODIFIED END ===
 
+            # === MODIFIED START ===
+            # 原因：user_id 解析对齐主流程，使用带缓存的 resolver 替代内联硬编码。
+            # 影响范围：临时推送 user_id 解析。
             user_id = batch.user_id
-            if not user_id and batch.owner_mobile:
+            if not user_id and batch.owner_mobile and user_resolver is not None:
                 try:
-                    from infrastructure.qixin_client import RemoteUserResolver
-                    resolver = RemoteUserResolver(
-                        api_url="http://mengyang.renruikeji.cn/api/userid",
-                        timeout_seconds=30,
-                    )
-                    user_id = resolver.get_userid_by_mobile(batch.owner_mobile)
+                    user_id = user_resolver(batch.owner_mobile)
                 except Exception:
                     user_id = batch.owner_mobile
+            # === MODIFIED END ===
 
             message_result = message_sender.send_file(
                 MessagePayload(
@@ -281,7 +335,11 @@ def _deliver_batches(
                     owner_mobile=batch.owner_mobile,
                     user_id=user_id or "",
                     file_path=generated_file.file_path,
-                    file_url=None,
+                    # === MODIFIED START ===
+                    # 原因：临时推送文件直推需要透传上传或签名后的公网文件 URL。
+                    # 影响范围：祺信文件直推 MessagePayload。
+                    file_url=file_url,
+                    # === MODIFIED END ===
                 )
             )
             deliveries.append(PipelineBatchDelivery(

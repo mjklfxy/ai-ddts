@@ -12,43 +12,42 @@ from application.task_service import TaskContext
 from domain.enums.exception import ExceptionProcessStatus
 from domain.exception_order import ExceptionOrder
 from infrastructure.cloud_warehouse_client import CloudWarehouseClient
+from shared.env import is_channel_classification_enabled
 
 
-EXCEPTION_ORDER_CSV_HEADERS = (
-    "trace_id",
-    "任务名称",
-    "关联单号",
-    "发货单号",
-    # === MODIFIED START ===
-    # 原因：SKU 口径明确为订单明细中的商品名称，并新增仓库字段。
-    # 影响范围：异常订单 CSV 导出表头。
-    "仓库编码",
-    "仓库",
-    "SKU（商品名称）",
-    # === MODIFIED START ===
-    # 原因：订单明细下载需要按 SKU-供应商对照带出供应商信息。
-    # 影响范围：异常订单 CSV 导出表头。
-    "供应商名称",
-    # === MODIFIED END ===
-    # === MODIFIED END ===
-    # === MODIFIED START ===
-    # 原因：异常订单 CSV 导出需要带出推送群信息，便于线下分配给厂家群主处理。
-    # 影响范围：exception_order_exports CSV 文件表头。
-    "推送群名称",
-    "群主手机号",
-    # === MODIFIED END ===
-    "渠道分类",
-    "货品摘要",
-    "数量",
-    "收件人",
-    "地址",
-    "电话",
-    "物流公司",
-    "物流单号",
-    "异常原因",
-    "规则名称",
-    "处理状态",
-)
+def get_exception_order_csv_headers() -> list[str]:
+    """Returns CSV headers, conditionally including channel_classification."""
+    headers = [
+        "trace_id",
+        "任务名称",
+        "关联单号",
+        "发货单号",
+        "仓库编码",
+        "仓库",
+        "SKU（商品名称）",
+        "供应商名称",
+        "推送群名称",
+        "群主手机号",
+    ]
+    if is_channel_classification_enabled():
+        headers.append("渠道分类")
+    headers.extend([
+        "货品摘要",
+        "数量",
+        "收件人",
+        "地址",
+        "电话",
+        "物流公司",
+        "物流单号",
+        "异常原因",
+        "规则名称",
+        "处理状态",
+    ])
+    return headers
+
+
+# Backward-compatible alias evaluated at import time.
+EXCEPTION_ORDER_CSV_HEADERS: tuple[str, ...] = tuple(get_exception_order_csv_headers())
 
 
 @dataclass(frozen=True, slots=True)
@@ -182,7 +181,7 @@ class ExceptionOrderStore:
 
         with file_path.open("w", newline="", encoding="utf-8-sig") as file:
             writer = csv.writer(file)
-            writer.writerow(EXCEPTION_ORDER_CSV_HEADERS)
+            writer.writerow(get_exception_order_csv_headers())
             writer.writerows(rows)
 
         return file_path
@@ -325,7 +324,7 @@ def _stored_from_dict(data: dict[str, Any]) -> StoredExceptionOrder:
 
 
 def _csv_row(record: StoredExceptionOrder) -> list[object]:
-    return [
+    row = [
         record.trace_id,
         record.task_name,
         record.order_no,
@@ -336,7 +335,10 @@ def _csv_row(record: StoredExceptionOrder) -> list[object]:
         record.supplier_name,
         record.group_name,
         record.owner_mobile,
-        record.channel_classification,
+    ]
+    if is_channel_classification_enabled():
+        row.append(record.channel_classification)
+    row.extend([
         record.goods_summary,
         record.quantity,
         record.receiver_name,
@@ -347,7 +349,8 @@ def _csv_row(record: StoredExceptionOrder) -> list[object]:
         record.reason,
         record.rule_name,
         record.process_status.value,
-    ]
+    ])
+    return row
 
 
 # === MODIFIED START ===

@@ -11,4 +11,6 @@ config/config.dev.json
 config/config_prod.json
 .claude/
 .agents/
+.codegraph/
+config/config.prod.json
 input/

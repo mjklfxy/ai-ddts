@@ -673,14 +673,29 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
             store = SpecialPushOrderStore(temp_push_id=child.name)
             orders = store.list_all()
 
-            # 从执行日志提取摘要信息
+            # === MODIFIED START ===
+            # 原因：修复日志 details 键名与 temp_push_runner 实际写入不匹配的问题，
+            #       同时补充 delivery_count 读取。
+            # 影响范围：临时推送历史列表数据展示。
+            # === MODIFIED END ===
             push_status = ""
             passed_count = 0
             ignored_count = 0
             error_count = 0
+            delivery_count = 0
+            # === MODIFIED START ===
+            # 原因：临时推送历史页参考任务清单，需要展示批次创建时间。
+            # 影响范围：/temp-push/orders 返回字段。
+            created_at = ""
+            # === MODIFIED END ===
             window_start = ""
             window_end = ""
             failure_reason = ""
+            # === MODIFIED START ===
+            # 原因：临时推送历史行需要返回日志中的 trace_id，避免接口因未定义变量失败。
+            # 影响范围：/temp-push/orders 返回字段与前端历史列表。
+            trace_id = ""
+            # === MODIFIED END ===
             log_path = child / "execution_logs.json"
             if log_path.exists():
                 try:
@@ -688,27 +703,35 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
                     logs = _json.loads(log_path.read_text(encoding="utf-8"))
                     for log in logs:
                         details = log.get("details", {})
-                        stage = log.get("stage", "")
-                        # 临时推送开始 — 提取时间窗口
-                        if "临时推送" in stage and not window_start:
-                            impact = log.get("impact", "")
-                            # impact 格式: "时间窗口：xxx 至 xxx"
-                            if "至" in impact:
-                                parts = impact.split("至")
-                                if len(parts) == 2:
-                                    window_start = parts[0].replace("时间窗口：", "").strip()
-                                    window_end = parts[1].strip()
-                            window_end = window_end or details.get("window_end", "")
-                        # 规则判断 — 提取计数
-                        if "规则" in stage:
-                            passed_count = details.get("passed_count", details.get("passed", 0))
-                            ignored_count = details.get("ignored_count", details.get("ignored", 0))
-                            error_count = details.get("error_count", details.get("error", 0))
-                        # 推送群 — 提取推送状态
-                        if "推送" in stage and "规则" not in stage:
+                        # === MODIFIED START ===
+                        # 原因：从批次日志提取 trace_id 和 details 时需要容错，保证历史列表能展示已有产物。
+                        # 影响范围：临时推送历史统计与下载按钮状态。
+                        if not isinstance(details, dict):
+                            details = {}
+                        if not trace_id:
+                            trace_id = str(log.get("trace_id", "") or "")
+                        # === MODIFIED END ===
+                        if not created_at:
+                            created_at = log.get("created_at", "")
+                        # === MODIFIED START ===
+                        # 原因：日志 stage/result 存的是中文枚举值（.value），需用中文匹配。
+                        # 影响范围：临时推送历史列表数据展示。
+                        # === MODIFIED END ===
+                        if log.get("stage") == "临时推送" and not window_start:
+                            window_start = details.get("window_start", "")
+                            window_end = details.get("window_end", "")
+                        if log.get("stage") == "规则判断":
+                            passed_count = details.get("passed", 0)
+                            ignored_count = details.get("ignored", 0)
+                            error_count = details.get("error", 0)
+                        if log.get("stage") == "推送群":
+                            # === MODIFIED START ===
+                            # 原因：历史列表状态应展示结构化推送状态值（如“已推送”），不是日志摘要。
+                            # 影响范围：临时推送历史列表状态徽标。
                             push_status = details.get("push_status", "") or log.get("summary", "")
-                        # 失败记录
-                        if log.get("result") == "失败" or log.get("result") == "FAILED":
+                            # === MODIFIED END ===
+                            delivery_count = details.get("delivery_count", 0)
+                        if log.get("result") == "失败":
                             failure_reason = log.get("summary", "")
                 except Exception:
                     pass
@@ -721,25 +744,77 @@ def create_app(api_service: ApiService | None = None) -> FastAPI:
 
             items.append({
                 "temp_push_id": child.name,
-                "trace_id": orders[0].trace_id if orders else "",
+                "trace_id": trace_id,
+                "created_at": created_at,
                 "order_count": len(orders),
                 "push_status": push_status,
                 "passed_count": passed_count,
                 "ignored_count": ignored_count,
                 "error_count": error_count,
+                "delivery_count": delivery_count,
                 "window_start": window_start,
                 "window_end": window_end,
                 "failure_reason": failure_reason,
             })
         return {"items": items}
 
+    # === MODIFIED START ===
+    # 原因：trace_id 改为可选，不传时下载该批次全部正常推送订单。
+    # 影响范围：临时推送正常推送订单下载接口。
+    # === MODIFIED END ===
     @app.get("/temp-push/{temp_push_id}/orders/download", tags=["temp-push"])
-    def download_temp_push_orders(temp_push_id: str, trace_id: str) -> FileResponse:
+    def download_temp_push_orders(temp_push_id: str, trace_id: str | None = None) -> FileResponse:
         """Downloads temporary push order details as CSV."""
 
         from application.special_push_order_store import SpecialPushOrderStore
         store = SpecialPushOrderStore(temp_push_id=temp_push_id)
         file_path = store.export_csv(trace_id)
+        return FileResponse(
+            path=file_path,
+            media_type="text/csv",
+            filename=file_path.name,
+        )
+
+    # === MODIFIED START ===
+    # 原因：临时推送需要下载异常订单 CSV，与定时任务清单的异常订单下载对齐。
+    # 影响范围：临时推送异常订单下载接口。
+    @app.get("/temp-push/{temp_push_id}/exception-orders/download", tags=["temp-push"])
+    def download_temp_push_exception_orders(temp_push_id: str) -> FileResponse:
+        """Downloads temporary push exception orders as CSV."""
+
+        from application.exception_order_store import ExceptionOrderStore
+        base_dir = Path("outputs") / "special_push" / temp_push_id
+        history_path = base_dir / "exception_orders.json"
+        if not history_path.exists():
+            raise HTTPException(status_code=404, detail="未找到异常订单记录")
+        store = ExceptionOrderStore(
+            history_path=history_path,
+            export_dir=base_dir / "exception_order_exports",
+        )
+        file_path = store.export_csv()
+        return FileResponse(
+            path=file_path,
+            media_type="text/csv",
+            filename=file_path.name,
+        )
+
+    # === MODIFIED START ===
+    # 原因：临时推送需要下载执行日志 CSV，与定时任务的执行日志下载对齐。
+    # 影响范围：临时推送执行日志下载接口。
+    @app.get("/temp-push/{temp_push_id}/execution-logs/download", tags=["temp-push"])
+    def download_temp_push_execution_logs(temp_push_id: str) -> FileResponse:
+        """Downloads temporary push execution logs as CSV."""
+
+        from application.execution_log_store import ExecutionLogStore
+        base_dir = Path("outputs") / "special_push" / temp_push_id
+        log_path = base_dir / "execution_logs.json"
+        if not log_path.exists():
+            raise HTTPException(status_code=404, detail="未找到执行日志记录")
+        store = ExecutionLogStore(
+            history_path=log_path,
+            export_dir=base_dir / "execution_log_exports",
+        )
+        file_path = store.export_csv()
         return FileResponse(
             path=file_path,
             media_type="text/csv",

@@ -617,21 +617,26 @@
           </div>
 
           <!-- 底部：历史记录 -->
-          <section class="panel tp-panel tp-history-panel">
+          <section class="panel task-list-panel tp-history-panel">
             <div class="panel-head">
               <div>
                 <h2>历史记录</h2>
                 <p>已完成的临时推送批次</p>
               </div>
             </div>
-            <div class="table-wrap tp-history-wrap">
+            <div class="table-wrap task-list-table-wrap tp-history-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>批次号</th>
-                    <th>状态</th>
-                    <th>通过/异常/忽略</th>
-                    <th>推送数</th>
+                    <!-- === MODIFIED START ===
+                    原因：临时推送历史参考任务清单展示，统一创建时间、订单统计和推送状态列。
+                    影响范围：临时推送历史表格。
+                    === MODIFIED END === -->
+                    <th>创建时间</th>
+                    <th>订单统计</th>
+                    <th>推送状态</th>
+                    <!-- === MODIFIED END === -->
                     <th>时间窗口</th>
                     <th>操作</th>
                   </tr>

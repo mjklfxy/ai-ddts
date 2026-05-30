@@ -10,12 +10,13 @@ from openpyxl import Workbook
 
 from application.order_splitter import GroupOrderBatch, OrderLineForSplit
 from domain.exception_order import ExceptionOrder
+from shared.env import is_channel_classification_enabled
 
 
 # === MODIFIED START ===
-# 原因：推送/上传文件统一改为 Excel，表头继续沿用原订单文件字段。
-# 影响范围：订单文件生成、上传文件名、祺信推送文件名。
-ORDER_FILE_HEADERS: tuple[str, ...] = (
+# 原因：渠道分类列由环境变量 AI_DDTS_CHANNEL_CLASSIFICATION_ENABLED 控制。
+# 影响范围：订单文件、异常订单文件表头和数据行。
+_BASE_ORDER_FILE_HEADERS: tuple[str, ...] = (
     "关联单号",
     "发货单号",
     "货品摘要",
@@ -25,10 +26,27 @@ ORDER_FILE_HEADERS: tuple[str, ...] = (
     "电话",
     "物流公司",
     "物流单号",
-    "渠道分类",
 )
 
-ORDER_ERROR_HEADERS: tuple[str, ...] = ORDER_FILE_HEADERS + ("异常原因",)
+
+def get_order_file_headers() -> list[str]:
+    """Returns order file headers, conditionally including channel_classification."""
+    headers = list(_BASE_ORDER_FILE_HEADERS)
+    if is_channel_classification_enabled():
+        headers.append("渠道分类")
+    return headers
+
+
+def get_order_error_headers() -> list[str]:
+    """Returns error file headers (order headers + error reason)."""
+    headers = get_order_file_headers()
+    headers.append("异常原因")
+    return headers
+
+
+# Backward-compatible aliases evaluated at import time for legacy callers.
+ORDER_FILE_HEADERS: tuple[str, ...] = tuple(get_order_file_headers())
+ORDER_ERROR_HEADERS: tuple[str, ...] = tuple(get_order_error_headers())
 # === MODIFIED END ===
 
 
@@ -60,14 +78,18 @@ class ExcelFileGenerator:
         self.output_dir = Path(output_dir)
         self.clock = clock or datetime.now
 
-    def generate(self, batch: GroupOrderBatch) -> GeneratedFile:
+    def generate(self, batch: GroupOrderBatch, file_prefix: str = "") -> GeneratedFile:
+        # === MODIFIED START ===
+        # 原因：临时推送需要 special_ 前缀区分文件名，接受可选 file_prefix 参数。
+        # 影响范围：Excel 文件生成。
+        # === MODIFIED END ===
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        file_path = self.output_dir / self._build_file_name(batch.group_name)
+        file_path = self.output_dir / self._build_file_name(batch.group_name, file_prefix=file_prefix)
 
         workbook = Workbook()
         worksheet = workbook.active
         worksheet.title = "orders"
-        worksheet.append(ORDER_FILE_HEADERS)
+        worksheet.append(get_order_file_headers())
         for order_line in batch.order_lines:
             worksheet.append(self._to_row(order_line))
         workbook.save(file_path)
@@ -100,22 +122,23 @@ class ExcelFileGenerator:
         workbook = Workbook()
         worksheet = workbook.active
         worksheet.title = "errors"
-        worksheet.append(ORDER_ERROR_HEADERS)
+        worksheet.append(get_order_error_headers())
         for order in exception_orders:
-            worksheet.append(
-                (
-                    order.order_no,
-                    order.delivery_order_no,
-                    order.goods_summary,
-                    order.quantity,
-                    order.receiver_name,
-                    order.address,
-                    order.phone,
-                    order.logistics_company,
-                    order.logistics_no,
-                    order.reason,
-                )
-            )
+            row = [
+                order.order_no,
+                order.delivery_order_no,
+                order.goods_summary,
+                order.quantity,
+                order.receiver_name,
+                order.address,
+                order.phone,
+                order.logistics_company,
+                order.logistics_no,
+            ]
+            if is_channel_classification_enabled():
+                row.append(order.channel_classification)
+            row.append(order.reason)
+            worksheet.append(row)
         workbook.save(file_path)
         workbook.close()
 
@@ -126,19 +149,21 @@ class ExcelFileGenerator:
             file_url=None,
         )
 
-    def _build_file_name(self, group_name: str) -> str:
+    def _build_file_name(self, group_name: str, file_prefix: str = "") -> str:
+        # === MODIFIED START ===
+        # 原因：支持可选文件名前缀（如临时推送的 special_）。
+        # 影响范围：Excel 文件命名。
+        # === MODIFIED END ===
         # 只过滤 Windows 文件名不允许的字符: < > : " / \ | ? *
         safe_group_name = sub(r'[<>:"/\\|?*]+', "_", group_name).strip(". ")
         if not safe_group_name:
             safe_group_name = "group"
         timestamp = self.clock().strftime("%Y%m%d%H%M%S")
-        return f"{safe_group_name}_{timestamp}.xlsx"
+        return f"{file_prefix}{safe_group_name}_{timestamp}.xlsx"
 
     @staticmethod
-    def _to_row(
-        order_line: OrderLineForSplit,
-    ) -> tuple[str, str, str, int, str, str, str, str, str, str]:
-        return (
+    def _to_row(order_line: OrderLineForSplit) -> list[object]:
+        row = [
             order_line.order_no,
             order_line.delivery_order_no,
             order_line.goods_summary,
@@ -148,8 +173,10 @@ class ExcelFileGenerator:
             order_line.phone,
             order_line.logistics_company,
             order_line.logistics_no,
-            order_line.channel_classification,
-        )
+        ]
+        if is_channel_classification_enabled():
+            row.append(order_line.channel_classification)
+        return row
 
 
 # === MODIFIED END ===

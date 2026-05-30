@@ -10,29 +10,41 @@ from typing import Any
 
 from application.pipeline import PipelineBatchDelivery
 from application.task_service import TaskContext
+from shared.env import is_channel_classification_enabled
 
 
-SPECIAL_PUSH_ORDER_CSV_HEADERS = (
-    "trace_id",
-    "临时推送ID",
-    "推送群",
-    "群主手机号",
-    "关联单号",
-    "发货单号",
-    "仓库编码",
-    "仓库",
-    "SKU（商品名称）",
-    "货品摘要",
-    "数量",
-    "收件人",
-    "地址",
-    "电话",
-    "物流公司",
-    "物流单号",
-    "渠道分类",
-    "推送文件",
-    "消息追踪号",
-)
+def get_special_push_order_csv_headers() -> list[str]:
+    """Returns CSV headers, conditionally including channel_classification."""
+    headers = [
+        "trace_id",
+        "临时推送ID",
+        "推送群",
+        "群主手机号",
+        "供应商名称",
+        "关联单号",
+        "发货单号",
+        "仓库编码",
+        "仓库",
+        "SKU（商品名称）",
+        "货品摘要",
+        "数量",
+        "收件人",
+        "地址",
+        "电话",
+        "物流公司",
+        "物流单号",
+    ]
+    if is_channel_classification_enabled():
+        headers.append("渠道分类")
+    headers.extend([
+        "推送文件",
+        "消息追踪号",
+    ])
+    return headers
+
+
+# Backward-compatible alias evaluated at import time.
+SPECIAL_PUSH_ORDER_CSV_HEADERS: tuple[str, ...] = tuple(get_special_push_order_csv_headers())
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,6 +55,7 @@ class StoredSpecialPushOrder:
     temp_push_id: str
     group_name: str
     owner_mobile: str
+    supplier_name: str
     order_no: str
     delivery_order_no: str
     warehouse_code: str
@@ -91,6 +104,7 @@ class SpecialPushOrderStore:
                             temp_push_id=self.temp_push_id,
                             group_name=delivery.batch.group_name,
                             owner_mobile=delivery.batch.owner_mobile,
+                            supplier_name=order_line.supplier_name,
                             order_no=order_line.order_no,
                             delivery_order_no=order_line.delivery_order_no,
                             warehouse_code=order_line.warehouse_code,
@@ -126,17 +140,35 @@ class SpecialPushOrderStore:
     def list_all(self) -> tuple[StoredSpecialPushOrder, ...]:
         return tuple(_stored_from_dict(r) for r in self._load_records())
 
-    def export_csv(self, trace_id: str) -> Path:
-        normalized = _normalize_trace_id(trace_id)
+    def export_csv(self, trace_id: str | None = None) -> Path:
+        # === MODIFIED START ===
+        # 原因：trace_id 改为可选，不传时导出该批次全部记录。
+        # 影响范围：临时推送正常推送订单 CSV 导出。
+        # === MODIFIED END ===
         self.export_dir.mkdir(parents=True, exist_ok=True)
-        file_path = self.export_dir / (
-            f"temp_push_{_safe_name(self.temp_push_id)}_{_safe_name(normalized)}_{datetime.now():%Y%m%d%H%M%S}.csv"
-        )
-        rows = [_csv_row(r) for r in self.list_by_trace(normalized)]
+        if trace_id is not None:
+            normalized = _normalize_trace_id(trace_id)
+            # === MODIFIED START ===
+            # 原因：临时推送导出文件名去掉 temp_push_ 前缀，保持与推送 Excel 命名一致。
+            # 影响范围：临时推送正常推送订单 CSV 导出文件名。
+            file_path = self.export_dir / (
+                f"{_safe_name(self.temp_push_id)}_{_safe_name(normalized)}_{datetime.now():%Y%m%d%H%M%S}.csv"
+            )
+            # === MODIFIED END ===
+            rows = [_csv_row(r) for r in self.list_by_trace(normalized)]
+        else:
+            # === MODIFIED START ===
+            # 原因：临时推送导出文件名去掉 temp_push_ 前缀，保持与推送 Excel 命名一致。
+            # 影响范围：临时推送正常推送订单 CSV 导出文件名。
+            file_path = self.export_dir / (
+                f"{_safe_name(self.temp_push_id)}_{datetime.now():%Y%m%d%H%M%S}.csv"
+            )
+            # === MODIFIED END ===
+            rows = [_csv_row(r) for r in self.list_all()]
 
         with file_path.open("w", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f)
-            writer.writerow(SPECIAL_PUSH_ORDER_CSV_HEADERS)
+            writer.writerow(get_special_push_order_csv_headers())
             writer.writerows(rows)
 
         return file_path
@@ -156,6 +188,7 @@ def _order_to_dict(record: StoredSpecialPushOrder) -> dict[str, object]:
         "temp_push_id": record.temp_push_id,
         "group_name": record.group_name,
         "owner_mobile": record.owner_mobile,
+        "supplier_name": record.supplier_name,
         "order_no": record.order_no,
         "delivery_order_no": record.delivery_order_no,
         "warehouse_code": record.warehouse_code,
@@ -180,6 +213,7 @@ def _stored_from_dict(data: dict[str, Any]) -> StoredSpecialPushOrder:
         temp_push_id=_optional_string(data, "temp_push_id"),
         group_name=_optional_string(data, "group_name"),
         owner_mobile=_optional_string(data, "owner_mobile"),
+        supplier_name=_optional_string(data, "supplier_name"),
         order_no=_required_string(data, "order_no"),
         delivery_order_no=_required_string(data, "delivery_order_no"),
         warehouse_code=_optional_string(data, "warehouse_code"),
@@ -199,11 +233,12 @@ def _stored_from_dict(data: dict[str, Any]) -> StoredSpecialPushOrder:
 
 
 def _csv_row(record: StoredSpecialPushOrder) -> list[object]:
-    return [
+    row = [
         record.trace_id,
         record.temp_push_id,
         record.group_name,
         record.owner_mobile,
+        record.supplier_name,
         record.order_no,
         record.delivery_order_no,
         record.warehouse_code,
@@ -216,10 +251,14 @@ def _csv_row(record: StoredSpecialPushOrder) -> list[object]:
         record.phone,
         record.logistics_company,
         record.logistics_no,
-        record.channel_classification,
+    ]
+    if is_channel_classification_enabled():
+        row.append(record.channel_classification)
+    row.extend([
         record.file_path,
         record.message_tracking_id,
-    ]
+    ])
+    return row
 
 
 def _normalize_trace_id(trace_id: str) -> str:

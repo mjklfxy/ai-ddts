@@ -152,6 +152,88 @@ class InterfacesAppTests(TestCase):
         self.assertEqual(response.content, b"xlsx-bytes")
 
     # === MODIFIED START ===
+    # 原因：临时推送历史页必须从批次产物返回真实统计和 trace_id，避免页面显示 0 且按钮不可用。
+    # 影响范围：/temp-push/orders 接口回归测试。
+    def test_temp_push_orders_returns_counts_from_batch_artifacts(self) -> None:
+        temp_output = Path("tmp") / "test_interfaces_app" / "temp_outputs"
+        batch_dir = temp_output / "special_push" / "TP-TEST"
+        batch_dir.mkdir(parents=True, exist_ok=True)
+        (batch_dir / "execution_logs.json").write_text(
+            json.dumps(
+                [
+                    {
+                        "created_at": "2026-05-30T08:25:36",
+                        "trace_id": "TRACE-001",
+                        "task_name": "临时推送-TP-TEST",
+                        "stage": "临时推送",
+                        "result": "成功",
+                        "summary": "临时推送开始",
+                        "details": {
+                            "window_start": "2026-05-29T08:25:30",
+                            "window_end": "2026-05-30T21:15:00",
+                        },
+                    },
+                    {
+                        "created_at": "2026-05-30T08:26:44",
+                        "trace_id": "TRACE-001",
+                        "task_name": "临时推送-TP-TEST",
+                        "stage": "规则判断",
+                        "result": "成功",
+                        "summary": "规则判断完成",
+                        "details": {"passed": 210, "ignored": 283, "error": 0},
+                    },
+                    {
+                        "created_at": "2026-05-30T08:26:48",
+                        "trace_id": "TRACE-001",
+                        "task_name": "临时推送-TP-TEST",
+                        "stage": "推送群",
+                        "result": "成功",
+                        "summary": "临时推送完成",
+                        "details": {"push_status": "已推送", "delivery_count": 1},
+                    },
+                ],
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+
+        class FakeSpecialPushOrderStore:
+            def __init__(self, temp_push_id: str) -> None:
+                self.temp_push_id = temp_push_id
+
+            def list_all(self):
+                return (object(), object(), object())
+
+        original_path = Path
+
+        def mapped_path(*parts):
+            if parts == ("outputs",):
+                return temp_output
+            return original_path(*parts)
+
+        with (
+            patch("interfaces.app.Path", side_effect=mapped_path),
+            patch(
+                "application.special_push_order_store.SpecialPushOrderStore",
+                FakeSpecialPushOrderStore,
+            ),
+        ):
+            response = self.client.get("/temp-push/orders")
+
+        self.assertEqual(response.status_code, 200)
+        items = response.json()["items"]
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["temp_push_id"], "TP-TEST")
+        self.assertEqual(items[0]["trace_id"], "TRACE-001")
+        self.assertEqual(items[0]["order_count"], 3)
+        self.assertEqual(items[0]["passed_count"], 210)
+        self.assertEqual(items[0]["ignored_count"], 283)
+        self.assertEqual(items[0]["error_count"], 0)
+        self.assertEqual(items[0]["delivery_count"], 1)
+        self.assertEqual(items[0]["push_status"], "已推送")
+    # === MODIFIED END ===
+
+    # === MODIFIED START ===
     # 原因：后台管理入口需要在给定管理员密码后启用登录验证，避免未授权触发真实推送。
     # 影响范围：/app、/static 和后台 API 入口。
     def test_admin_login_redirects_app_when_unauthenticated(self) -> None:

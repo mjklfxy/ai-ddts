@@ -12,12 +12,11 @@ class SpecialSkuRule(OrderRule):
 
     rule_name = "SpecialSku"
 
-    def __init__(self, special_skus: set[str], enabled: bool = True) -> None:
+    def __init__(self, special_skus: set[str]) -> None:
         self.special_skus = {s.strip() for s in special_skus if s.strip()}
-        self.enabled = enabled
 
     def evaluate(self, context: RuleContext) -> RuleResult:
-        if not self.enabled or not self.special_skus:
+        if not self.special_skus:
             return RuleResult(decision=RuleDecision.IGNORE, rule_name=self.rule_name)
         for sku in context.sku_codes:
             if sku.strip() in self.special_skus:

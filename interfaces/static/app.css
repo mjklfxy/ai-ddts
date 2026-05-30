@@ -585,10 +585,18 @@ h2 {
   align-self: flex-start;
   margin-top: 4px;
 }
-.tp-history-wrap {
-  max-height: 360px;
-  overflow-y: auto;
+/* === MODIFIED START ===
+原因：临时推送历史参考任务清单，表格区域使用同一套固定表头和面板内滚动。
+影响范围：临时推送历史记录布局。
+=== MODIFIED END === */
+.tp-history-panel {
+  min-height: 360px;
 }
+
+.tp-history-wrap {
+  max-height: none;
+}
+/* === MODIFIED END === */
 
 .metric-grid {
   display: grid;
