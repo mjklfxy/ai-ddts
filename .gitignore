@@ -15,3 +15,6 @@ config/config_prod.json
 config/config.prod.json
 input/
 bidui/
+scripts/test_jikeyun_query*.py
+scripts/test_jikeyun_query*_response.json
+scripts/jikeyun_response_sample.json

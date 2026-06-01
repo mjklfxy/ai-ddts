@@ -86,31 +86,35 @@ class RegionParserLegalTests(TestCase):
             {"sku_code": "SKU-B", "province": "新疆", "city": None},
         ])
 
-    def test_multi_sku_with_comma_delimiter(self) -> None:
-        """逗号分隔多个 SKU。"""
+    def test_comma_in_product_name_preserved(self) -> None:
+        """逗号出现在产品名称内部时不应被拆分。"""
         path = _make_region_xlsx([
             ["产品名称", "省", "市"],
-            ["SKU-A,SKU-B", "新疆", None],
+            ["酸菜鱼450g/450g*20袋（一件代发，单次不低于5袋)", "青海", None],
         ])
         parsed = load_restricted_regions_from_xlsx(path)
-        self.assertEqual(parsed, [
-            {"sku_code": "SKU-A", "province": "新疆", "city": None},
-            {"sku_code": "SKU-B", "province": "新疆", "city": None},
-        ])
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["sku_code"], "酸菜鱼450g/450g*20袋（一件代发，单次不低于5袋)")
 
-    def test_multi_sku_with_chinese_delimiters(self) -> None:
-        """中文逗号、顿号、分号分隔。"""
+    def test_semicolon_in_product_name_preserved(self) -> None:
+        """分号出现在产品名称内部时不应被拆分。"""
         path = _make_region_xlsx([
             ["产品名称", "省", "市"],
-            ["SKU-A，SKU-B、SKU-C；SKU-D", "新疆", None],
+            ["SKU-A；SKU-B", "新疆", None],
         ])
         parsed = load_restricted_regions_from_xlsx(path)
-        self.assertEqual(parsed, [
-            {"sku_code": "SKU-A", "province": "新疆", "city": None},
-            {"sku_code": "SKU-B", "province": "新疆", "city": None},
-            {"sku_code": "SKU-C", "province": "新疆", "city": None},
-            {"sku_code": "SKU-D", "province": "新疆", "city": None},
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["sku_code"], "SKU-A；SKU-B")
+
+    def test_fullwidth_comma_in_product_name_preserved(self) -> None:
+        """全角逗号出现在产品名称内部时不应被拆分。"""
+        path = _make_region_xlsx([
+            ["产品名称", "省", "市"],
+            ["大别山老母鸡1kg*10只/箱/（5箱以上，下此链接）", "青海", None],
         ])
+        parsed = load_restricted_regions_from_xlsx(path)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["sku_code"], "大别山老母鸡1kg*10只/箱/（5箱以上，下此链接）")
 
     def test_multi_sku_plus_merged_region(self) -> None:
         """多个 SKU + 合并区域：每行的 SKU 与区域按行展开。"""

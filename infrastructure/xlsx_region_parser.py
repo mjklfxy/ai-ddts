@@ -3,7 +3,7 @@
 规则：
 - 每行一条记录，不允许 forward-fill
 - 仅支持 A 列（产品名称）真实纵向合并单元格
-- 一个单元格支持多个 SKU（换行/逗号/顿号/分号分隔）
+- 一个单元格支持多个 SKU（换行符分隔）
 - 省级限发覆盖市级限发
 - 任何格式错误立即中断，返回结构化错误信息
 """
@@ -149,11 +149,13 @@ def _normalized_city(city: str) -> str | None:
 
 
 def _split_skus(text: str) -> list[str]:
-    """按多种分隔符拆分 SKU。"""
-    normalized = text.replace(" ", " ").replace("　", " ")
-    parts = re.split(r"[\n\r,，、;；]+", normalized)
-    return [p.strip() for p in parts if p.strip()]
+    """按换行符拆分 SKU。
 
+    Only newlines act as delimiters.
+    """
+    normalized = text.replace("�", " ").replace("\u3000", " ")
+    parts = re.split(r"[\n\r]+", normalized)
+    return [p.strip() for p in parts if p.strip()]
 
 def _has_newline(text: str) -> bool:
     return "\n" in text or "\r" in text
@@ -373,7 +375,7 @@ def _load_via_xlrd(path: Path) -> list[dict[str, str | None]]:
                 row=row_idx + 1,
                 column="A",
                 reason=f"单元格包含换行符: {product!r}",
-                suggestion="请拆分为多行，或使用逗号、顿号、分号分隔多个 SKU",
+                suggestion="请拆分为多行（使用换行符分隔多个 SKU）",
             )
 
         if not product:
