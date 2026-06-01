@@ -14,3 +14,4 @@ config/config_prod.json
 .codegraph/
 config/config.prod.json
 input/
+bidui/

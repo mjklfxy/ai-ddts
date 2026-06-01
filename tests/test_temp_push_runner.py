@@ -253,6 +253,46 @@ class RuleEngineTests(TestCase):
         self.assertTrue(result.is_error)
         self.assertEqual(result.results[-1].rule_name, "RegionRule")
 
+    def test_temp_push_region_filtering_catches_restricted_sku(self) -> None:
+        """Temp push rule chain: SKU in special_skus + region match → RegionRule ERROR."""
+        engine = RuleEngine(rules=[
+            SpecialSkuRule(special_skus={"SKU-001", "SKU-002"}),
+            RegionRule(restricted_regions=[
+                RestrictedRegion(sku_code="SKU-001", province="广东省"),
+            ], enabled=True),
+            GroupRule(sku_group_map={
+                "SKU-001": SkuGroupInfo(group_name="G1", owner_mobile=""),
+                "SKU-002": SkuGroupInfo(group_name="G2", owner_mobile=""),
+            }, enabled=True),
+        ])
+        # SKU-001 in special_skus + region match → ERROR
+        ctx_restricted = RuleContext(
+            order_no="SO-1",
+            sku_codes=("SKU-001",),
+            receiver_province="广东省",
+        )
+        result = engine.evaluate(ctx_restricted)
+        self.assertTrue(result.is_error, "SKU-001 in restricted region should ERROR")
+        self.assertEqual(result.results[-1].rule_name, "RegionRule")
+
+        # SKU-002 in special_skus + region NOT match → PASS
+        ctx_safe = RuleContext(
+            order_no="SO-2",
+            sku_codes=("SKU-002",),
+            receiver_province="浙江省",
+        )
+        result = engine.evaluate(ctx_safe)
+        self.assertTrue(result.is_pass, "SKU-002 in non-restricted region should PASS")
+
+        # SKU-999 NOT in special_skus → IGNORE (never reaches RegionRule)
+        ctx_unknown = RuleContext(
+            order_no="SO-3",
+            sku_codes=("SKU-999",),
+            receiver_province="广东省",
+        )
+        result = engine.evaluate(ctx_unknown)
+        self.assertTrue(result.is_ignore, "SKU-999 not in special_skus should IGNORE")
+
 
 # ---------------------------------------------------------------------------
 # OrderSplitter
