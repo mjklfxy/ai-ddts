@@ -55,19 +55,29 @@ class ProductCallerConfigSyncClient:
                 close = getattr(response, "close", None)
                 if callable(close):
                     close()
+        except urllib.error.HTTPError as exc:
+            detail = _read_error_body(exc)
+            raise ProductCallerConfigSyncError(
+                f"product caller sync request failed: HTTP {exc.code} {exc.reason}{detail}"
+            ) from exc
         except urllib.error.URLError as exc:
             raise ProductCallerConfigSyncError(
                 f"product caller sync request failed: {exc.__class__.__name__}"
             ) from exc
 
         payload = _decode_response(raw_body)
+        # === MODIFIED START ===
+        # 原因：新接口用 success:true 而非 code:200 表示成功，兼容两种格式。
+        # 影响范围：sync 响应判断逻辑。
         code = payload.get("code")
-        if code != 200:
-            message = payload.get("message") or "unknown error"
-            raise ProductCallerConfigSyncError(
-                f"product caller sync failed: code={code}, message={message}"
-            )
-        return payload
+        success = payload.get("success")
+        if code == 200 or success is True:
+            return payload
+        message = payload.get("message") or "unknown error"
+        raise ProductCallerConfigSyncError(
+            f"product caller sync failed: code={code}, message={message}"
+        )
+        # === MODIFIED END ===
 
 
 def _decode_response(raw_body: bytes) -> dict[str, Any]:
@@ -80,3 +90,17 @@ def _decode_response(raw_body: bytes) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ProductCallerConfigSyncError("product caller sync response must be a JSON object")
     return payload
+
+
+def _read_error_body(exc: urllib.error.HTTPError) -> str:
+    """Reads and truncates the HTTP error response body for diagnostics."""
+    try:
+        body = exc.read()
+    except Exception:
+        return ""
+    if not body:
+        return ""
+    text = body.decode("utf-8", errors="replace")
+    if len(text) > 500:
+        text = text[:500] + "..."
+    return f"\nresponse body: {text}"
